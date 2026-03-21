@@ -23,4 +23,4 @@ export const appConfig: ApplicationConfig = {
     provideAuth(() => getAuth()),       // Para el login de usuariosvale, 
     provideFirestore(() => getFirestore()) // Para guardar los eventos del calendario
   ],
-};
+}; 
