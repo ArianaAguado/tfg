@@ -9,6 +9,14 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 // 2. Importa tu configuración de entorno
 import { environment } from '../environments/environments'; 
 
+// 1. Importaciones necesarias de Firebase
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+
+// 2. Importa tu configuración de entorno
+import { environment } from '../environments/environments'; 
+
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
