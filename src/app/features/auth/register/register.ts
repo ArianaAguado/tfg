@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { Auth, createUserWithEmailAndPassword } from '@angular/fire/auth';
 import { Firestore, doc, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule], 
+  imports: [FormsModule, RouterLink], 
   templateUrl: './register.html',
   styleUrl: './register.css',
 })

@@ -1,4 +1,3 @@
-/* Reset local para el componente */
 * {
     margin: 0;
     padding: 0;
@@ -13,14 +12,13 @@
     justify-content: center;
     align-items: center;
     letter-spacing: 1px;
-    background-color: #0c1022; /* Color de fondo de tu imagen */
+    background-color: #0c1022; 
 }
 
-/* El contenedor con el borde animado */
 .login_form_container {
     position: relative;
     width: 400px;
-    height: 520px; /* Un poco más alto para el registro */
+    height: 520px; 
     background: #040717;
     border-radius: 50px 5px;
     display: flex;
@@ -29,7 +27,6 @@
     overflow: hidden;
 }
 
-/* El efecto de luz giratoria tras el formulario */
 .login_form_container::before {
     content: '';
     position: absolute;
@@ -54,7 +51,6 @@
     100% { transform: rotate(360deg); }
 }
 
-/* El formulario real que va encima */
 .login_form {
     position: absolute;
     inset: 5px;
@@ -72,7 +68,6 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Estilo de los inputs basado en tus imágenes */
 .input_group {
     margin-top: 25px;
     position: relative;
@@ -97,7 +92,6 @@ input {
     letter-spacing: 1px;
 }
 
-/* El botón neón */
 #login_button {
     position: relative;
     width: 100%;
@@ -117,4 +111,26 @@ input {
 
 #login_button:hover {
     box-shadow: 0 0 20px #00ccff;
+}
+
+.login-link {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 14px;
+    color: #fff; 
+}
+
+.login-link a {
+    color: #00ccff; 
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+    cursor: pointer;
+    text-shadow: 0 0 5px #00ccff55;
+}
+
+.login-link a:hover {
+    color: #d400d4; 
+    text-shadow: 0 0 10px #d400d4;
+    text-decoration: underline;
 }

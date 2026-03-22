@@ -4,7 +4,7 @@
       <h2>REGISTRO</h2>
       
       <div class="input_group">
-        <input type="text" [(ngModel)]="userData.nombre" placeholder="Nombre completo">
+        <input type="text" [(ngModel)]="userData.nombre" placeholder="Nombre">
       </div>
 
       <div class="input_group">
@@ -18,6 +18,10 @@
       <button id="login_button" (click)="registrarUsuario()">
         CREAR CUENTA
       </button>
-    </div>
+
+      <div class="login-link">
+      ¿Ya tienes una cuenta? <a routerLink="/login">Inicia sesión aquí</a>
+      </div>
+    </div>    
   </div>
 </div>
