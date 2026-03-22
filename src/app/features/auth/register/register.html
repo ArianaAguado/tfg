@@ -1,3 +1,23 @@
-<button type="button" (click)="probarConexion()">
-  Validar Firebase 🔥
-</button>
+<div class="register-wrapper">
+  <div class="login_form_container">
+    <div class="login_form">
+      <h2>REGISTRO</h2>
+      
+      <div class="input_group">
+        <input type="text" [(ngModel)]="userData.nombre" placeholder="Nombre completo">
+      </div>
+
+      <div class="input_group">
+        <input type="email" [(ngModel)]="userData.email" placeholder="Email">
+      </div>
+
+      <div class="input_group">
+        <input type="password" [(ngModel)]="userData.password" placeholder="Contraseña">
+      </div>
+
+      <button id="login_button" (click)="registrarUsuario()">
+        CREAR CUENTA
+      </button>
+    </div>
+  </div>
+</div>

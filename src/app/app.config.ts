@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 // 1. Importaciones necesarias de Firebase
@@ -8,19 +8,18 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 
 // 2. Importa tu configuración de entorno
 import { environment } from '../environments/environments'; 
-
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(), 
+    provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes),
 
-    // 3. Inicialización de Firebase
+    // 3. Inicialización de Firebase con tu objeto de entorno
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
 
-    // 4. Proveedores de servicios específicos
-    provideAuth(() => getAuth()),       // Para el login de usuariosvale, 
-    provideFirestore(() => getFirestore()) // Para guardar los eventos del calendario
+    // 4. Proveedores de servicios
+    provideAuth(() => getAuth()),           
+    provideFirestore(() => getFirestore())  
   ],
 };

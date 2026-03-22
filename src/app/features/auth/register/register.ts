@@ -1,29 +1,53 @@
 import { Component, inject } from '@angular/core';
-import { Firestore, collection, addDoc } from '@angular/fire/firestore'; // Importamos Firebase
+import { FormsModule } from '@angular/forms';
+import { Auth, createUserWithEmailAndPassword } from '@angular/fire/auth';
+import { Firestore, doc, setDoc } from '@angular/fire/firestore';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
-  standalone: true, // Asegúrate de que esto esté así
-  imports: [],
+  standalone: true,
+  imports: [FormsModule], 
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
 export class Register {
-  // Inyectamos el servicio de base de datos
+  private auth = inject(Auth);
   private firestore = inject(Firestore);
+  private router = inject(Router);
 
-  // Función para probar si la conexión funciona
-  async probarConexion() {
+  // Objeto para capturar los datos del HTML
+  userData = {
+    nombre: '',
+    email: '',
+    password: ''
+  };
+
+  async registrarUsuario() {
     try {
-      const col = collection(this.firestore, 'test_tfg');
-      await addDoc(col, { 
-        mensaje: '¡Conectado desde el Register!',
-        fecha: new Date().toISOString() 
+      // 1. Creamos el usuario en Firebase Authentication
+      const credenciales = await createUserWithEmailAndPassword(
+        this.auth, 
+        this.userData.email, 
+        this.userData.password
+      );
+
+      const userId = credenciales.user.uid;
+
+      // 2. Guardamos sus datos adicionales en Firestore
+      await setDoc(doc(this.firestore, 'usuarios', userId), {
+        nombre: this.userData.nombre,
+        email: this.userData.email,
+        rol: 'usuario',
+        fechaRegistro: new Date()
       });
-      alert('¡CONEXIÓN EXITOSA! Revisa tu consola de Firebase.');
-    } catch (error) {
-      console.error('Error al conectar:', error);
-      alert('Fallo en la conexión. Mira la consola (F12).');
+
+      alert('¡Cuenta creada con éxito!');
+      this.router.navigate(['/']);
+
+    } catch (error: any) {
+      console.error(error);
+      alert('Error al registrar: ' + error.message);
     }
   }
 }
