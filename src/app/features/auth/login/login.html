@@ -1,11 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login animado</title>
-</head>
-<body>
-    
-</body>
-</html>
+<div class="login-wrapper">
+  <div class="login_form_container">
+    <form class="login_form" [formGroup]="formularioLogin" (ngSubmit)="onSubmit()">
+      <h2>Iniciar Sesión</h2>
+
+      <div class="input_group">
+        <input type="email" formControlName="email" placeholder="Email" class="input_text">
+      </div>
+
+      <div class="input_group">
+        <input type="password" formControlName="password" placeholder="Contraseña" class="input_text">
+      </div>
+
+      <button id="login_button" type="submit" [disabled]="formularioLogin.invalid">
+        ENTRAR
+      </button>
+
+      <div class="login-link">
+        ¿No tienes una cuenta? <a routerLink="/registro">Regístrate aquí</a>
+      </div>
+    </form>
+  </div>
+</div>
