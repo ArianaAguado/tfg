@@ -1,5 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { withViewTransitions } from '@angular/router';
 
 // 1. Importaciones necesarias de Firebase
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -14,7 +15,7 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(), 
-    provideRouter(routes),
+    provideRouter(routes, withViewTransitions()) ,
 
     // 3. Inicialización de Firebase
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
