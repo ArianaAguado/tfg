@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
+import { Auth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-login',
@@ -36,4 +36,15 @@ export class Login {
       }
     }
   }
+
+// Método para iniciar sesión con Google
+  async loginConGoogle() {
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(this.auth, provider);
+    this.router.navigate(['/']);
+  } catch (error: any) {
+    alert('Error con Google: ' + error.message);
+  }
+}
 }
