@@ -16,7 +16,11 @@
       </button>
 
       <div class="login-link">
-        ¿No tienes una cuenta? <a routerLink="/registro">Regístrate aquí</a>
+        ¿No tienes una cuenta? <a routerLink="/register">Regístrate aquí</a>
+      </div>
+
+      <div class="login-link">
+        <a (click)="router.navigate(['/'])" style="cursor:pointer">Volver al inicio</a>
       </div>
     </form>
   </div>

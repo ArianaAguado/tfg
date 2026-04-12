@@ -15,7 +15,7 @@ import { RouterLink } from '@angular/router';
 export class Register {
   private auth = inject(Auth);
   private firestore = inject(Firestore);
-  private router = inject(Router);
+  public router = inject(Router);
 
   // Objeto para capturar los datos del HTML
   userData = {

@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-login',
@@ -16,10 +16,10 @@ import { CommonModule } from '@angular/common';
 })
 export class Login {
   private formBuilder = inject(FormBuilder);
-  private router = inject(Router);
+  public router = inject(Router);
+  private auth = inject(Auth);
 
-
-  formularioLogin= this.formBuilder.group({
+  formularioLogin = this.formBuilder.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
@@ -28,15 +28,11 @@ export class Login {
     if (this.formularioLogin.valid) {
       const { email, password } = this.formularioLogin.value;
       try {
-        // Aquí puedes agregar la lógica para autenticar al usuario con Firebase
-        // Por ejemplo, usando AngularFireAuth:
-        // await this.afAuth.signInWithEmailAndPassword(email, password);
-        
-        // Si el login es exitoso, redirige al calendario
-        this.router.navigate(['/calendario']);
-      } catch (error) {
+        await signInWithEmailAndPassword(this.auth, email!, password!);
+        this.router.navigate(['/']); //calendario
+      } catch (error: any) {
         console.error('Error de autenticación:', error);
-         console.log("Ha habido un error en tu autenticación. Por favor, verifica tus credenciales");
+        alert('Email o contraseña incorrectos: ' + error.message);
       }
     }
   }

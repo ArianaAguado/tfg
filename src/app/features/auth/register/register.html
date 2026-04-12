@@ -20,8 +20,13 @@
       </button>
 
       <div class="login-link">
-      ¿Ya tienes una cuenta? <a routerLink="/login">Inicia sesión aquí</a>
+        ¿Ya tienes una cuenta? <a routerLink="/login">Inicia sesión aquí</a>
       </div>
+
+      <div class="login-link">
+        <a (click)="router.navigate(['/'])" style="cursor:pointer">Volver al inicio</a>
+      </div>
+
     </div>    
   </div>
 </div>
