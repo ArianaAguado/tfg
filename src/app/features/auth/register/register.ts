@@ -44,7 +44,7 @@ export class Register {
       });
 
       alert('¡Cuenta creada con éxito!');
-      this.router.navigate(['/']);
+      this.router.navigate(['/dashboard']);
 
     } catch (error: any) {
       console.error(error);

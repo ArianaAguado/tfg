@@ -29,7 +29,7 @@ export class Login {
       const { email, password } = this.formularioLogin.value;
       try {
         await signInWithEmailAndPassword(this.auth, email!, password!);
-        this.router.navigate(['/']); //calendario
+        this.router.navigate(['/dashboard']); 
       } catch (error: any) {
         console.error('Error de autenticación:', error);
         alert('Email o contraseña incorrectos: ' + error.message);
@@ -42,7 +42,7 @@ export class Login {
   try {
     const provider = new GoogleAuthProvider();
     await signInWithPopup(this.auth, provider);
-    this.router.navigate(['/']);
+    this.router.navigate(['/dashboard']);
   } catch (error: any) {
     alert('Error con Google: ' + error.message);
   }
