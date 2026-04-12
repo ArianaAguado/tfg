@@ -13,8 +13,8 @@ import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-provideZoneChangeDetection({ eventCoalescing: true }),
-provideRouter(routes, withViewTransitions()),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes, withViewTransitions()),
 
     // 3. Inicialización de Firebase con tu objeto de entorno
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
