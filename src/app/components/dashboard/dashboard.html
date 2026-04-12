@@ -14,6 +14,7 @@
     </header>
 
     <div class="dashboard-container">
+      
       <div *ngIf="cargando" class="loading-state">
         <p>Buscando lanzamientos en RAWG...</p>
       </div>
@@ -35,13 +36,19 @@
           <div *ngFor="let dia of diasMes" class="calendar-day">
             <span class="day-number">{{ dia }}</span>
             
-            <div *ngIf="obtenerJuegoDelDia(dia) as juego" class="game-indicator">
+            <div *ngIf="obtenerJuegoDelDia(dia) as juego" class="game-info">
               <span class="game-dot"></span>
+              
+              <div class="game-thumbnail">
+                  <img [src]="juego.background_image" alt="Portada de {{juego.name}}">
+              </div>
+
               <span class="game-name">{{ juego.name }}</span>
             </div>
           </div>
         </div>
       </section>
+
     </div>
   </main>
 </div>

@@ -1,19 +1,31 @@
+/* --- LAYOUT DEL DASHBOARD --- */
 .dashboard-wrapper {
     display: flex;
     min-height: 100vh;
-    background-color: #05070a; /* Fondo muy oscuro */
+    background-color: #030507; /* Fondo oscuro KYG */
     color: white;
 }
 
-/* Sidebar */
+/* Sidebar (Barra lateral) */
 .sidebar {
     width: 250px;
-    background: rgba(255, 255, 255, 0.03);
-    border-right: 1px solid rgba(0, 204, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    border-right: 1px solid rgba(0, 204, 255, 0.08);
     padding: 30px 20px;
     display: flex;
     flex-direction: column;
     gap: 40px;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.neon {
+    color: #00ccff;
+    text-shadow: 0 0 10px #00ccff;
 }
 
 .sidebar nav {
@@ -27,15 +39,16 @@
     text-decoration: none;
     padding: 10px;
     border-radius: 8px;
-    transition: 0.3s;
+    transition: 0.3s ease;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .sidebar nav a:hover, .sidebar nav a.active {
-    background: rgba(0, 204, 255, 0.1);
+    background: rgba(0, 204, 255, 0.08);
     color: #00ccff;
+    box-shadow: 0 0 10px rgba(0, 204, 255, 0.05);
 }
 
 /* Contenido Principal */
@@ -50,34 +63,117 @@
     margin-bottom: 30px;
 }
 
-/* Ajuste del Grid del Calendario */
+.texto-neon {
+    color: #ff00ff; /* Magenta neón para variar */
+    text-shadow: 0 0 15px #ff00ff;
+}
+
+/* Contenedor del Calendario */
+.dashboard-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.calendar-section {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.calendar-header {
+    text-transform: capitalize; /* Para que 'abril' salga con mayúscula */
+    margin-bottom: 20px;
+}
+
+/* Grid del Calendario */
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 10px;
 }
 
-.calendar-day {
-    min-height: 110px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 10px;
-    border-radius: 10px;
+.weekday {
+    text-align: center;
+    color: #a0a5bc;
+    font-size: 0.9rem;
+    padding-bottom: 10px;
+    font-weight: bold;
 }
 
-/* El punto neón que pediste */
+.calendar-day {
+    min-height: 140px; /* Súbelo si las fotos y nombres no caben bien */
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    padding: 12px;
+    border-radius: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-day:hover {
+    border-color: #00ccff;
+    box-shadow: 0 0 15px rgba(0, 204, 255, 0.1);
+}
+
+.day-number {
+    font-weight: bold;
+    color: #e0e6ff;
+    font-size: 1.1rem;
+    margin-bottom: auto; /* Empuja el resto hacia abajo */
+}
+
+/* --- NUEVA ESTILIZACIÓN DE LA INFO DEL JUEGO --- */
+.game-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra el punto, foto y nombre */
+    gap: 8px; /* Espacio entre los elementos */
+    margin-top: 10px;
+}
+
 .game-dot {
     display: block;
     width: 8px;
     height: 8px;
     background: #ff00aa; /* Rosa neón */
     border-radius: 50%;
-    box-shadow: 0 0 10px #ff00aa;
-    margin-bottom: 5px;
+    box-shadow: 0 0 12px #ff00aa;
+}
+
+/* NUEVO: Contenedor y diseño de la foto */
+.game-thumbnail {
+    width: 100%; /* Ocupa el ancho del día (menos el padding) */
+    height: 60px; /* Altura fija para la foto */
+    border-radius: 6px;
+    overflow: hidden; /* Corta si la foto es mayor */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* ¡CLAVE! La foto no se deforma, se recorta */
+    display: block;
 }
 
 .game-name {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    color: #fff;
+    text-align: center;
     line-height: 1.2;
     display: block;
+    width: 100%;
+    white-space: nowrap; /* No rompe la línea */
+    overflow: hidden; /* Corta si es muy largo */
+    text-overflow: ellipsis; /* Pone puntos suspensivos (...) */
+}
+
+/* Estado de carga */
+.loading-state {
+    text-align: center;
+    padding: 40px;
+    color: #a0a5bc;
 }
