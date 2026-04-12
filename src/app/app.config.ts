@@ -1,6 +1,8 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { withViewTransitions } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { Routes } from '@angular/router';
 
 // 1. Importaciones necesarias de Firebase
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -15,6 +17,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withViewTransitions()),
+    provideHttpClient(),
 
     // 3. Inicialización de Firebase con tu objeto de entorno
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),

@@ -1,0 +1,47 @@
+<div class="dashboard-wrapper">
+  <aside class="sidebar">
+    <div class="logo">KYG <span class="neon">Dash</span></div>
+    <nav>
+      <a href="#" class="active"><i class="fa-solid fa-calendar"></i> Calendario</a>
+      <a href="#"><i class="fa-solid fa-gamepad"></i> Mi Biblioteca</a>
+      <a href="#"><i class="fa-solid fa-magnifying-glass"></i> Buscar</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="main-header">
+      <h1>Calendario de <span class="texto-neon">Lanzamientos</span></h1>
+    </header>
+
+    <div class="dashboard-container">
+      <div *ngIf="cargando" class="loading-state">
+        <p>Buscando lanzamientos en RAWG...</p>
+      </div>
+
+      <section class="calendar-section" *ngIf="!cargando">
+        <header class="calendar-header">
+          <h2>{{ fechaActual | date:'MMMM yyyy' }}</h2> 
+        </header>
+
+        <div class="calendar-grid">
+          <div class="weekday">Lun</div>
+          <div class="weekday">Mar</div>
+          <div class="weekday">Mié</div>
+          <div class="weekday">Jue</div>
+          <div class="weekday">Vie</div>
+          <div class="weekday">Sáb</div>
+          <div class="weekday">Dom</div>
+
+          <div *ngFor="let dia of diasMes" class="calendar-day">
+            <span class="day-number">{{ dia }}</span>
+            
+            <div *ngIf="obtenerJuegoDelDia(dia) as juego" class="game-indicator">
+              <span class="game-dot"></span>
+              <span class="game-name">{{ juego.name }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>

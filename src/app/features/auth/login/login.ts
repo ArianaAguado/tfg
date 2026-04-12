@@ -33,7 +33,7 @@ export class Login {
         // await this.afAuth.signInWithEmailAndPassword(email, password);
         
         // Si el login es exitoso, redirige al calendario
-        this.router.navigate(['/calendario']);
+        this.router.navigate(['/dashboard']);
       } catch (error) {
         console.error('Error de autenticación:', error);
          console.log("Ha habido un error en tu autenticación. Por favor, verifica tus credenciales");

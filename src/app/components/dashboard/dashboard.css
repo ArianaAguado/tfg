@@ -1,0 +1,83 @@
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background-color: #05070a; /* Fondo muy oscuro */
+    color: white;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(0, 204, 255, 0.1);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.sidebar nav a {
+    color: #a0a5bc;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background: rgba(0, 204, 255, 0.1);
+    color: #00ccff;
+}
+
+/* Contenido Principal */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.main-header h1 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+}
+
+/* Ajuste del Grid del Calendario */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.calendar-day {
+    min-height: 110px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* El punto neón que pediste */
+.game-dot {
+    display: block;
+    width: 8px;
+    height: 8px;
+    background: #ff00aa; /* Rosa neón */
+    border-radius: 50%;
+    box-shadow: 0 0 10px #ff00aa;
+    margin-bottom: 5px;
+}
+
+.game-name {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    display: block;
+}
