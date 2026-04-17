@@ -13,7 +13,7 @@ export class Dashboard implements OnInit {
   private rawg = inject(Rawg);
 
   juegos: any[] = []; // Inicializado vacío
-  diasMes: number[] = [];
+  diasMes: (number | null)[] = [];
   fechaActual: Date = new Date();
   cargando: boolean = true;
 
@@ -26,7 +26,14 @@ export class Dashboard implements OnInit {
     const año = this.fechaActual.getFullYear();
     const mes = this.fechaActual.getMonth();
     const ultimoDia = new Date(año, mes + 1, 0).getDate();
-    this.diasMes = Array.from({ length: ultimoDia }, (_, i) => i + 1);
+
+    let primerDiaSemana = new Date(`${año}-${String(mes + 1).padStart(2, '0')}-01T12:00:00`).getDay();
+    //se pone T12:00:00 para evitar problemas de desfase horario que pueden hacer que el primer día del mes aparezca como domingo (0) en lugar de lunes (1)
+    primerDiaSemana=(primerDiaSemana+6)%7;
+
+    const vacias: null[] = Array(primerDiaSemana).fill(null);
+    const dias: number[]= Array.from({length:ultimoDia}, (_, i) => i + 1);
+    this.diasMes = [...vacias, ...dias];
   }
 
   cargarJuegos() {
@@ -45,19 +52,31 @@ export class Dashboard implements OnInit {
     });
   }
 
-  obtenerJuegoDelDia(dia: number) {
-    if (!this.juegos || this.juegos.length === 0) return null;
+  esDiaActual(dia:number|null): boolean {
+    if(!dia) return false;
+    const hoy=new Date();
+    return dia===hoy.getDate() &&
+           this.fechaActual.getMonth()===hoy.getMonth() &&
+            this.fechaActual.getFullYear()===hoy.getFullYear();
+    }
 
-    const mesActual = this.fechaActual.getMonth();
-    const añoActual = this.fechaActual.getFullYear();
 
-    return this.juegos.find(juego => {
-      if (!juego.released) return false;
-      const fechaJuego = new Date(juego.released);
-      // Ajustamos el desfase horario sumando un día si ves que los juegos salen el día anterior
-      return fechaJuego.getUTCDate() === dia && 
-             fechaJuego.getUTCMonth() === mesActual && 
-             fechaJuego.getUTCFullYear() === añoActual;
-    });
-  }
+
+  obtenerJuegoDelDia(dia: number | null) {
+  if (!dia || !this.juegos || this.juegos.length === 0) return null;
+
+  const mesActual = this.fechaActual.getMonth();
+  const añoActual = this.fechaActual.getFullYear();
+
+  return this.juegos.find(juego => {
+    if (!juego.released) return false;
+    // Añadimos T12:00:00 igual que en generarCalendario para evitar desfase
+    const fechaJuego = new Date(juego.released + 'T12:00:00');
+    return fechaJuego.getDate() === dia &&
+           fechaJuego.getMonth() === mesActual &&
+           fechaJuego.getFullYear() === añoActual;
+  });
+
+  
+}
 }

@@ -113,6 +113,24 @@
     flex-direction: column;
 }
 
+.calendar-day.empty {
+  background: transparent;
+  border-color: transparent;
+  pointer-events: none;
+}
+
+/* Día de hoy resaltado */
+.calendar-day.hoy {
+  border-color: #00ccff;
+  background: rgba(0, 204, 255, 0.07);
+  box-shadow: 0 0 18px rgba(0, 204, 255, 0.15);
+}
+
+.calendar-day.hoy .day-number {
+  color: #00ccff;
+  text-shadow: 0 0 8px #00ccff;
+}
+
 .calendar-day:hover {
     border-color: #00ccff;
     box-shadow: 0 0 15px rgba(0, 204, 255, 0.1);

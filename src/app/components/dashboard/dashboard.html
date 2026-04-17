@@ -14,14 +14,14 @@
     </header>
 
     <div class="dashboard-container">
-      
+
       <div *ngIf="cargando" class="loading-state">
         <p>Buscando lanzamientos en RAWG...</p>
       </div>
 
       <section class="calendar-section" *ngIf="!cargando">
         <header class="calendar-header">
-          <h2>{{ fechaActual | date:'MMMM yyyy' }}</h2> 
+          <h2>{{ fechaActual | date:'MMMM yyyy' }}</h2>
         </header>
 
         <div class="calendar-grid">
@@ -33,19 +33,31 @@
           <div class="weekday">Sáb</div>
           <div class="weekday">Dom</div>
 
-          <div *ngFor="let dia of diasMes" class="calendar-day">
-            <span class="day-number">{{ dia }}</span>
-            
-            <div *ngIf="obtenerJuegoDelDia(dia) as juego" class="game-info">
-              <span class="game-dot"></span>
-              
-              <div class="game-thumbnail">
+          <ng-container *ngFor="let dia of diasMes">
+
+            <!-- Celda vacía para el desplazamiento inicial -->
+            <div *ngIf="dia === null" class="calendar-day empty"></div>
+
+            <!-- Celda con día real -->
+            <div *ngIf="dia !== null"
+                 class="calendar-day"
+                 [class.hoy]="esDiaActual(dia)">
+
+              <span class="day-number">{{ dia }}</span>
+
+              <div *ngIf="obtenerJuegoDelDia(dia) as juego" class="game-info">
+                <span class="game-dot"></span>
+
+                <div class="game-thumbnail">
                   <img [src]="juego.background_image" alt="Portada de {{juego.name}}">
+                </div>
+
+                <span class="game-name">{{ juego.name }}</span>
               </div>
 
-              <span class="game-name">{{ juego.name }}</span>
             </div>
-          </div>
+
+          </ng-container>
         </div>
       </section>
 

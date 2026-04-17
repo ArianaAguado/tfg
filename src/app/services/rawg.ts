@@ -11,10 +11,16 @@ export class Rawg {
   private apiUrl = 'https://api.rawg.io/api/games';
 
   nuevosLanzamientos(): Observable<any> {
-    // Pedimos juegos de todo el año 2026 para asegurar que el array no venga vacío
-    const fechas = '2026-01-01,2026-12-31'; 
-    const url = `${this.apiUrl}?key=${this.apiKey}&dates=${fechas}&ordering=-released&page_size=40`;
-    
-    return this.http.get(url);
-  }
+  const hoy = new Date();
+  const año = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+  const ultimoDia = new Date(año, hoy.getMonth() + 1, 0).getDate();
+  
+  const fechaInicio = `${año}-${mes}-01`;
+  const fechaFin = `${año}-${mes}-${ultimoDia}`;
+  const fechas = `${fechaInicio},${fechaFin}`;
+  
+  const url = `${this.apiUrl}?key=${this.apiKey}&dates=${fechas}&ordering=released&page_size=40`;
+  return this.http.get(url);
+}
 }
