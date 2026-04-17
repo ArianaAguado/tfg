@@ -23,4 +23,18 @@ export class Rawg {
   const url = `${this.apiUrl}?key=${this.apiKey}&dates=${fechas}&ordering=released&page_size=40`;
   return this.http.get(url);
 }
+
+buscarJuegos(query: string): Observable<any> {
+  const hoy = new Date();
+  const año = hoy.getFullYear();
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+  const ultimoDia = new Date(año, hoy.getMonth() + 1, 0).getDate();
+  
+  const fechaInicio = `${año}-${mes}-01`;
+  const fechaFin = `${año}-${mes}-${ultimoDia}`;
+  const fechas = `${fechaInicio},${fechaFin}`;
+
+  const url = `${this.apiUrl}?key=${this.apiKey}&search=${query}&dates=${fechas}&page_size=40`;
+  return this.http.get(url);
+}
 }

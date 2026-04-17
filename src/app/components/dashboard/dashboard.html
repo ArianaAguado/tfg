@@ -2,9 +2,8 @@
   <aside class="sidebar">
     <div class="logo">KYG <span class="neon">Dash</span></div>
     <nav>
-      <a href="#" class="active"><i class="fa-solid fa-calendar"></i> Calendario</a>
-      <a href="#"><i class="fa-solid fa-gamepad"></i> Mi Biblioteca</a>
-      <a href="#"><i class="fa-solid fa-magnifying-glass"></i> Buscar</a>
+      <a routerLink="/dashboard" class="active"><i class="fa-solid fa-calendar"></i> Calendario</a>
+      <a routerLink="/biblioteca"><i class="fa-solid fa-gamepad"></i> Mi Biblioteca</a>
     </nav>
   </aside>
 
@@ -15,8 +14,23 @@
 
     <div class="dashboard-container">
 
+      <!-- BARRA DE BÚSQUEDA -->
+      <div class="search-bar">
+        <input
+          type="text"
+          [(ngModel)]="query"
+          (keyup.enter)="buscar()"
+          placeholder="Busca tu juego en el calendario..."
+          class="search-input"
+        />
+        <!-- si quieres búsqueda en tiempo real añadir: (ngModelChange)="buscar()" -->
+        <button (click)="buscar()" class="search-button">
+          <span class="material-icons">search</span>
+        </button>
+      </div>
+
       <div *ngIf="cargando" class="loading-state">
-        <p>Buscando lanzamientos en RAWG...</p>
+        <p>Buscando lanzamientos...</p>
       </div>
 
       <section class="calendar-section" *ngIf="!cargando">
@@ -34,11 +48,8 @@
           <div class="weekday">Dom</div>
 
           <ng-container *ngFor="let dia of diasMes">
-
-            <!-- Celda vacía para el desplazamiento inicial -->
             <div *ngIf="dia === null" class="calendar-day empty"></div>
 
-            <!-- Celda con día real -->
             <div *ngIf="dia !== null"
                  class="calendar-day"
                  [class.hoy]="esDiaActual(dia)">
@@ -47,16 +58,13 @@
 
               <div *ngIf="obtenerJuegoDelDia(dia) as juego" class="game-info">
                 <span class="game-dot"></span>
-
                 <div class="game-thumbnail">
                   <img [src]="juego.background_image" alt="Portada de {{juego.name}}">
                 </div>
-
                 <span class="game-name">{{ juego.name }}</span>
               </div>
 
             </div>
-
           </ng-container>
         </div>
       </section>
