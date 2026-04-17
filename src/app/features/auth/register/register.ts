@@ -15,7 +15,7 @@ import { RouterLink } from '@angular/router';
 export class Register {
   private auth = inject(Auth);
   private firestore = inject(Firestore);
-  private router = inject(Router);
+  public router = inject(Router);
 
   // Objeto para capturar los datos del HTML
   userData = {
@@ -44,7 +44,7 @@ export class Register {
       });
 
       alert('¡Cuenta creada con éxito!');
-      this.router.navigate(['/']);
+      this.router.navigate(['/dashboard']);
 
     } catch (error: any) {
       console.error(error);
@@ -52,3 +52,4 @@ export class Register {
     }
   }
 }
+
