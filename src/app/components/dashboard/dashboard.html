@@ -2,28 +2,26 @@
   <aside class="sidebar">
     <div class="logo">KYG <span class="neon">Dash</span></div>
     <nav>
-      <a routerLink="/dashboard" class="active"><i class="fa-solid fa-calendar"></i> Calendario</a>
-      <a routerLink="/biblioteca"><i class="fa-solid fa-gamepad"></i> Mi Biblioteca</a>
+      <a routerLink="/dashboard" class="active"><i
+          class="fa-solid fa-calendar"></i> Calendario</a>
+      <a routerLink="/biblioteca"><i class="fa-solid fa-gamepad"></i> Mi
+        Biblioteca</a>
+      <a (click)="abrirAdmin()" class="nav-link-admin"><i
+          class="fa-solid fa-shield"></i> Admin</a>
     </nav>
   </aside>
 
   <main class="main-content">
+    <!-- todo tu contenido actual sin cambios -->
     <header class="main-header">
       <h1>Calendario de <span class="texto-neon">Lanzamientos</span></h1>
     </header>
 
     <div class="dashboard-container">
-
-      <!-- BARRA DE BÚSQUEDA -->
       <div class="search-bar">
-        <input
-          type="text"
-          [(ngModel)]="query"
-          (keyup.enter)="buscar()"
+        <input type="text" [(ngModel)]="query" (keyup.enter)="buscar()"
           placeholder="Busca tu juego en el calendario..."
-          class="search-input"
-        />
-        <!-- si quieres búsqueda en tiempo real añadir: (ngModelChange)="buscar()" -->
+          class="search-input" />
         <button (click)="buscar()" class="search-button">
           <span class="material-icons">search</span>
         </button>
@@ -37,7 +35,6 @@
         <header class="calendar-header">
           <h2>{{ fechaActual | date:'MMMM yyyy' }}</h2>
         </header>
-
         <div class="calendar-grid">
           <div class="weekday">Lun</div>
           <div class="weekday">Mar</div>
@@ -49,26 +46,89 @@
 
           <ng-container *ngFor="let dia of diasMes">
             <div *ngIf="dia === null" class="calendar-day empty"></div>
-
-            <div *ngIf="dia !== null"
-                 class="calendar-day"
-                 [class.hoy]="esDiaActual(dia)">
-
+            <div *ngIf="dia !== null" class="calendar-day"
+              [class.hoy]="esDiaActual(dia)">
               <span class="day-number">{{ dia }}</span>
-
               <div *ngIf="obtenerJuegoDelDia(dia) as juego" class="game-info">
                 <span class="game-dot"></span>
                 <div class="game-thumbnail">
-                  <img [src]="juego.background_image" alt="Portada de {{juego.name}}">
+                  <img [src]="juego.background_image"
+                    alt="Portada de {{juego.name}}">
                 </div>
                 <span class="game-name">{{ juego.name }}</span>
               </div>
-
             </div>
           </ng-container>
         </div>
       </section>
-
     </div>
   </main>
+
+  <!-- MODAL ADMIN -->
+  <div class="modal-overlay" *ngIf="adminAbierto" (click)="cerrarAdmin($event)">
+    <div class="modal-panel">
+
+      <div class="modal-header">
+        <h2>Gestión de juegos <span class="texto-neon">custom</span></h2>
+        <button class="modal-close" (click)="adminAbierto = false">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Formulario -->
+      <div class="admin-form">
+        <input type="text" [(ngModel)]="formulario.nombre"
+          placeholder="Nombre del juego *" />
+        <input type="text" [(ngModel)]="formulario.fechaLanzamiento"
+          placeholder="Fecha lanzamiento (YYYY-MM-DD)" />
+        <textarea [(ngModel)]="formulario.descripcion" placeholder="Descripción"
+          rows="3"></textarea>
+
+        <div class="imagen-upload">
+          <label for="imagenInput" class="upload-label">
+            <i class="fa-solid fa-upload"></i>
+            {{ imagenArchivo ? imagenArchivo.name : 'Seleccionar portada' }}
+          </label>
+          <input id="imagenInput" type="file" accept="image/*"
+            (change)="onImagenSeleccionada($event)" hidden />
+          <img *ngIf="previstaImagen" [src]="previstaImagen" alt="Preview"
+            class="imagen-preview" />
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-guardar" (click)="guardar()"
+            [disabled]="guardando">
+            <span *ngIf="subiendoImagen">Subiendo imagen...</span>
+            <span *ngIf="!subiendoImagen && guardando">Guardando...</span>
+            <span *ngIf="!guardando">{{ modoEdicion ? 'Actualizar' :
+              'Añadir juego' }}</span>
+          </button>
+          <button *ngIf="modoEdicion" class="btn-cancelar"
+            (click)="cancelar()">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Listado -->
+      <div class="admin-lista">
+        <p *ngIf="juegosCustom.length === 0" style="color: #a0a5bc">No hay
+          juegos custom todavía.</p>
+        <div class="admin-card" *ngFor="let juego of juegosCustom">
+          <img [src]="juego.imagen || 'assets/placeholder.png'"
+            alt="{{ juego.nombre }}" class="card-img" />
+          <div class="card-info">
+            <h3>{{ juego.nombre }}</h3>
+            <p>{{ juego.fechaLanzamiento || 'Sin fecha' }}</p>
+          </div>
+          <div class="card-actions">
+            <button class="btn-edit"
+              (click)="editarJuego(juego)">Editar</button>
+            <button class="btn-delete"
+              (click)="eliminarJuego(juego)">Eliminar</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
