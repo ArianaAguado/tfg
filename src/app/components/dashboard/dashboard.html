@@ -1,18 +1,40 @@
 <div class="dashboard-wrapper">
   <aside class="sidebar">
     <div class="logo">KYG <span class="neon">Dash</span></div>
+
     <nav>
-      <a routerLink="/dashboard" class="active"><i
-          class="fa-solid fa-calendar"></i> Calendario</a>
-      <a routerLink="/biblioteca"><i class="fa-solid fa-gamepad"></i> Mi
-        Biblioteca</a>
-      <a (click)="abrirAdmin()" class="nav-link-admin"><i
-          class="fa-solid fa-shield"></i> Admin</a>
+      <a routerLink="/dashboard" class="active">
+        <i class="fa-solid fa-calendar"></i> Calendario
+      </a>
+      <a routerLink="/biblioteca">
+        <i class="fa-solid fa-gamepad"></i> Mi Biblioteca
+      </a>
+      <a (click)="abrirAdmin()" class="nav-link-admin">
+        <i class="fa-solid fa-shield"></i> Admin
+      </a>
     </nav>
+
+    <!-- PERFIL DE USUARIO (botón sidebar) -->
+    <div class="user-profile" *ngIf="usuario" (click)="abrirPerfil()">
+      <div class="user-avatar">
+        <img
+          *ngIf="usuario.photoURL"
+          [src]="usuario.photoURL"
+          alt="Avatar"
+          class="avatar-img" />
+        <div *ngIf="!usuario.photoURL" class="avatar-placeholder">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </div>
+      <div class="user-info">
+        <span class="user-name">{{ usuario.displayName || 'Usuario' }}</span>
+        <span class="user-email">{{ usuario.email }}</span>
+      </div>
+      <i class="fa-solid fa-chevron-right user-arrow"></i>
+    </div>
   </aside>
 
   <main class="main-content">
-    <!-- todo tu contenido actual sin cambios -->
     <header class="main-header">
       <h1>Calendario de <span class="texto-neon">Lanzamientos</span></h1>
     </header>
@@ -75,7 +97,6 @@
         </button>
       </div>
 
-      <!-- Formulario -->
       <div class="admin-form">
         <input type="text" [(ngModel)]="formulario.nombre"
           placeholder="Nombre del juego *" />
@@ -108,7 +129,6 @@
         </div>
       </div>
 
-      <!-- Listado -->
       <div class="admin-lista">
         <p *ngIf="juegosCustom.length === 0" style="color: #a0a5bc">No hay
           juegos custom todavía.</p>
@@ -127,6 +147,77 @@
           </div>
         </div>
       </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL PERFIL -->
+  <div class="modal-overlay" *ngIf="perfilAbierto"
+    (click)="cerrarPerfil($event)">
+    <div class="modal-panel">
+
+      <div class="modal-header">
+        <h2>Perfil de <span class="texto-neon">usuario</span></h2>
+        <button class="modal-close" (click)="perfilAbierto = false">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="perfil-avatar-wrapper">
+        <img
+          *ngIf="usuario?.photoURL"
+          [src]="usuario!.photoURL"
+          alt="Avatar"
+          class="perfil-avatar-img" />
+        <div *ngIf="!usuario?.photoURL" class="perfil-avatar-placeholder">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </div>
+
+      <div class="perfil-datos">
+        <div class="perfil-campo">
+          <span class="campo-label">
+            <i class="fa-solid fa-user"></i> Nombre
+          </span>
+          <span class="campo-valor">{{ usuario?.displayName || 'Sin nombre'
+            }}</span>
+        </div>
+
+        <div class="perfil-campo">
+          <span class="campo-label">
+            <i class="fa-solid fa-envelope"></i> Correo
+          </span>
+          <span class="campo-valor">{{ usuario?.email }}</span>
+        </div>
+
+        <div class="perfil-campo">
+          <span class="campo-label">
+            <i class="fa-solid fa-calendar-plus"></i> Miembro desde
+          </span>
+          <span class="campo-valor">{{ usuario?.metadata?.creationTime |
+            date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="perfil-campo">
+          <span class="campo-label">
+            <i class="fa-solid fa-calendar-plus"></i> Miembro desde
+          </span>
+          <span class="campo-valor">{{ usuario?.metadata?.creationTime |
+            date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="perfil-campo">
+          <span class="campo-label">
+            <i class="fa-solid fa-clock"></i> Último acceso
+          </span>
+          <span class="campo-valor">{{ usuario?.metadata?.lastSignInTime |
+            date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+
+      <button class="btn-cerrar-sesion" (click)="cerrarSesion()">
+        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+      </button>
 
     </div>
   </div>

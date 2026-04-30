@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { initializeApp, getApps } from 'firebase/app';
 import {
   getFirestore,
@@ -11,6 +11,12 @@ import {
   doc,
   getDocs
 } from 'firebase/firestore';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut,
+  User
+} from 'firebase/auth';
 import { environment } from '../../environments/environments';
 
 export interface JuegoCustom {
@@ -27,9 +33,27 @@ export interface JuegoCustom {
 
 const app = getApps().length ? getApps()[0] : initializeApp(environment.firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
+
+  private usuarioSubject = new BehaviorSubject<User | null>(null);
+  usuario$ = this.usuarioSubject.asObservable();
+
+  constructor() {
+    onAuthStateChanged(auth, (user) => {
+      this.usuarioSubject.next(user);
+    });
+  }
+
+  get usuarioActual(): User | null {
+    return auth.currentUser;
+  }
+
+  async cerrarSesion(): Promise<void> {
+    await signOut(auth);
+  }
 
   obtenerJuegos(): Observable<JuegoCustom[]> {
     return new Observable(observer => {

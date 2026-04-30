@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Rawg } from '../../services/rawg';
 import { FirebaseService, JuegoCustom } from '../../services/firebase.service';
+import { Router } from '@angular/router';
+import { User } from 'firebase/auth';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,17 +33,26 @@ export class Dashboard implements OnInit {
   guardando = false;
   subiendoImagen = false;
   adminAbierto = false;
+  // Propiedad para el usuario actual
+  usuario: User | null = null;
+  private router = inject(Router);
+  perfilAbierto = false;
+
 
   ngOnInit(): void {
-    this.generarCalendario();
-    this.cargarJuegos();
-    this.firebase.obtenerJuegos().subscribe({
-      next: (juegos) => {
-        this.juegosCustom = juegos;
-      },
-      error: (err) => console.error('Error obteniendo juegos:', err)
-    });
-  }
+  this.generarCalendario();
+  this.cargarJuegos();
+  this.firebase.usuario$.subscribe(u => {
+    this.usuario = u;
+    this.cdr.detectChanges();
+  });
+  this.firebase.obtenerJuegos().subscribe({
+    next: (juegos) => {
+      this.juegosCustom = juegos;
+    },
+    error: (err) => console.error('Error obteniendo juegos:', err)
+  });
+}
 
   generarCalendario() {
     const año = this.fechaActual.getFullYear();
@@ -190,4 +201,19 @@ export class Dashboard implements OnInit {
       this.adminAbierto = false;
     }
   }
+
+  async cerrarSesion() {
+  await this.firebase.cerrarSesion();
+  this.router.navigate(['/']);
+}
+
+abrirPerfil() {
+  this.perfilAbierto = true;
+}
+
+cerrarPerfil(event: MouseEvent) {
+  if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
+    this.perfilAbierto = false;
+  }
+}
 }
