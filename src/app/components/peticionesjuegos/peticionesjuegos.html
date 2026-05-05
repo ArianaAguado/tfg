@@ -1,0 +1,40 @@
+<div class="peticiones-wrapper">
+  <div class="header-peticiones">
+    <h1>Peticiones de <span class="texto-neon">Desarrolladores</span></h1>
+    <p>Revisa las propuestas antes de publicarlas en la plataforma.</p>
+  </div>
+
+  <div class="lista-peticiones">
+    <div *ngIf="peticiones.length === 0" class="no-peticiones">
+      <i class="fa-solid fa-inbox"></i>
+      <p>No hay peticiones pendientes por ahora.</p>
+    </div>
+
+    <div class="peticion-card" *ngFor="let peticion of peticiones">
+      <div class="card-badge">PENDIENTE</div>
+      
+      <div class="peticion-content">
+        <img [src]="peticion.imagen || 'assets/placeholder.png'" class="peticion-img" />
+        
+        <div class="peticion-info">
+          <h3>{{ peticion.nombre }}</h3>
+          <p class="desc">{{ peticion.descripcion | slice:0:100 }}...</p>
+          
+          <div class="dev-data">
+            <span><i class="fa-solid fa-user-ninja"></i> {{ peticion.desarrolladorNombre }}</span>
+            <span><i class="fa-solid fa-envelope"></i> {{ peticion.desarrolladorEmail }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="peticion-actions">
+        <button class="btn-aprobar" (click)="aprobarPeticion(peticion)" [disabled]="cargando">
+          <i class="fa-solid fa-check"></i> Aprobar y Publicar
+        </button>
+        <button class="btn-rechazar" (click)="rechazarPeticion(peticion)" [disabled]="cargando">
+          <i class="fa-solid fa-xmark"></i> Rechazar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
