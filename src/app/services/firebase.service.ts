@@ -11,7 +11,9 @@ import {
   doc,
   getDocs,
   getDoc,
-  setDoc
+  setDoc,
+  query,
+  orderBy
 } from 'firebase/firestore';
 import {
   getAuth,
@@ -20,6 +22,8 @@ import {
   User
 } from 'firebase/auth';
 import { environment } from '../../environments/environments';
+
+// ── INTERFACES ──
 
 export interface JuegoCustom {
   id?: string;
@@ -33,6 +37,14 @@ export interface JuegoCustom {
   esCustom: boolean;
 }
 
+export interface PeticionJuego extends JuegoCustom {
+  desarrolladorNombre: string;
+  desarrolladorEmail: string;
+  desarrolladorId: string;
+  fechaPeticion: number;
+  estado: 'pendiente' | 'aprobado' | 'rechazado';
+}
+
 export interface UsuarioApp {
   uid: string;
   email: string;
@@ -41,6 +53,7 @@ export interface UsuarioApp {
   fechaRegistro: string;
 }
 
+// Inicialización de Firebase
 const app = getApps().length ? getApps()[0] : initializeApp(environment.firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -66,7 +79,7 @@ export class FirebaseService {
     });
   }
 
-  // ── ROLES ──
+  // ── SECCIÓN: ROLES Y USUARIOS ──
 
   async obtenerRolUsuario(uid: string): Promise<string> {
     const docRef = doc(db, 'usuarios', uid);
@@ -95,7 +108,7 @@ export class FirebaseService {
     return this.rolSubject.getValue();
   }
 
-  // ── AUTH ──
+  // ── SECCIÓN: AUTH ──
 
   get usuarioActual(): User | null {
     return auth.currentUser;
@@ -105,7 +118,7 @@ export class FirebaseService {
     await signOut(auth);
   }
 
-  // ── JUEGOS ──
+  // ── SECCIÓN: JUEGOS OFICIALES ──
 
   obtenerJuegos(): Observable<JuegoCustom[]> {
     return new Observable(observer => {
@@ -121,26 +134,6 @@ export class FirebaseService {
     });
   }
 
-  async buscarPorNombre(nombre: string): Promise<JuegoCustom[]> {
-    const colRef = collection(db, 'juegos');
-    const snapshot = await getDocs(colRef);
-    const todos = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as JuegoCustom));
-    return todos.filter(j => j.nombre.toLowerCase().includes(nombre.toLowerCase()));
-  }
-
-  subirImagen(archivo: File): Promise<{ url: string; path: string }> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve({ url: reader.result as string, path: '' });
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(archivo);
-    });
-  }
-
-  async borrarImagen(imagenPath: string): Promise<void> {
-    return;
-  }
-
   async agregarJuego(juego: Omit<JuegoCustom, 'id'>): Promise<void> {
     await addDoc(collection(db, 'juegos'), juego);
   }
@@ -151,5 +144,63 @@ export class FirebaseService {
 
   async eliminarJuego(juego: JuegoCustom): Promise<void> {
     await deleteDoc(doc(db, 'juegos', juego.id!));
+  }
+
+  // ── SECCIÓN: PETICIONES DE DESARROLLADORES ──
+
+  /**
+   * Los Admins usan esto para ver las solicitudes en tiempo real
+   */
+  obtenerPeticiones(): Observable<PeticionJuego[]> {
+    return new Observable(observer => {
+      const colRef = collection(db, 'peticiones_juegos');
+      // Opcional: const q = query(colRef, orderBy('fechaPeticion', 'desc'));
+      const unsub = onSnapshot(colRef, 
+        snapshot => {
+          const peticiones = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PeticionJuego));
+          observer.next(peticiones);
+        },
+        err => observer.error(err)
+      );
+      return () => unsub();
+    });
+  }
+
+  /**
+   * Los Desarrolladores usan esto para enviar su propuesta
+   */
+  async enviarPeticion(peticion: Omit<PeticionJuego, 'id'>): Promise<void> {
+    await addDoc(collection(db, 'peticiones_juegos'), peticion);
+  }
+
+  /**
+   * El Admin usa esto para borrar la petición tras aprobarla o rechazarla
+   */
+  async eliminarPeticion(id: string): Promise<void> {
+    const docRef = doc(db, 'peticiones_juegos', id);
+    await deleteDoc(docRef);
+  }
+
+  // ── SECCIÓN: UTILIDADES ──
+
+  async buscarPorNombre(nombre: string): Promise<JuegoCustom[]> {
+    const colRef = collection(db, 'juegos');
+    const snapshot = await getDocs(colRef);
+    const todos = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as JuegoCustom));
+    return todos.filter(j => j.nombre.toLowerCase().includes(nombre.toLowerCase()));
+  }
+
+  subirImagen(archivo: File): Promise<{ url: string; path: string }> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve({ url: reader.result as string, path: 'uploads/' + Date.now() + '_' + archivo.name });
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(archivo);
+    });
+  }
+
+  async borrarImagen(imagenPath: string): Promise<void> {
+    // Implementar si usas Firebase Storage en el futuro
+    return;
   }
 }
