@@ -2,7 +2,13 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Auth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from '@angular/fire/auth';
+import {
+  Auth,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider
+} from '@angular/fire/auth';
+import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +20,7 @@ export class Login {
   private formBuilder = inject(FormBuilder);
   public router = inject(Router);
   private auth = inject(Auth);
+  private firestore = inject(Firestore); // ← necesario para Google
 
   errorMessage = '';
 
@@ -37,7 +44,21 @@ export class Login {
   async loginConGoogle() {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(this.auth, provider);
+      const credenciales = await signInWithPopup(this.auth, provider);
+      const user = credenciales.user;
+      const docRef = doc(this.firestore, 'usuarios', user.uid);
+      const snap = await getDoc(docRef);
+
+      if (!snap.exists()) {
+        await setDoc(docRef, {
+          uid: user.uid,
+          nombre: user.displayName ?? '',
+          email: user.email,
+          rol: 'usuario',
+          fechaRegistro: new Date().toISOString()
+        });
+      }
+
       this.router.navigate(['/dashboard']);
     } catch (error: any) {
       this.errorMessage = this.getErrorMessage(error.code);

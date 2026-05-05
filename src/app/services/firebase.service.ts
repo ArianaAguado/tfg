@@ -9,7 +9,9 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  getDocs
+  getDocs,
+  getDoc,
+  setDoc
 } from 'firebase/firestore';
 import {
   getAuth,
@@ -31,6 +33,14 @@ export interface JuegoCustom {
   esCustom: boolean;
 }
 
+export interface UsuarioApp {
+  uid: string;
+  email: string;
+  nombre: string;
+  rol: 'usuario' | 'admin' | 'desarrollador';
+  fechaRegistro: string;
+}
+
 const app = getApps().length ? getApps()[0] : initializeApp(environment.firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -41,11 +51,51 @@ export class FirebaseService {
   private usuarioSubject = new BehaviorSubject<User | null>(null);
   usuario$ = this.usuarioSubject.asObservable();
 
+  private rolSubject = new BehaviorSubject<string | null>(null);
+  rol$ = this.rolSubject.asObservable();
+
   constructor() {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       this.usuarioSubject.next(user);
+      if (user) {
+        const rol = await this.obtenerRolUsuario(user.uid);
+        this.rolSubject.next(rol);
+      } else {
+        this.rolSubject.next(null);
+      }
     });
   }
+
+  // ── ROLES ──
+
+  async obtenerRolUsuario(uid: string): Promise<string> {
+    const docRef = doc(db, 'usuarios', uid);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      return snap.data()['rol'] ?? 'usuario';
+    }
+    return 'usuario';
+  }
+
+  async crearUsuarioEnFirestore(user: User): Promise<void> {
+    const docRef = doc(db, 'usuarios', user.uid);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) {
+      await setDoc(docRef, {
+        uid: user.uid,
+        email: user.email,
+        nombre: user.displayName ?? '',
+        rol: 'usuario',
+        fechaRegistro: new Date().toISOString()
+      });
+    }
+  }
+
+  get rolActual(): string | null {
+    return this.rolSubject.getValue();
+  }
+
+  // ── AUTH ──
 
   get usuarioActual(): User | null {
     return auth.currentUser;
@@ -54,6 +104,8 @@ export class FirebaseService {
   async cerrarSesion(): Promise<void> {
     await signOut(auth);
   }
+
+  // ── JUEGOS ──
 
   obtenerJuegos(): Observable<JuegoCustom[]> {
     return new Observable(observer => {

@@ -1,0 +1,181 @@
+/* ── LAYOUT GENERAL DE LA PÁGINA ── */
+.main-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.main-header h1 {
+  font-size: 2rem;
+  margin-bottom: 30px;
+}
+
+.texto-neon {
+  color: #ff00ff;
+  text-shadow: 0 0 15px #ff00ff;
+}
+
+.dashboard-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── BARRA DE BÚSQUEDA ── */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 204, 255, 0.2);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.3s;
+}
+
+.search-input:focus {
+  border-color: #00ccff;
+  box-shadow: 0 0 10px rgba(0, 204, 255, 0.2);
+}
+
+.search-button {
+  padding: 12px 20px;
+  background: transparent;
+  border: 2px solid rgba(0, 204, 255, 0.2);
+  border-radius: 10px;
+  color: #00ccff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-button:hover {
+  background: rgba(0, 204, 255, 0.1);
+}
+
+/* ── ESTADO DE CARGA ── */
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #a0a5bc;
+}
+
+/* ── SECCIÓN CALENDARIO ── */
+.calendar-section {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.01);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.calendar-header {
+  text-transform: capitalize;
+  margin-bottom: 20px;
+}
+
+/* ── GRID DEL CALENDARIO ── */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.weekday {
+  text-align: center;
+  color: #a0a5bc;
+  font-size: 0.9rem;
+  padding-bottom: 10px;
+  font-weight: bold;
+}
+
+.calendar-day {
+  min-height: 140px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 12px;
+  border-radius: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  border-color: transparent;
+  pointer-events: none;
+}
+
+.calendar-day.hoy {
+  border-color: #00ccff;
+  background: rgba(0, 204, 255, 0.07);
+  box-shadow: 0 0 18px rgba(0, 204, 255, 0.15);
+}
+
+.calendar-day.hoy .day-number {
+  color: #00ccff;
+  text-shadow: 0 0 8px #00ccff;
+}
+
+.calendar-day:hover {
+  border-color: #00ccff;
+  box-shadow: 0 0 15px rgba(0, 204, 255, 0.1);
+}
+
+.day-number {
+  font-weight: bold;
+  color: #e0e6ff;
+  font-size: 1.1rem;
+  margin-bottom: auto;
+}
+
+/* ── INFO DEL JUEGO EN EL DÍA ── */
+.game-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.game-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  background: #ff00aa;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #ff00aa;
+}
+
+.game-thumbnail {
+  width: 100%;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.game-name {
+  font-size: 0.7rem;
+  color: #fff;
+  text-align: center;
+  line-height: 1.2;
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

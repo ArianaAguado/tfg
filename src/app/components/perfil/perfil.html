@@ -1,0 +1,66 @@
+<div class="perfil-wrapper">
+  <div class="perfil-panel">
+
+    <div class="perfil-header">
+      <h1>Perfil de <span class="texto-neon">usuario</span></h1>
+    </div>
+
+    <div class="perfil-avatar-wrapper">
+      <img *ngIf="usuario?.photoURL" [src]="usuario!.photoURL"
+        alt="Avatar" class="perfil-avatar-img"/>
+      <div *ngIf="!usuario?.photoURL" class="perfil-avatar-placeholder">
+        <i class="fa-solid fa-user"></i>
+      </div>
+    </div>
+
+    <div class="perfil-datos">
+
+      <div class="perfil-campo">
+        <span class="campo-label">
+          <i class="fa-solid fa-user"></i> Nombre
+        </span>
+        <span class="campo-valor">{{ usuario?.displayName || 'Sin nombre' }}</span>
+      </div>
+
+      <div class="perfil-campo">
+        <span class="campo-label">
+          <i class="fa-solid fa-envelope"></i> Correo
+        </span>
+        <span class="campo-valor">{{ usuario?.email }}</span>
+      </div>
+
+      <div class="perfil-campo">
+        <span class="campo-label">
+          <i class="fa-solid fa-id-badge"></i> Rol
+        </span>
+        <span class="campo-valor rol-badge" [ngClass]="'rol-' + rol">
+          {{ rol }}
+        </span>
+      </div>
+
+      <div class="perfil-campo">
+        <span class="campo-label">
+          <i class="fa-solid fa-calendar-plus"></i> Miembro desde
+        </span>
+        <span class="campo-valor">
+          {{ usuario?.metadata?.creationTime | date:'dd/MM/yyyy' }}
+        </span>
+      </div>
+
+      <div class="perfil-campo">
+        <span class="campo-label">
+          <i class="fa-solid fa-clock"></i> Último acceso
+        </span>
+        <span class="campo-valor">
+          {{ usuario?.metadata?.lastSignInTime | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+      </div>
+
+    </div>
+
+    <button class="btn-cerrar-sesion" (click)="cerrarSesion()">
+      <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+    </button>
+
+  </div>
+</div>

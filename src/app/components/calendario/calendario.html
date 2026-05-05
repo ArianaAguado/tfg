@@ -1,0 +1,47 @@
+<header class="main-header">
+  <h1>Calendario de <span class="texto-neon">Lanzamientos</span></h1>
+</header>
+
+<div class="dashboard-container">
+  <div class="search-bar">
+    <input type="text" [(ngModel)]="query" (keyup.enter)="buscar()"
+      placeholder="Busca tu juego en el calendario..."
+      class="search-input" />
+    <button (click)="buscar()" class="search-button">
+      <span class="material-icons">search</span>
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="loading-state">
+    <p>Buscando lanzamientos...</p>
+  </div>
+
+  <section class="calendar-section" *ngIf="!cargando">
+    <header class="calendar-header">
+      <h2>{{ fechaActual | date:'MMMM yyyy' }}</h2>
+    </header>
+    <div class="calendar-grid">
+      <div class="weekday">Lun</div>
+      <div class="weekday">Mar</div>
+      <div class="weekday">Mié</div>
+      <div class="weekday">Jue</div>
+      <div class="weekday">Vie</div>
+      <div class="weekday">Sáb</div>
+      <div class="weekday">Dom</div>
+
+      <ng-container *ngFor="let dia of diasMes">
+        <div *ngIf="dia === null" class="calendar-day empty"></div>
+        <div *ngIf="dia !== null" class="calendar-day" [class.hoy]="esDiaActual(dia)">
+          <span class="day-number">{{ dia }}</span>
+          <div *ngIf="obtenerJuegoDelDia(dia) as juego" class="game-info">
+            <span class="game-dot"></span>
+            <div class="game-thumbnail">
+              <img [src]="juego.background_image" alt="Portada de {{juego.name}}">
+            </div>
+            <span class="game-name">{{ juego.name }}</span>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </section>
+</div>

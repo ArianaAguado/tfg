@@ -3,25 +3,20 @@
     <div class="logo">KYG <span class="neon">Dash</span></div>
 
     <nav>
-      <a routerLink="/dashboard" class="active">
+      <a routerLink="calendario" routerLinkActive="active">
         <i class="fa-solid fa-calendar"></i> Calendario
       </a>
-      <a routerLink="/biblioteca">
+      <a routerLink="biblioteca" routerLinkActive="active">
         <i class="fa-solid fa-gamepad"></i> Mi Biblioteca
       </a>
-      <a (click)="abrirAdmin()" class="nav-link-admin">
-        <i class="fa-solid fa-shield"></i> Admin
+      <a *ngIf="rol === 'admin'" routerLink="crear-juegos" routerLinkActive="active">
+        <i class="fa-solid fa-shield"></i> Gestión Juegos
       </a>
     </nav>
 
-    <!-- PERFIL DE USUARIO (botón sidebar) -->
-    <div class="user-profile" *ngIf="usuario" (click)="abrirPerfil()">
+    <div class="user-profile" *ngIf="usuario" routerLink="perfil">
       <div class="user-avatar">
-        <img
-          *ngIf="usuario.photoURL"
-          [src]="usuario.photoURL"
-          alt="Avatar"
-          class="avatar-img" />
+        <img *ngIf="usuario.photoURL" [src]="usuario.photoURL" alt="Avatar" class="avatar-img"/>
         <div *ngIf="!usuario.photoURL" class="avatar-placeholder">
           <i class="fa-solid fa-user"></i>
         </div>
@@ -35,191 +30,6 @@
   </aside>
 
   <main class="main-content">
-    <header class="main-header">
-      <h1>Calendario de <span class="texto-neon">Lanzamientos</span></h1>
-    </header>
-
-    <div class="dashboard-container">
-      <div class="search-bar">
-        <input type="text" [(ngModel)]="query" (keyup.enter)="buscar()"
-          placeholder="Busca tu juego en el calendario..."
-          class="search-input" />
-        <button (click)="buscar()" class="search-button">
-          <span class="material-icons">search</span>
-        </button>
-      </div>
-
-      <div *ngIf="cargando" class="loading-state">
-        <p>Buscando lanzamientos...</p>
-      </div>
-
-      <section class="calendar-section" *ngIf="!cargando">
-        <header class="calendar-header">
-          <h2>{{ fechaActual | date:'MMMM yyyy' }}</h2>
-        </header>
-        <div class="calendar-grid">
-          <div class="weekday">Lun</div>
-          <div class="weekday">Mar</div>
-          <div class="weekday">Mié</div>
-          <div class="weekday">Jue</div>
-          <div class="weekday">Vie</div>
-          <div class="weekday">Sáb</div>
-          <div class="weekday">Dom</div>
-
-          <ng-container *ngFor="let dia of diasMes">
-            <div *ngIf="dia === null" class="calendar-day empty"></div>
-            <div *ngIf="dia !== null" class="calendar-day"
-              [class.hoy]="esDiaActual(dia)">
-              <span class="day-number">{{ dia }}</span>
-              <div *ngIf="obtenerJuegoDelDia(dia) as juego" class="game-info">
-                <span class="game-dot"></span>
-                <div class="game-thumbnail">
-                  <img [src]="juego.background_image"
-                    alt="Portada de {{juego.name}}">
-                </div>
-                <span class="game-name">{{ juego.name }}</span>
-              </div>
-            </div>
-          </ng-container>
-        </div>
-      </section>
-    </div>
+    <router-outlet></router-outlet>
   </main>
-
-  <!-- MODAL ADMIN -->
-  <div class="modal-overlay" *ngIf="adminAbierto" (click)="cerrarAdmin($event)">
-    <div class="modal-panel">
-
-      <div class="modal-header">
-        <h2>Gestión de juegos <span class="texto-neon">custom</span></h2>
-        <button class="modal-close" (click)="adminAbierto = false">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="admin-form">
-        <input type="text" [(ngModel)]="formulario.nombre"
-          placeholder="Nombre del juego *" />
-        <input type="text" [(ngModel)]="formulario.fechaLanzamiento"
-          placeholder="Fecha lanzamiento (YYYY-MM-DD)" />
-        <textarea [(ngModel)]="formulario.descripcion" placeholder="Descripción"
-          rows="3"></textarea>
-
-        <div class="imagen-upload">
-          <label for="imagenInput" class="upload-label">
-            <i class="fa-solid fa-upload"></i>
-            {{ imagenArchivo ? imagenArchivo.name : 'Seleccionar portada' }}
-          </label>
-          <input id="imagenInput" type="file" accept="image/*"
-            (change)="onImagenSeleccionada($event)" hidden />
-          <img *ngIf="previstaImagen" [src]="previstaImagen" alt="Preview"
-            class="imagen-preview" />
-        </div>
-
-        <div class="form-actions">
-          <button class="btn-guardar" (click)="guardar()"
-            [disabled]="guardando">
-            <span *ngIf="subiendoImagen">Subiendo imagen...</span>
-            <span *ngIf="!subiendoImagen && guardando">Guardando...</span>
-            <span *ngIf="!guardando">{{ modoEdicion ? 'Actualizar' :
-              'Añadir juego' }}</span>
-          </button>
-          <button *ngIf="modoEdicion" class="btn-cancelar"
-            (click)="cancelar()">Cancelar</button>
-        </div>
-      </div>
-
-      <div class="admin-lista">
-        <p *ngIf="juegosCustom.length === 0" style="color: #a0a5bc">No hay
-          juegos custom todavía.</p>
-        <div class="admin-card" *ngFor="let juego of juegosCustom">
-          <img [src]="juego.imagen || 'assets/placeholder.png'"
-            alt="{{ juego.nombre }}" class="card-img" />
-          <div class="card-info">
-            <h3>{{ juego.nombre }}</h3>
-            <p>{{ juego.fechaLanzamiento || 'Sin fecha' }}</p>
-          </div>
-          <div class="card-actions">
-            <button class="btn-edit"
-              (click)="editarJuego(juego)">Editar</button>
-            <button class="btn-delete"
-              (click)="eliminarJuego(juego)">Eliminar</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- MODAL PERFIL -->
-  <div class="modal-overlay" *ngIf="perfilAbierto"
-    (click)="cerrarPerfil($event)">
-    <div class="modal-panel">
-
-      <div class="modal-header">
-        <h2>Perfil de <span class="texto-neon">usuario</span></h2>
-        <button class="modal-close" (click)="perfilAbierto = false">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <div class="perfil-avatar-wrapper">
-        <img
-          *ngIf="usuario?.photoURL"
-          [src]="usuario!.photoURL"
-          alt="Avatar"
-          class="perfil-avatar-img" />
-        <div *ngIf="!usuario?.photoURL" class="perfil-avatar-placeholder">
-          <i class="fa-solid fa-user"></i>
-        </div>
-      </div>
-
-      <div class="perfil-datos">
-        <div class="perfil-campo">
-          <span class="campo-label">
-            <i class="fa-solid fa-user"></i> Nombre
-          </span>
-          <span class="campo-valor">{{ usuario?.displayName || 'Sin nombre'
-            }}</span>
-        </div>
-
-        <div class="perfil-campo">
-          <span class="campo-label">
-            <i class="fa-solid fa-envelope"></i> Correo
-          </span>
-          <span class="campo-valor">{{ usuario?.email }}</span>
-        </div>
-
-        <div class="perfil-campo">
-          <span class="campo-label">
-            <i class="fa-solid fa-calendar-plus"></i> Miembro desde
-          </span>
-          <span class="campo-valor">{{ usuario?.metadata?.creationTime |
-            date:'dd/MM/yyyy' }}</span>
-        </div>
-
-        <div class="perfil-campo">
-          <span class="campo-label">
-            <i class="fa-solid fa-calendar-plus"></i> Miembro desde
-          </span>
-          <span class="campo-valor">{{ usuario?.metadata?.creationTime |
-            date:'dd/MM/yyyy' }}</span>
-        </div>
-
-        <div class="perfil-campo">
-          <span class="campo-label">
-            <i class="fa-solid fa-clock"></i> Último acceso
-          </span>
-          <span class="campo-valor">{{ usuario?.metadata?.lastSignInTime |
-            date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-      </div>
-
-      <button class="btn-cerrar-sesion" (click)="cerrarSesion()">
-        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
-      </button>
-
-    </div>
-  </div>
-
 </div>

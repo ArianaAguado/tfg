@@ -1,0 +1,78 @@
+<!-- Eliminamos el *ngIf="visible" para que se vea siempre que entremos a la ruta -->
+<div class="modal-overlay-page">
+    <div class="modal-panel">
+
+        <div class="modal-header">
+            <h2>Gestión de juegos <span class="texto-neon">custom</span></h2>
+            <!-- Si quieres que el botón X te saque de aquí, podemos usar un link o router.navigate -->
+            <button class="modal-close" routerLink="/dashboard/calendario">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="admin-form">
+            <input type="text" [(ngModel)]="datosJuego.nombre"
+                placeholder="Nombre del juego" />
+            <input type="text" [(ngModel)]="datosJuego.fechaLanzamiento"
+                placeholder="Fecha lanzamiento (YYYY-MM-DD)" />
+            <textarea [(ngModel)]="datosJuego.descripcion"
+                placeholder="Descripción"
+                rows="3"></textarea>
+
+            <div class="imagen-upload">
+                <label for="imagenInput" class="upload-label">
+                    <i class="fa-solid fa-upload"></i>
+                    {{ archivoImagen ? archivoImagen.name :
+                    'Seleccionar portada' }}
+                </label>
+                <input id="imagenInput" type="file" accept="image/*"
+                    (change)="onImagenSeleccionada($event)" hidden />
+                <img *ngIf="previewImagen" [src]="previewImagen" alt="Preview"
+                    class="imagen-preview" />
+            </div>
+
+            <div class="form-actions">
+                <button class="btn-guardar" (click)="guardarJuego()"
+                    [disabled]="estaGuardando">
+                    <!-- Estado de carga -->
+                    <ng-container *ngIf="estaGuardando">
+                        <span *ngIf="estaSubiendoImagen">Subiendo
+                            imagen...</span>
+                        <span *ngIf="!estaSubiendoImagen">Guardando...</span>
+                    </ng-container>
+
+                    <!-- Estado normal -->
+                    <ng-container *ngIf="!estaGuardando">
+                        <span>{{ esEdicion ? 'Actualizar Cambios' :
+                            'Añadir nuevo juego' }}</span>
+                    </ng-container>
+                </button>
+
+                <button *ngIf="esEdicion" class="btn-cancelar"
+                    (click)="limpiarFormulario()">
+                    Cancelar edición
+                </button>
+            </div>
+
+            <div class="admin-lista">
+                <p *ngIf="listaJuegos.length === 0" style="color: #a0a5bc">No
+                    hay juegos custom todavía.</p>
+
+                <div class="admin-card" *ngFor="let juego of listaJuegos">
+                    <img [src]="juego.imagen || 'assets/placeholder.png'"
+                        alt="{{ juego.nombre }}" class="card-img" />
+                    <div class="card-info">
+                        <h3>{{ juego.nombre }}</h3>
+                        <p>{{ juego.fechaLanzamiento || 'Sin fecha' }}</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-edit"
+                            (click)="prepararEdicion(juego)">Editar</button>
+                        <button class="btn-delete"
+                            (click)="borrarJuego(juego)">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>

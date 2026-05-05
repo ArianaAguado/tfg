@@ -1,0 +1,136 @@
+.perfil-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.perfil-panel {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.perfil-header h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.texto-neon {
+  color: #ff00ff;
+  text-shadow: 0 0 15px #ff00ff;
+}
+
+.perfil-avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.perfil-avatar-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(0, 204, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 204, 255, 0.15);
+}
+
+.perfil-avatar-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(0, 204, 255, 0.08);
+  border: 3px solid rgba(0, 204, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00ccff;
+  font-size: 2.5rem;
+}
+
+.perfil-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.perfil-campo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+}
+
+.campo-label {
+  color: #a0a5bc;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.campo-label i {
+  color: #00ccff;
+  width: 16px;
+  text-align: center;
+}
+
+.campo-valor {
+  color: #e0e6ff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Badges de rol */
+.rol-badge {
+  text-transform: capitalize;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+}
+
+.rol-admin {
+  color: #ff00ff;
+  background: rgba(255, 0, 255, 0.08);
+  border: 1px solid rgba(255, 0, 255, 0.3);
+}
+
+.rol-desarrollador {
+  color: #00ccff;
+  background: rgba(0, 204, 255, 0.08);
+  border: 1px solid rgba(0, 204, 255, 0.3);
+}
+
+.rol-usuario {
+  color: #a0a5bc;
+  background: rgba(160, 165, 188, 0.08);
+  border: 1px solid rgba(160, 165, 188, 0.3);
+}
+
+.btn-cerrar-sesion {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 2px solid #ff4466;
+  border-radius: 10px;
+  color: #ff4466;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: 0.3s;
+}
+
+.btn-cerrar-sesion:hover {
+  background: rgba(255, 68, 102, 0.1);
+  box-shadow: 0 0 15px rgba(255, 68, 102, 0.2);
+}

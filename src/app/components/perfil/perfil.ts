@@ -1,18 +1,19 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
 import { User } from 'firebase/auth';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css',
+  imports: [CommonModule],
+  templateUrl: './perfil.html',
+  styleUrl: './perfil.css',
 })
-export class Dashboard implements OnInit {
+export class Perfil implements OnInit {
   private firebase = inject(FirebaseService);
+  private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
   usuario: User | null = null;
@@ -28,5 +29,10 @@ export class Dashboard implements OnInit {
       this.rol = r;
       this.cdr.detectChanges();
     });
+  }
+
+  async cerrarSesion() {
+    await this.firebase.cerrarSesion();
+    this.router.navigate(['/']);
   }
 }
