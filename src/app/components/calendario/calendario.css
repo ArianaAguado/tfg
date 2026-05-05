@@ -75,15 +75,34 @@
 }
 
 .calendar-header {
-  text-transform: capitalize;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 20px;
+  text-transform: capitalize;
+}
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid rgba(0, 204, 255, 0.3);
+  color: #00ccff;
+  font-size: 1.2rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.nav-btn:hover {
+  background: rgba(0, 204, 255, 0.1);
 }
 
 /* ── GRID DEL CALENDARIO ── */
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 10px;
+  align-items: stretch;
 }
 
 .weekday {
@@ -96,6 +115,9 @@
 
 .calendar-day {
   min-height: 140px;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.04);
   padding: 12px;
@@ -110,6 +132,8 @@
   background: transparent;
   border-color: transparent;
   pointer-events: none;
+  min-height: 140px;
+  width: 100%;
 }
 
 .calendar-day.hoy {
@@ -178,4 +202,156 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ── BADGE Y HOVER PANEL ── */
+.tiene-juegos {
+  cursor: pointer;
+}
+
+.badge-mas {
+  font-size: 0.65rem;
+  color: #ff00aa;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.hover-panel {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 105%;
+  z-index: 10;
+  background: #1a1a2e;
+  border: 1px solid rgba(0, 204, 255, 0.3);
+  border-radius: 12px;
+  padding: 10px;
+  width: 200px;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.calendar-day:hover .hover-panel {
+  display: flex;
+}
+
+.hover-juego {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hover-juego img {
+  width: 50px;
+  height: 35px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.hover-juego span {
+  font-size: 0.75rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-contenido {
+  background: #0f0f1a;
+  border: 1px solid rgba(0, 204, 255, 0.2);
+  border-radius: 16px;
+  padding: 30px;
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-cerrar {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.modal-titulo {
+  margin-bottom: 20px;
+  color: #00ccff;
+}
+
+.modal-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-juego {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modal-juego:hover {
+  border-color: #00ccff;
+  background: rgba(0, 204, 255, 0.05);
+}
+
+.modal-juego img {
+  width: 80px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.modal-juego span {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+/* ── DETALLE DEL JUEGO ── */
+.juego-detalle img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.juego-detalle h2 {
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.juego-detalle p {
+  color: #a0a5bc;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.btn-volver {
+  background: transparent;
+  border: none;
+  color: #00ccff;
+  cursor: pointer;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
 }

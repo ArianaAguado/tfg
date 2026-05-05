@@ -11,6 +11,7 @@ import { FirebaseService, JuegoCustom } from '../../services/firebase.service';
   templateUrl: './calendario.html',
   styleUrl: './calendario.css',
 })
+
 export class Calendario implements OnInit {
   private rawg = inject(Rawg);
   private firebase = inject(FirebaseService);
@@ -22,6 +23,9 @@ export class Calendario implements OnInit {
   cargando: boolean = true;
   query: string = '';
   juegosCustom: JuegoCustom[] = [];
+  juegoSeleccionado: any = null;
+  diasSeleccionado: any[] = [];
+  mostrarModal: boolean = false;
 
   ngOnInit(): void {
     this.generarCalendario();
@@ -48,7 +52,7 @@ export class Calendario implements OnInit {
 
   cargarJuegos() {
     this.cargando = true;
-    this.rawg.nuevosLanzamientos().subscribe({
+    this.rawg.nuevosLanzamientos(this.fechaActual).subscribe({
       next: (juegos) => {
         this.juegos = juegos;
         this.cargando = false;
@@ -66,7 +70,7 @@ export class Calendario implements OnInit {
       return;
     }
     this.cargando = true;
-    this.rawg.buscarJuegos(this.query).subscribe({
+    this.rawg.buscarJuegos(this.query, this.fechaActual).subscribe({
       next: (juegos) => {
         this.juegos = juegos;
         this.cargando = false;
@@ -82,12 +86,12 @@ export class Calendario implements OnInit {
     if (!dia) return false;
     const hoy = new Date();
     return dia === hoy.getDate() &&
-           this.fechaActual.getMonth() === hoy.getMonth() &&
-           this.fechaActual.getFullYear() === hoy.getFullYear();
+      this.fechaActual.getMonth() === hoy.getMonth() &&
+      this.fechaActual.getFullYear() === hoy.getFullYear();
   }
 
-  obtenerJuegoDelDia(dia: number | null) {
-    if (!dia) return null;
+  obtenerJuegosDelDia(dia: number | null) {
+    if (!dia) return [];
     const mesActual = this.fechaActual.getMonth();
     const añoActual = this.fechaActual.getFullYear();
 
@@ -101,12 +105,55 @@ export class Calendario implements OnInit {
       }))
     ];
 
-    return todos.find(juego => {
+    return todos.filter(juego => {
       if (!juego.released) return false;
       const fechaJuego = new Date(juego.released + 'T12:00:00');
       return fechaJuego.getDate() === dia &&
-             fechaJuego.getMonth() === mesActual &&
-             fechaJuego.getFullYear() === añoActual;
+        fechaJuego.getMonth() === mesActual &&
+        fechaJuego.getFullYear() === añoActual;
     });
+  }
+
+  abrirModal(juegos: any[]) {
+    this.diasSeleccionado = juegos;
+    this.mostrarModal = true;
+  }
+
+  seleccionarJuego(juego: any) {
+    this.juegoSeleccionado = juego;
+  }
+
+  cerrarModal() {
+    this.mostrarModal = false;
+    this.juegoSeleccionado = null;
+    this.diasSeleccionado = [];
+  }
+
+  obtenerGeneros(juego: any): string {
+    return juego.genres?.map((g: any) => g.name).join(', ') || 'No disponible';
+  }
+
+  obtenerPlataformas(juego: any): string {
+    return juego.platforms?.map((p: any) => p.platform.name).join(', ') || 'No disponible';
+  }
+
+  mesAnterior() {
+    this.fechaActual = new Date(
+      this.fechaActual.getFullYear(),
+      this.fechaActual.getMonth() - 1,
+      1
+    );
+    this.generarCalendario();
+    this.cargarJuegos();
+  }
+
+  mesSiguiente() {
+    this.fechaActual = new Date(
+      this.fechaActual.getFullYear(),
+      this.fechaActual.getMonth() + 1,
+      1
+    );
+    this.generarCalendario();
+    this.cargarJuegos();
   }
 }

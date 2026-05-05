@@ -7,6 +7,7 @@ import { FirebaseService } from './firebase.service';
 @Injectable({
   providedIn: 'root'
 })
+
 export class Rawg {
   private http = inject(HttpClient);
   private firebase = inject(FirebaseService);
@@ -22,8 +23,8 @@ export class Rawg {
     };
   }
 
-  nuevosLanzamientos(): Observable<any[]> {
-    const { fechaInicio, fechaFin } = this.rangoMesActual();
+  nuevosLanzamientos(fecha: Date): Observable<any[]> {
+    const { fechaInicio, fechaFin } = this.rangoMes(fecha);
     const url = `${this.apiUrl}?key=${this.apiKey}&dates=${fechaInicio},${fechaFin}&ordering=released&page_size=40`;
 
     return this.http.get<any>(url).pipe(
@@ -32,8 +33,8 @@ export class Rawg {
   }
 
   // Busca en RAWG y en Firebase, fusiona resultados
-  buscarJuegos(query: string): Observable<any[]> {
-    const { fechaInicio, fechaFin } = this.rangoMesActual();
+  buscarJuegos(query: string, fecha: Date): Observable<any[]> {
+    const { fechaInicio, fechaFin } = this.rangoMes(fecha);
     const url = `${this.apiUrl}?key=${this.apiKey}&search=${query}&dates=${fechaInicio},${fechaFin}&page_size=40`;
 
     const rawg$ = this.http.get<any>(url).pipe(
@@ -47,14 +48,13 @@ export class Rawg {
     );
   }
 
-  private rangoMesActual() {
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-    const ultimoDia = new Date(año, hoy.getMonth() + 1, 0).getDate();
-    return {
-      fechaInicio: `${año}-${mes}-01`,
-      fechaFin: `${año}-${mes}-${ultimoDia}`
-    };
-  }
+  private rangoMes(fecha: Date) {
+  const año = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const ultimoDia = new Date(año, fecha.getMonth() + 1, 0).getDate();
+  return {
+    fechaInicio: `${año}-${mes}-01`,
+    fechaFin: `${año}-${mes}-${ultimoDia}`
+  };
+}
 }
