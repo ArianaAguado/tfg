@@ -6,7 +6,8 @@ import { Dashboard } from './components/dashboard/dashboard';
 import { Calendario } from './components/calendario/calendario';
 import { Perfil } from './components/perfil/perfil';
 import { Biblioteca } from './components/biblioteca/biblioteca';
-import { CrearJuegosComponent } from './components/crearjuegos/crearjuegos'; 
+import { CrearJuegosComponent } from './components/crearjuegos/crearjuegos';
+import { PeticionesJuegos } from './components/peticionesjuegos/peticionesjuegos'; 
 
 export const routes: Routes = [
   { path: '', component: Inicio },
@@ -20,7 +21,8 @@ export const routes: Routes = [
       { path: 'calendario', component: Calendario },
       { path: 'perfil', component: Perfil },
       { path: 'biblioteca', component: Biblioteca },
-      { path: 'crear-juegos', component: CrearJuegosComponent }, 
+      { path: 'crear-juegos', component: CrearJuegosComponent },
+      { path: 'peticiones', component: PeticionesJuegos },
     ]
   },
 ];
