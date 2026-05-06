@@ -1,7 +1,11 @@
 <div class="peticiones-wrapper">
   <div class="header-peticiones">
-    <h1>Peticiones de <span class="texto-neon">Desarrolladores</span></h1>
-    <p>Revisa las propuestas antes de publicarlas en la plataforma.</p>
+    <h1>Revisar <span class="texto-neon">Peticiones</span></h1>
+    <p>{{ peticiones.length }} propuestas pendientes de revisión.</p>
+  </div>
+
+  <div *ngIf="mensajeExito" class="alert-success">
+    <i class="fa-solid fa-circle-check"></i> {{ mensajeExito }}
   </div>
 
   <div class="lista-peticiones">
@@ -12,14 +16,30 @@
 
     <div class="peticion-card" *ngFor="let peticion of peticiones">
       <div class="card-badge">PENDIENTE</div>
-      
+
       <div class="peticion-content">
-        <img [src]="peticion.imagen || 'assets/placeholder.png'" class="peticion-img" />
-        
+        <img [src]="peticion.imagen || 'assets/placeholder.png'"
+             class="peticion-img"
+             (error)="$any($event.target).src='assets/placeholder.png'" />
+
         <div class="peticion-info">
           <h3>{{ peticion.nombre }}</h3>
-          <p class="desc">{{ peticion.descripcion | slice:0:100 }}...</p>
-          
+
+          <div class="meta-row">
+            <span class="meta-item">
+              <i class="fa-solid fa-calendar-day"></i>
+              {{ peticion.fechaLanzamiento }}
+            </span>
+          </div>
+
+          <!-- Géneros y plataformas como tags -->
+          <div class="tags-row">
+            <span class="tag tag-genero" *ngFor="let g of peticion.generos">{{ g }}</span>
+            <span class="tag tag-plat" *ngFor="let p of peticion.plataformas">{{ p }}</span>
+          </div>
+
+          <p class="desc">{{ peticion.descripcion | slice:0:150 }}...</p>
+
           <div class="dev-data">
             <span><i class="fa-solid fa-user-ninja"></i> {{ peticion.desarrolladorNombre }}</span>
             <span><i class="fa-solid fa-envelope"></i> {{ peticion.desarrolladorEmail }}</span>
@@ -29,7 +49,7 @@
 
       <div class="peticion-actions">
         <button class="btn-aprobar" (click)="aprobarPeticion(peticion)" [disabled]="cargando">
-          <i class="fa-solid fa-check"></i> Aprobar y Publicar
+          <i class="fa-solid fa-check"></i> Aprobar y publicar
         </button>
         <button class="btn-rechazar" (click)="rechazarPeticion(peticion)" [disabled]="cargando">
           <i class="fa-solid fa-xmark"></i> Rechazar

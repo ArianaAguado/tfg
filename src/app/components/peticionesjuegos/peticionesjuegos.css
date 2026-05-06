@@ -1,0 +1,246 @@
+.peticiones-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header-peticiones {
+  margin-bottom: 32px;
+}
+
+.header-peticiones h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.header-peticiones p {
+  color: #a0a5bc;
+  font-size: 0.95rem;
+}
+
+/* Alerta de éxito */
+.alert-success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(0, 255, 136, 0.06);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 10px;
+  color: #00ff88;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+/* Lista */
+.lista-peticiones {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Estado vacío */
+.no-peticiones {
+  text-align: center;
+  padding: 60px 20px;
+  color: #a0a5bc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.no-peticiones i {
+  font-size: 2.5rem;
+  color: rgba(0, 204, 255, 0.3);
+}
+
+.no-peticiones p {
+  font-size: 1rem;
+}
+
+/* Tarjeta de petición */
+.peticion-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 0, 255, 0.15);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: 0.3s;
+  position: relative;
+}
+
+.peticion-card:hover {
+  border-color: rgba(255, 0, 255, 0.3);
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.07);
+}
+
+/* Badge pendiente */
+.card-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 0.65rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 170, 0, 0.1);
+  border: 1px solid rgba(255, 170, 0, 0.3);
+  color: #ffaa00;
+}
+
+/* Contenido principal de la tarjeta */
+.peticion-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.peticion-img {
+  width: 110px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.peticion-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.peticion-info h3 {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #e0e6ff;
+}
+
+/* Fecha */
+.meta-row {
+  display: flex;
+  gap: 16px;
+}
+
+.meta-item {
+  font-size: 0.8rem;
+  color: #a0a5bc;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-item i {
+  color: #00ccff;
+}
+
+/* Tags géneros y plataformas */
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 0.7rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.tag-genero {
+  background: rgba(255, 0, 255, 0.08);
+  border: 1px solid rgba(255, 0, 255, 0.2);
+  color: #ff00ff;
+}
+
+.tag-plat {
+  background: rgba(0, 204, 255, 0.08);
+  border: 1px solid rgba(0, 204, 255, 0.2);
+  color: #00ccff;
+}
+
+/* Descripción */
+.desc {
+  font-size: 0.85rem;
+  color: #a0a5bc;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Datos del desarrollador */
+.dev-data {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.dev-data span {
+  font-size: 0.8rem;
+  color: #636e72;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dev-data i {
+  color: #a0a5bc;
+}
+
+/* Botones de acción */
+.peticion-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.btn-aprobar {
+  padding: 10px 24px;
+  background: transparent;
+  border: 2px solid #00ff88;
+  border-radius: 10px;
+  color: #00ff88;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.3s;
+}
+
+.btn-aprobar:hover:not(:disabled) {
+  background: rgba(0, 255, 136, 0.08);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.15);
+}
+
+.btn-rechazar {
+  padding: 10px 24px;
+  background: transparent;
+  border: 2px solid #ff4466;
+  border-radius: 10px;
+  color: #ff4466;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.3s;
+}
+
+.btn-rechazar:hover:not(:disabled) {
+  background: rgba(255, 68, 102, 0.08);
+  box-shadow: 0 0 15px rgba(255, 68, 102, 0.15);
+}
+
+.btn-aprobar:disabled,
+.btn-rechazar:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

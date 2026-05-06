@@ -7,7 +7,8 @@ import { Calendario } from './components/calendario/calendario';
 import { Perfil } from './components/perfil/perfil';
 import { Biblioteca } from './components/biblioteca/biblioteca';
 import { CrearJuegosComponent } from './components/crearjuegos/crearjuegos';
-import { PeticionesJuegos } from './components/peticionesjuegos/peticionesjuegos'; 
+import { PeticionesJuegosComponent } from './components/peticionesjuegos/peticionesjuegos';
+import { ProponerJuegoComponent } from './components/proponerjuego/proponerjuego';
 
 export const routes: Routes = [
   { path: '', component: Inicio },
@@ -22,7 +23,8 @@ export const routes: Routes = [
       { path: 'perfil', component: Perfil },
       { path: 'biblioteca', component: Biblioteca },
       { path: 'crear-juegos', component: CrearJuegosComponent },
-      { path: 'peticiones', component: PeticionesJuegos },
+      { path: 'peticiones', component: PeticionesJuegosComponent },  
+      { path: 'proponer-juego', component: ProponerJuegoComponent },
     ]
   },
 ];

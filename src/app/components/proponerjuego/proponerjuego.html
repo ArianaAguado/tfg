@@ -1,0 +1,83 @@
+<div class="proponer-wrapper">
+  <div class="header">
+    <h1>Proponer un <span class="texto-neon">juego</span></h1>
+    <p>Rellena los datos y el equipo revisará tu propuesta.</p>
+  </div>
+
+  <div *ngIf="error" class="alert-error">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    {{ error }}
+  </div>
+
+  <!-- Estado enviado: fuera del form, reemplaza todo el contenido -->
+  <div class="enviado-state" *ngIf="enviado">
+    <i class="fa-solid fa-circle-check"></i>
+    <h2>¡Propuesta enviada!</h2>
+    <p>El equipo revisará tu solicitud y te notificaremos pronto.</p>
+    <button class="btn-nueva-propuesta" (click)="volverAEnviar()">
+      <i class="fa-solid fa-plus"></i> Enviar otra propuesta
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="enviar()" class="proponer-form" *ngIf="!enviado">
+
+    <div class="form-group">
+      <label for="nombre">Nombre del juego</label>
+      <input id="nombre" type="text" formControlName="nombre" placeholder="Ej: Hollow Knight: Silksong" />
+      <span class="field-error" *ngIf="f['nombre'].invalid && f['nombre'].touched">
+        El nombre es obligatorio.
+      </span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="fechaLanzamiento">Fecha de lanzamiento</label>
+        <input id="fechaLanzamiento" type="date" formControlName="fechaLanzamiento" />
+        <span class="field-error" *ngIf="f['fechaLanzamiento'].invalid && f['fechaLanzamiento'].touched">
+          Indica la fecha de lanzamiento.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="generos">Géneros <small>(separados por coma)</small></label>
+        <input id="generos" type="text" formControlName="generos" placeholder="Acción, RPG, Plataformas" />
+        <span class="field-error" *ngIf="f['generos'].invalid && f['generos'].touched">
+          Indica al menos un género.
+        </span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="plataformas">Plataformas <small>(separadas por coma)</small></label>
+        <input id="plataformas" type="text" formControlName="plataformas" placeholder="PC, PS5, Switch" />
+        <span class="field-error" *ngIf="f['plataformas'].invalid && f['plataformas'].touched">
+          Indica al menos una plataforma.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="imagen">URL de la portada</label>
+        <input id="imagen" type="url" formControlName="imagen" placeholder="https://..." />
+        <span class="field-error" *ngIf="f['imagen'].invalid && f['imagen'].touched">
+          Introduce una URL válida.
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" formControlName="descripcion" rows="4"
+        placeholder="Describe brevemente el juego, mecánicas principales, historia..."></textarea>
+      <span class="field-error" *ngIf="f['descripcion'].invalid && f['descripcion'].touched">
+        La descripción debe tener al menos 20 caracteres.
+      </span>
+    </div>
+
+    <button type="submit" class="btn-enviar" [disabled]="enviando">
+      <i class="fa-solid fa-paper-plane"></i>
+      {{ enviando ? 'Enviando...' : 'Enviar propuesta' }}
+    </button>
+
+  </form>
+</div>
