@@ -1,10 +1,13 @@
-.biblioteca-wrapper {
-  padding: 0;
+/* ── LAYOUT GENERAL DE LA PÁGINA ── */
+.main-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
 }
 
 .main-header h1 {
   font-size: 2rem;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 .texto-neon {
@@ -12,29 +15,377 @@
   text-shadow: 0 0 15px #ff00ff;
 }
 
-.biblioteca-empty {
+.dashboard-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── BARRA DE BÚSQUEDA ── */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 204, 255, 0.2);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+  transition: 0.3s;
+}
+
+.search-input:focus {
+  border-color: #00ccff;
+  box-shadow: 0 0 10px rgba(0, 204, 255, 0.2);
+}
+
+.search-button {
+  padding: 12px 20px;
+  background: transparent;
+  border: 2px solid rgba(0, 204, 255, 0.2);
+  border-radius: 10px;
+  color: #00ccff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-button:hover {
+  background: rgba(0, 204, 255, 0.1);
+}
+
+/* ── ESTADO DE CARGA ── */
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #a0a5bc;
+}
+
+/* ── SECCIÓN CALENDARIO ── */
+.calendar-section {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.01);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  text-transform: capitalize;
+}
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid rgba(0, 204, 255, 0.3);
+  color: #00ccff;
+  font-size: 1.2rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.nav-btn:hover {
+  background: rgba(0, 204, 255, 0.1);
+}
+
+/* ── GRID DEL CALENDARIO ── */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.weekday {
+  text-align: center;
+  color: #a0a5bc;
+  font-size: 0.9rem;
+  padding-bottom: 10px;
+  font-weight: bold;
+}
+
+.calendar-day {
+  min-height: 140px;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 12px;
+  border-radius: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  border-color: transparent;
+  pointer-events: none;
+  min-height: 140px;
+  width: 100%;
+}
+
+.calendar-day.hoy {
+  border-color: #00ccff;
+  background: rgba(0, 204, 255, 0.07);
+  box-shadow: 0 0 18px rgba(0, 204, 255, 0.15);
+}
+
+.calendar-day.hoy .day-number {
+  color: #00ccff;
+  text-shadow: 0 0 8px #00ccff;
+}
+
+.calendar-day:hover {
+  border-color: #00ccff;
+  box-shadow: 0 0 15px rgba(0, 204, 255, 0.1);
+}
+
+.day-number {
+  font-weight: bold;
+  color: #e0e6ff;
+  font-size: 1.1rem;
+  margin-bottom: auto;
+}
+
+/* ── INFO DEL JUEGO EN EL DÍA ── */
+.game-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 80px 20px;
-  color: #a0a5bc;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.game-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  background: #ff00aa;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #ff00aa;
+}
+
+.game-thumbnail {
+  width: 100%;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.game-name {
+  font-size: 0.7rem;
+  color: #fff;
   text-align: center;
+  line-height: 1.2;
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.biblioteca-empty i {
-  font-size: 3rem;
-  color: rgba(0, 204, 255, 0.3);
+/* ── BADGE Y HOVER PANEL ── */
+.tiene-juegos {
+  cursor: pointer;
 }
 
-.biblioteca-empty p {
-  font-size: 1.1rem;
-  color: #e0e6ff;
-  margin: 0;
+.badge-mas {
+  font-size: 0.65rem;
+  color: #ff00aa;
+  text-align: center;
+  margin-top: 4px;
 }
 
-.biblioteca-empty span {
+.hover-panel {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 105%;
+  z-index: 10;
+  background: #1a1a2e;
+  border: 1px solid rgba(0, 204, 255, 0.3);
+  border-radius: 12px;
+  padding: 10px;
+  width: 200px;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.calendar-day:hover .hover-panel {
+  display: flex;
+}
+
+.hover-juego {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hover-juego img {
+  width: 50px;
+  height: 35px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.hover-juego span {
+  font-size: 0.75rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-contenido {
+  background: #0f0f1a;
+  border: 1px solid rgba(0, 204, 255, 0.2);
+  border-radius: 16px;
+  padding: 30px;
+  width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-cerrar {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.modal-titulo {
+  margin-bottom: 20px;
+  color: #00ccff;
+}
+
+.modal-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-juego {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.modal-juego:hover {
+  border-color: #00ccff;
+  background: rgba(0, 204, 255, 0.05);
+}
+
+.modal-juego img {
+  width: 80px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.modal-juego span {
+  color: #fff;
   font-size: 0.9rem;
+}
+
+/* ── DETALLE DEL JUEGO ── */
+.juego-detalle img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.juego-detalle h2 {
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.juego-detalle p {
   color: #a0a5bc;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.btn-volver {
+  background: transparent;
+  border: none;
+  color: #00ccff;
+  cursor: pointer;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.btn-favorito {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #ff00aa;
+  font-size: 1.5rem;
+  transition: 0.3s;
+}
+
+.btn-favorito:hover {
+  transform: scale(1.2);
+  text-shadow: 0 0 10px #ff00aa;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #a0a5bc;
+}
+
+.empty-state .material-icons {
+  font-size: 3rem;
+  color: #ff00aa;
+  display: block;
+  margin-bottom: 16px;
 }

@@ -355,3 +355,24 @@
   margin-bottom: 16px;
   font-size: 0.9rem;
 }
+
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.btn-favorito {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #ff00aa;
+  font-size: 1.5rem;
+  transition: 0.3s;
+}
+
+.btn-favorito:hover {
+  transform: scale(1.2);
+  text-shadow: 0 0 10px #ff00aa;
+}

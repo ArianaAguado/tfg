@@ -53,6 +53,16 @@ export interface UsuarioApp {
   fechaRegistro: string;
 }
 
+export interface JuegoFavorito {
+  id?: string;
+  name: string;
+  background_image: string;
+  released: string;
+  rating?: number;
+  genres?: { name: string }[];
+  platforms?: { platform: { name: string } }[];
+}
+
 // Inicialización de Firebase
 const app = getApps().length ? getApps()[0] : initializeApp(environment.firebaseConfig);
 const db = getFirestore(app);
@@ -155,7 +165,7 @@ export class FirebaseService {
     return new Observable(observer => {
       const colRef = collection(db, 'peticiones_juegos');
       // Opcional: const q = query(colRef, orderBy('fechaPeticion', 'desc'));
-      const unsub = onSnapshot(colRef, 
+      const unsub = onSnapshot(colRef,
         snapshot => {
           const peticiones = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PeticionJuego));
           observer.next(peticiones);
@@ -203,4 +213,63 @@ export class FirebaseService {
     // Implementar si usas Firebase Storage en el futuro
     return;
   }
+
+  // ── SECCIÓN: FAVORITOS ──
+
+  async añadirFavorito(juego: JuegoFavorito): Promise<void> {
+    const uid = auth.currentUser?.uid;
+    if (!uid) { console.error('No hay usuario'); return; }
+    const id = juego.released + '_' + juego.name.replace(/\s/g, '_');
+    await setDoc(doc(db, 'favoritos', uid, 'juegos', id), juego);
+  }
+
+  async quitarFavorito(juego: JuegoFavorito): Promise<void> {
+    const uid = auth.currentUser?.uid;
+    if (!uid) { console.error('No hay usuario'); return; }
+    const id = juego.released + '_' + juego.name.replace(/\s/g, '_');
+    await deleteDoc(doc(db, 'favoritos', uid, 'juegos', id));
+  }
+
+  async esFavorito(juego: JuegoFavorito): Promise<boolean> {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return false;
+    const id = juego.released + '_' + juego.name.replace(/\s/g, '_');
+    const snap = await getDoc(doc(db, 'favoritos', uid, 'juegos', id));
+    return snap.exists();
+  }
+
+  obtenerFavoritos(): Observable<JuegoFavorito[]> {
+    return new Observable(observer => {
+      let unsubFirestore: (() => void) | null = null;
+
+      const unsubAuth = onAuthStateChanged(auth, (user) => {
+        // Cancelamos el listener anterior de Firestore si existía
+        if (unsubFirestore) {
+          unsubFirestore();
+          unsubFirestore = null;
+        }
+
+        if (!user) {
+          observer.next([]);
+          return;
+        }
+
+        const colRef = collection(db, 'favoritos', user.uid, 'juegos');
+        unsubFirestore = onSnapshot(colRef,
+          snapshot => {
+            const juegos = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as JuegoFavorito));
+            observer.next(juegos);
+          },
+          err => observer.error(err)
+        );
+      });
+
+      // Al hacer unsubscribe, limpiamos ambos listeners
+      return () => {
+        unsubAuth();
+        if (unsubFirestore) unsubFirestore();
+      };
+    });
+  }
+
 }

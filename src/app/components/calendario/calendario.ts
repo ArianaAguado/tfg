@@ -26,16 +26,22 @@ export class Calendario implements OnInit {
   juegoSeleccionado: any = null;
   diasSeleccionado: any[] = [];
   mostrarModal: boolean = false;
+  favoritosIds: Set<string> = new Set();
+  cargandoFavorito: boolean = false;
 
   ngOnInit(): void {
     this.generarCalendario();
     this.cargarJuegos();
     this.firebase.obtenerJuegos().subscribe({
-      next: (juegos) => {
-        this.juegosCustom = juegos;
-        this.cdr.detectChanges();
-      },
+      next: (juegos) => { this.juegosCustom = juegos; this.cdr.detectChanges(); },
       error: (err) => console.error('Error obteniendo juegos:', err)
+    });
+    // Cargamos los ids de favoritos en local
+    this.firebase.obtenerFavoritos().subscribe({
+      next: (favs) => {
+        this.favoritosIds = new Set(favs.map(f => f.released + '_' + f.name.replace(/\s/g, '_')));
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -114,15 +120,6 @@ export class Calendario implements OnInit {
     });
   }
 
-  abrirModal(juegos: any[]) {
-    this.diasSeleccionado = juegos;
-    this.mostrarModal = true;
-  }
-
-  seleccionarJuego(juego: any) {
-    this.juegoSeleccionado = juego;
-  }
-
   cerrarModal() {
     this.mostrarModal = false;
     this.juegoSeleccionado = null;
@@ -155,5 +152,32 @@ export class Calendario implements OnInit {
     );
     this.generarCalendario();
     this.cargarJuegos();
+  }
+
+  esFavoritoActual: boolean = false;
+
+  async abrirModal(juegos: any[]) {
+    this.diasSeleccionado = juegos;
+    this.mostrarModal = true;
+    this.juegoSeleccionado = null;
+  }
+
+  async seleccionarJuego(juego: any) {
+    this.juegoSeleccionado = juego;
+    this.cargandoFavorito = true;
+    this.esFavoritoActual = await this.firebase.esFavorito(juego);
+    this.cargandoFavorito = false;
+    this.cdr.detectChanges();
+  }
+
+  async toggleFavorito() {
+    if (!this.juegoSeleccionado) return;
+    if (this.esFavoritoActual) {
+      await this.firebase.quitarFavorito(this.juegoSeleccionado);
+    } else {
+      await this.firebase.añadirFavorito(this.juegoSeleccionado);
+    }
+    this.cerrarModal();
+    this.cdr.detectChanges();
   }
 }

@@ -11,6 +11,8 @@ import { FirebaseService } from './firebase.service';
 export class Rawg {
   private http = inject(HttpClient);
   private firebase = inject(FirebaseService);
+  private cache = new Map<string, any[]>();
+
 
   private apiKey = 'cf7adb5ebad849b3b46d41b217e81c54';
   private apiUrl = 'https://api.rawg.io/api/games';

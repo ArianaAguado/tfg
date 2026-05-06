@@ -1,11 +1,101 @@
-<div class="biblioteca-wrapper">
-  <header class="main-header">
-    <h1>Mi <span class="texto-neon">Biblioteca</span></h1>
-  </header>
+<header class="main-header">
+  <h1>Mi <span class="texto-neon">Biblioteca</span></h1>
+</header>
 
-  <div class="biblioteca-empty">
-    <i class="fa-solid fa-gamepad"></i>
-    <p>Tu biblioteca está vacía por ahora.</p>
-    <span>Próximamente podrás guardar tus juegos aquí.</span>
+<div class="dashboard-container">
+
+  <div *ngIf="cargando" class="loading-state">
+    <p>Cargando tu biblioteca...</p>
+  </div>
+
+  <section class="calendar-section" *ngIf="!cargando">
+    <header class="calendar-header">
+      <button class="nav-btn" (click)="mesAnterior()">&#8592;</button>
+      <h2>{{ fechaActual | date:'MMMM yyyy' }}</h2>
+      <button class="nav-btn" (click)="mesSiguiente()">&#8594;</button>
+    </header>
+
+    <div class="calendar-grid">
+      <div class="weekday">Lun</div>
+      <div class="weekday">Mar</div>
+      <div class="weekday">Mié</div>
+      <div class="weekday">Jue</div>
+      <div class="weekday">Vie</div>
+      <div class="weekday">Sáb</div>
+      <div class="weekday">Dom</div>
+
+      <ng-container *ngFor="let dia of diasMes">
+        <div *ngIf="dia === null" class="calendar-day empty"></div>
+        <div *ngIf="dia !== null"
+             class="calendar-day"
+             [class.hoy]="esDiaActual(dia)"
+             [class.tiene-juegos]="obtenerFavoritosDelDia(dia).length > 0"
+             (click)="obtenerFavoritosDelDia(dia).length > 0 && abrirModal(obtenerFavoritosDelDia(dia))">
+
+          <span class="day-number">{{ dia }}</span>
+
+          <div *ngIf="obtenerFavoritosDelDia(dia)[0] as juego" class="game-info">
+            <span class="game-dot"></span>
+            <div class="game-thumbnail">
+              <img [src]="juego.background_image" alt="{{juego.name}}">
+            </div>
+            <span class="game-name">{{ juego.name }}</span>
+          </div>
+
+          <span *ngIf="obtenerFavoritosDelDia(dia).length > 1" class="badge-mas">
+            +{{ obtenerFavoritosDelDia(dia).length - 1 }} más
+          </span>
+
+          <div *ngIf="obtenerFavoritosDelDia(dia).length > 1" class="hover-panel">
+            <div *ngFor="let j of obtenerFavoritosDelDia(dia)" class="hover-juego">
+              <img [src]="j.background_image" alt="{{j.name}}">
+              <span>{{ j.name }}</span>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+    </div>
+  </section>
+
+  <div *ngIf="!cargando && favoritos.length === 0" class="empty-state">
+    <span class="material-icons">favorite_border</span>
+    <p>Todavía no tienes juegos en tu biblioteca.</p>
+    <p>Dale al corazón en cualquier juego del calendario.</p>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <button class="modal-cerrar" (click)="cerrarModal()">✕</button>
+
+    <div *ngIf="juegoSeleccionado; else listaJuegos" class="juego-detalle">
+      <div class="detalle-header">
+        <button class="btn-volver" (click)="juegoSeleccionado = null">← Volver</button>
+        <button class="btn-favorito" (click)="toggleFavorito()" title="Quitar de biblioteca">
+          <span class="material-icons">favorite</span>
+        </button>
+      </div>
+      <img [src]="juegoSeleccionado.background_image" alt="{{juegoSeleccionado.name}}">
+      <h2>{{ juegoSeleccionado.name }}</h2>
+      <p><strong>Fecha:</strong> {{ juegoSeleccionado.released }}</p>
+      <p><strong>Rating:</strong> {{ juegoSeleccionado.rating }} / 5</p>
+      <p><strong>Géneros:</strong> {{ obtenerGeneros(juegoSeleccionado) }}</p>
+      <p><strong>Plataformas:</strong> {{ obtenerPlataformas(juegoSeleccionado) }}</p>
+    </div>
+
+    <ng-template #listaJuegos>
+      <h2 class="modal-titulo">Mis juegos del día</h2>
+      <div class="modal-lista">
+        <div *ngFor="let j of diasSeleccionado"
+             class="modal-juego"
+             (click)="seleccionarJuego(j)">
+          <img [src]="j.background_image" alt="{{j.name}}">
+          <span>{{ j.name }}</span>
+        </div>
+      </div>
+    </ng-template>
   </div>
 </div>

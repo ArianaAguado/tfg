@@ -74,7 +74,13 @@
 
     <!-- Vista detalle de un juego -->
     <div *ngIf="juegoSeleccionado; else listaJuegos" class="juego-detalle">
-      <button class="btn-volver" (click)="juegoSeleccionado = null">← Volver</button>
+      <div class="detalle-header">
+        <button class="btn-volver" (click)="juegoSeleccionado = null">← Volver</button>
+        <button *ngIf="!cargandoFavorito" class="btn-favorito" (click)="toggleFavorito()">
+          <span class="material-icons">{{ esFavoritoActual ? 'favorite' : 'favorite_border' }}</span>
+        </button>
+        <span *ngIf="cargandoFavorito" class="material-icons" style="color: #ff00aa">hourglass_empty</span>
+      </div>
       <img [src]="juegoSeleccionado.background_image" alt="{{juegoSeleccionado.name}}">
       <h2>{{ juegoSeleccionado.name }}</h2>
       <p><strong>Rating:</strong> {{ juegoSeleccionado.rating }} / 5</p>

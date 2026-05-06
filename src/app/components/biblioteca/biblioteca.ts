@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FirebaseService, JuegoFavorito } from '../../services/firebase.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-biblioteca',
@@ -8,4 +10,115 @@ import { CommonModule } from '@angular/common';
   templateUrl: './biblioteca.html',
   styleUrl: './biblioteca.css',
 })
-export class Biblioteca {}
+export class Biblioteca implements OnInit, OnDestroy {
+  private firebase = inject(FirebaseService);
+  private subscription: Subscription | null = null;
+  private cdr = inject(ChangeDetectorRef);
+
+  favoritos: JuegoFavorito[] = [];
+  diasMes: (number | null)[] = [];
+  fechaActual: Date = new Date();
+  cargando: boolean = true;
+
+  juegoSeleccionado: any = null;
+  diasSeleccionado: any[] = [];
+  mostrarModal: boolean = false;
+  esFavoritoActual: boolean = true;
+
+  ngOnInit(): void {
+    this.generarCalendario();
+    // Pequeño delay para que Firebase restaure la sesión antes de suscribirse
+    setTimeout(() => this.suscribirFavoritos(), 300);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  suscribirFavoritos(): void {
+  this.cargando = true;
+  this.subscription = this.firebase.obtenerFavoritos().subscribe({
+    next: (juegos) => {
+      this.favoritos = juegos;
+      this.cargando = false;
+      this.cdr.detectChanges(); // <- añade esto
+    },
+    error: (err) => {
+      console.error('Error cargando favoritos:', err);
+      this.cargando = false;
+      this.cdr.detectChanges(); // <- y esto
+    }
+  });
+}
+
+  generarCalendario(): void {
+    const año = this.fechaActual.getFullYear();
+    const mes = this.fechaActual.getMonth();
+    const ultimoDia = new Date(año, mes + 1, 0).getDate();
+    let primerDiaSemana = new Date(`${año}-${String(mes + 1).padStart(2, '0')}-01T12:00:00`).getDay();
+    primerDiaSemana = (primerDiaSemana + 6) % 7;
+    const vacias: null[] = Array(primerDiaSemana).fill(null);
+    const dias: number[] = Array.from({ length: ultimoDia }, (_, i) => i + 1);
+    this.diasMes = [...vacias, ...dias];
+  }
+
+  mesAnterior(): void {
+    this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() - 1, 1);
+    this.generarCalendario();
+  }
+
+  mesSiguiente(): void {
+    this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() + 1, 1);
+    this.generarCalendario();
+  }
+
+  esDiaActual(dia: number | null): boolean {
+    if (!dia) return false;
+    const hoy = new Date();
+    return dia === hoy.getDate() &&
+      this.fechaActual.getMonth() === hoy.getMonth() &&
+      this.fechaActual.getFullYear() === hoy.getFullYear();
+  }
+
+  obtenerFavoritosDelDia(dia: number | null): JuegoFavorito[] {
+    if (!dia) return [];
+    return this.favoritos.filter(juego => {
+      if (!juego.released) return false;
+      const fecha = new Date(juego.released + 'T12:00:00');
+      return fecha.getDate() === dia &&
+        fecha.getMonth() === this.fechaActual.getMonth() &&
+        fecha.getFullYear() === this.fechaActual.getFullYear();
+    });
+  }
+
+  abrirModal(juegos: JuegoFavorito[]): void {
+    this.diasSeleccionado = juegos;
+    this.mostrarModal = true;
+    this.juegoSeleccionado = null;
+  }
+
+  seleccionarJuego(juego: any): void {
+    this.juegoSeleccionado = juego;
+  }
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+    this.juegoSeleccionado = null;
+    this.diasSeleccionado = [];
+  }
+
+  async toggleFavorito(): Promise<void> {
+    if (!this.juegoSeleccionado) return;
+    await this.firebase.quitarFavorito(this.juegoSeleccionado);
+    this.favoritos = this.favoritos.filter(j => j.name !== this.juegoSeleccionado.name);
+    this.cerrarModal();
+  }
+
+  obtenerGeneros(juego: any): string {
+    return juego.genres?.map((g: any) => g.name).join(', ') || 'No disponible';
+  }
+
+  obtenerPlataformas(juego: any): string {
+    return juego.platforms?.map((p: any) => p.platform.name).join(', ') || 'No disponible';
+  }
+}
