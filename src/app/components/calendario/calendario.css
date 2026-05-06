@@ -84,8 +84,8 @@
 
 .nav-btn {
   background: transparent;
-  border: 1px solid rgba(0, 204, 255, 0.3);
-  color: #00ccff;
+  border: 1px solid #ff00aa;
+  color: #ff00aa;
   font-size: 1.2rem;
   padding: 8px 16px;
   border-radius: 8px;
@@ -94,7 +94,7 @@
 }
 
 .nav-btn:hover {
-  background: rgba(0, 204, 255, 0.1);
+  background: rgba(255, 0, 170, 0.1);
 }
 
 /* ── GRID DEL CALENDARIO ── */

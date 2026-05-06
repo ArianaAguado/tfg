@@ -26,28 +26,45 @@ export class Rawg {
   }
 
   nuevosLanzamientos(fecha: Date): Observable<any[]> {
-    const { fechaInicio, fechaFin } = this.rangoMes(fecha);
-    const cacheKey = fechaInicio; // "2026-05" como clave única
+  const { fechaInicio, fechaFin } = this.rangoMes(fecha);
+  const cacheKey = fechaInicio;
 
-    // Si ya tenemos los datos de este mes, los devolvemos sin llamar a la API
-    if (this.cache.has(cacheKey)) {
-      const cached = this.cache.get(cacheKey)!; // el ! le dice a TypeScript "confía en mí, existe"
-      return new Observable(observer => {
-        observer.next(cached);
-        observer.complete();
-      });
-    }
-
-    const url = `${this.apiUrl}?key=${this.apiKey}&dates=${fechaInicio},${fechaFin}&ordering=released&page_size=40`;
-
-    return this.http.get<any>(url).pipe(
-      map(data => {
-        const juegos = (data.results || []).map((j: any) => this.normalizarRawg(j));
-        this.cache.set(cacheKey, juegos); // guardamos en caché
-        return juegos;
-      })
-    );
+  if (this.cache.has(cacheKey)) {
+    const cached = this.cache.get(cacheKey)!;
+    return new Observable(observer => {
+      observer.next(cached);
+      observer.complete();
+    });
   }
+
+  return new Observable(observer => {
+    const todosLosJuegos: any[] = [];
+
+    const cargarPagina = (pagina: number) => {
+      const url = `${this.apiUrl}?key=${this.apiKey}&dates=${fechaInicio},${fechaFin}&ordering=released&page_size=40&page=${pagina}`;
+
+      this.http.get<any>(url).subscribe({
+        next: (data) => {
+          const juegos = (data.results || []).map((j: any) => this.normalizarRawg(j));
+          todosLosJuegos.push(...juegos);
+
+          if (data.next) {
+            // hay más páginas, seguimos
+            cargarPagina(pagina + 1);
+          } else {
+            // ya no hay más, guardamos en caché y emitimos
+            this.cache.set(cacheKey, todosLosJuegos);
+            observer.next(todosLosJuegos);
+            observer.complete();
+          }
+        },
+        error: (err) => observer.error(err)
+      });
+    };
+
+    cargarPagina(1);
+  });
+}
 
   // Busca en RAWG y en Firebase, fusiona resultados
   buscarJuegos(query: string, fecha: Date): Observable<any[]> {
