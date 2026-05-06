@@ -19,8 +19,8 @@
 
       <div class="peticion-content">
         <img [src]="peticion.imagen || 'assets/placeholder.png'"
-             class="peticion-img"
-             (error)="$any($event.target).src='assets/placeholder.png'" />
+          class="peticion-img"
+          (error)="$any($event.target).src='assets/placeholder.png'" />
 
         <div class="peticion-info">
           <h3>{{ peticion.nombre }}</h3>
@@ -30,31 +30,92 @@
               <i class="fa-solid fa-calendar-day"></i>
               {{ peticion.fechaLanzamiento }}
             </span>
+            <span class="meta-item">
+              <i class="fa-solid fa-tag"></i>
+              {{ peticion.precio === 0 ? 'Gratis' : (peticion.precio + ' €') }}
+            </span>
+            <a *ngIf="peticion.urlSteam" [href]="peticion.urlSteam"
+              target="_blank" class="meta-steam">
+              <i class="fa-brands fa-steam"></i> Ver en Steam
+            </a>
           </div>
 
-          <!-- Géneros y plataformas como tags -->
           <div class="tags-row">
-            <span class="tag tag-genero" *ngFor="let g of peticion.generos">{{ g }}</span>
-            <span class="tag tag-plat" *ngFor="let p of peticion.plataformas">{{ p }}</span>
+            <span class="tag tag-genero" *ngFor="let g of peticion.generos">{{ g
+              }}</span>
+            <span class="tag tag-plat" *ngFor="let p of peticion.plataformas">{{
+              p }}</span>
           </div>
 
-          <p class="desc">{{ peticion.descripcion | slice:0:150 }}...</p>
+          <p class="desc">
+            {{ peticion.descripcion | slice:0:150 }}{{
+            (peticion.descripcion?.length ?? 0) > 150 ? '...' : '' }}
+          </p>
 
           <div class="dev-data">
-            <span><i class="fa-solid fa-user-ninja"></i> {{ peticion.desarrolladorNombre }}</span>
-            <span><i class="fa-solid fa-envelope"></i> {{ peticion.desarrolladorEmail }}</span>
+            <span><i class="fa-solid fa-user-ninja"></i> {{
+              peticion.desarrolladorNombre }}</span>
+            <span><i class="fa-solid fa-envelope"></i> {{
+              peticion.desarrolladorEmail }}</span>
           </div>
         </div>
       </div>
 
       <div class="peticion-actions">
-        <button class="btn-aprobar" (click)="aprobarPeticion(peticion)" [disabled]="cargando">
+        <button class="btn-aprobar" (click)="aprobarPeticion(peticion)"
+          [disabled]="cargando">
           <i class="fa-solid fa-check"></i> Aprobar y publicar
         </button>
-        <button class="btn-rechazar" (click)="rechazarPeticion(peticion)" [disabled]="cargando">
+        <button class="btn-rechazar" (click)="rechazarPeticion(peticion)"
+          [disabled]="cargando">
           <i class="fa-solid fa-xmark"></i> Rechazar
         </button>
       </div>
     </div>
   </div>
+
+  <!-- ── HISTORIAL ── -->
+  <div class="historial-section" *ngIf="historial.length > 0">
+    <button class="btn-toggle-historial" (click)="toggleHistorial()">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      {{ verHistorial ? 'Ocultar historial' : 'Ver historial (' +
+      historial.length + ')' }}
+    </button>
+
+    <div class="historial-lista" *ngIf="verHistorial">
+      <div class="historial-card" *ngFor="let item of historial"
+        [class.aprobado]="item.estado === 'aprobado'"
+        [class.rechazado]="item.estado === 'rechazado'">
+
+        <div class="historial-badge"
+          [class.badge-aprobado]="item.estado === 'aprobado'"
+          [class.badge-rechazado]="item.estado === 'rechazado'">
+          <i class="fa-solid" [class.fa-check]="item.estado === 'aprobado'"
+            [class.fa-xmark]="item.estado === 'rechazado'"></i>
+          {{ item.estado === 'aprobado' ? 'Aprobado' : 'Rechazado' }}
+        </div>
+
+        <div class="historial-content">
+          <img [src]="item.imagen || 'assets/placeholder.png'"
+            class="historial-img"
+            (error)="$any($event.target).src='assets/placeholder.png'" />
+          <div class="historial-info">
+            <h4>{{ item.nombre }}</h4>
+            <div class="dev-data">
+              <span><i class="fa-solid fa-user-ninja"></i> {{
+                item.desarrolladorNombre }}</span>
+              <span><i class="fa-solid fa-envelope"></i> {{
+                item.desarrolladorEmail }}</span>
+            </div>
+            <span class="historial-fecha">
+              <i class="fa-solid fa-calendar-check"></i>
+              Resuelta el {{ item['fechaResolucion'] | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </div>

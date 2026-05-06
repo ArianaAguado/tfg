@@ -35,6 +35,8 @@ export interface JuegoCustom {
   generos?: string[];
   plataformas?: string[];
   esCustom: boolean;
+  urlSteam?: string; 
+  precio?: number; 
 }
 
 export interface PeticionJuego extends JuegoCustom {
@@ -42,6 +44,7 @@ export interface PeticionJuego extends JuegoCustom {
   desarrolladorEmail: string;
   desarrolladorId: string;
   fechaPeticion: number;
+  fechaResolucion?: number;
   estado: 'pendiente' | 'aprobado' | 'rechazado';
 }
 
@@ -203,5 +206,51 @@ export class FirebaseService {
     // Implementar si usas Firebase Storage en el futuro
     return;
   }
+
+
+  async archivarPeticion(peticion: PeticionJuego, resultado: 'aprobado' | 'rechazado'): Promise<void> {
+  await addDoc(collection(db, 'historial_peticiones'), {
+    ...peticion,
+    estado: resultado,
+    fechaResolucion: Date.now(),
+  });
+  await this.eliminarPeticion(peticion.id!);
+}
+
+obtenerHistorial(): Observable<PeticionJuego[]> {
+  return new Observable(observer => {
+    const q = query(
+      collection(db, 'historial_peticiones'),
+      orderBy('fechaResolucion', 'desc')
+    );
+    const unsub = onSnapshot(q,
+      snapshot => {
+        const historial = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PeticionJuego));
+        observer.next(historial);
+      },
+      err => observer.error(err)
+    );
+    return () => unsub();
+  });
+}
+
+obtenerHistorialPorDesarrollador(uid: string): Observable<PeticionJuego[]> {
+  return new Observable(observer => {
+    const q = query(
+      collection(db, 'historial_peticiones'),
+      orderBy('fechaResolucion', 'desc')
+    );
+    const unsub = onSnapshot(q,
+      snapshot => {
+        const historial = snapshot.docs
+          .map(d => ({ id: d.id, ...d.data() } as PeticionJuego))
+          .filter(p => p.desarrolladorId === uid);
+        observer.next(historial);
+      },
+      err => observer.error(err)
+    );
+    return () => unsub();
+  });
+}
 }
 

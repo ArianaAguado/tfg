@@ -9,7 +9,7 @@
     {{ error }}
   </div>
 
-  <!-- Estado enviado: fuera del form, reemplaza todo el contenido -->
+  <!-- Estado enviado con éxito -->
   <div class="enviado-state" *ngIf="enviado">
     <i class="fa-solid fa-circle-check"></i>
     <h2>¡Propuesta enviada!</h2>
@@ -23,7 +23,8 @@
 
     <div class="form-group">
       <label for="nombre">Nombre del juego</label>
-      <input id="nombre" type="text" formControlName="nombre" placeholder="Ej: Hollow Knight: Silksong" />
+      <input id="nombre" type="text" formControlName="nombre"
+        placeholder="Ej: Hollow Knight: Silksong" />
       <span class="field-error" *ngIf="f['nombre'].invalid && f['nombre'].touched">
         El nombre es obligatorio.
       </span>
@@ -40,7 +41,8 @@
 
       <div class="form-group">
         <label for="generos">Géneros <small>(separados por coma)</small></label>
-        <input id="generos" type="text" formControlName="generos" placeholder="Acción, RPG, Plataformas" />
+        <input id="generos" type="text" formControlName="generos"
+          placeholder="Acción, RPG, Plataformas" />
         <span class="field-error" *ngIf="f['generos'].invalid && f['generos'].touched">
           Indica al menos un género.
         </span>
@@ -50,7 +52,8 @@
     <div class="form-row">
       <div class="form-group">
         <label for="plataformas">Plataformas <small>(separadas por coma)</small></label>
-        <input id="plataformas" type="text" formControlName="plataformas" placeholder="PC, PS5, Switch" />
+        <input id="plataformas" type="text" formControlName="plataformas"
+          placeholder="PC, PS5, Switch" />
         <span class="field-error" *ngIf="f['plataformas'].invalid && f['plataformas'].touched">
           Indica al menos una plataforma.
         </span>
@@ -61,6 +64,26 @@
         <input id="imagen" type="url" formControlName="imagen" placeholder="https://..." />
         <span class="field-error" *ngIf="f['imagen'].invalid && f['imagen'].touched">
           Introduce una URL válida.
+        </span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="urlSteam">URL de Steam</label>
+        <input id="urlSteam" type="url" formControlName="urlSteam"
+          placeholder="https://store.steampowered.com/app/..." />
+        <span class="field-error" *ngIf="f['urlSteam'].invalid && f['urlSteam'].touched">
+          Introduce la URL de Steam.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="precio">Precio <small>(0 si es gratis)</small></label>
+        <input id="precio" type="number" formControlName="precio"
+          placeholder="19.99" min="0" step="0.01" />
+        <span class="field-error" *ngIf="f['precio'].invalid && f['precio'].touched">
+          Introduce un precio válido.
         </span>
       </div>
     </div>
@@ -80,4 +103,77 @@
     </button>
 
   </form>
+
+  <!-- ── MIS PROPUESTAS ── -->
+  <div class="mis-propuestas-section">
+    <div class="mis-propuestas-header">
+      <h2>Mis propuestas</h2>
+    </div>
+
+    <!-- Pendientes -->
+    <div class="pendientes-lista" *ngIf="peticionesPendientes.length > 0">
+      <p class="sublabel"><i class="fa-solid fa-clock"></i> En revisión</p>
+      <div class="historial-card pendiente-card" *ngFor="let item of peticionesPendientes">
+        <div class="historial-badge badge-pendiente">
+          <i class="fa-solid fa-clock"></i> En revisión
+        </div>
+        <div class="historial-content">
+          <img [src]="item.imagen || 'assets/placeholder.png'" class="historial-img"
+               (error)="$any($event.target).src='assets/placeholder.png'" />
+          <div class="historial-info">
+            <h4>{{ item.nombre }}</h4>
+            <span class="historial-fecha">
+              <i class="fa-solid fa-calendar-plus"></i>
+              Enviada el {{ item.fechaPeticion | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historial resuelto -->
+    <div *ngIf="historial.length > 0">
+      <button class="btn-toggle-historial" (click)="toggleHistorial()">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        {{ verHistorial ? 'Ocultar historial' : 'Ver historial (' + historial.length + ')' }}
+      </button>
+
+      <div class="historial-lista" *ngIf="verHistorial">
+        <div class="historial-card" *ngFor="let item of historial"
+             [class.aprobado]="item.estado === 'aprobado'"
+             [class.rechazado]="item.estado === 'rechazado'">
+
+          <div class="historial-badge"
+               [class.badge-aprobado]="item.estado === 'aprobado'"
+               [class.badge-rechazado]="item.estado === 'rechazado'">
+            <i class="fa-solid"
+               [class.fa-check]="item.estado === 'aprobado'"
+               [class.fa-xmark]="item.estado === 'rechazado'"></i>
+            {{ item.estado === 'aprobado' ? 'Aprobado' : 'Rechazado' }}
+          </div>
+
+          <div class="historial-content">
+            <img [src]="item.imagen || 'assets/placeholder.png'" class="historial-img"
+                 (error)="$any($event.target).src='assets/placeholder.png'" />
+            <div class="historial-info">
+              <h4>{{ item.nombre }}</h4>
+              <span class="historial-fecha">
+                <i class="fa-solid fa-calendar-check"></i>
+                Resuelta el {{ item.fechaResolucion | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Sin propuestas -->
+    <div class="no-propuestas"
+         *ngIf="peticionesPendientes.length === 0 && historial.length === 0">
+      <i class="fa-solid fa-file-circle-question"></i>
+      <p>Aún no has enviado ninguna propuesta.</p>
+    </div>
+
+  </div>
 </div>
