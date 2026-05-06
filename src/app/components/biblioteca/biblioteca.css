@@ -377,3 +377,12 @@
   text-shadow: 0 0 10px #ff00aa;
 }
 
+.game-info,
+.game-thumbnail,
+.game-name,
+.game-dot,
+.badge-mas,
+.hover-panel,
+.hover-juego {
+  pointer-events: none;
+}
