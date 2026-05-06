@@ -27,10 +27,25 @@ export class Rawg {
 
   nuevosLanzamientos(fecha: Date): Observable<any[]> {
     const { fechaInicio, fechaFin } = this.rangoMes(fecha);
+    const cacheKey = fechaInicio; // "2026-05" como clave única
+
+    // Si ya tenemos los datos de este mes, los devolvemos sin llamar a la API
+    if (this.cache.has(cacheKey)) {
+      const cached = this.cache.get(cacheKey)!; // el ! le dice a TypeScript "confía en mí, existe"
+      return new Observable(observer => {
+        observer.next(cached);
+        observer.complete();
+      });
+    }
+
     const url = `${this.apiUrl}?key=${this.apiKey}&dates=${fechaInicio},${fechaFin}&ordering=released&page_size=40`;
 
     return this.http.get<any>(url).pipe(
-      map(data => (data.results || []).map((j: any) => this.normalizarRawg(j)))
+      map(data => {
+        const juegos = (data.results || []).map((j: any) => this.normalizarRawg(j));
+        this.cache.set(cacheKey, juegos); // guardamos en caché
+        return juegos;
+      })
     );
   }
 
@@ -51,12 +66,12 @@ export class Rawg {
   }
 
   private rangoMes(fecha: Date) {
-  const año = fecha.getFullYear();
-  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-  const ultimoDia = new Date(año, fecha.getMonth() + 1, 0).getDate();
-  return {
-    fechaInicio: `${año}-${mes}-01`,
-    fechaFin: `${año}-${mes}-${ultimoDia}`
-  };
-}
+    const año = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const ultimoDia = new Date(año, fecha.getMonth() + 1, 0).getDate();
+    return {
+      fechaInicio: `${año}-${mes}-01`,
+      fechaFin: `${año}-${mes}-${ultimoDia}`
+    };
+  }
 }
