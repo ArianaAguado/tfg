@@ -10,6 +10,7 @@ import { CrearJuegosComponent } from './components/crearjuegos/crearjuegos';
 import { PeticionesJuegosComponent } from './components/peticionesjuegos/peticionesjuegos';
 import { ProponerJuegoComponent } from './components/proponerjuego/proponerjuego';
 import { DetalleJuego } from './components/detalle-juego/detalle-juego';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: Inicio },
@@ -18,6 +19,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: Dashboard,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'calendario', pathMatch: 'full' },
       { path: 'calendario', component: Calendario },
