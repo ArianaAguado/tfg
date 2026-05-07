@@ -55,7 +55,7 @@
 
           <!-- Hover panel -->
           <div *ngIf="obtenerJuegosDelDia(dia).length > 1" class="hover-panel">
-            <div *ngFor="let j of obtenerJuegosDelDia(dia)" class="hover-juego">
+            <div *ngFor="let j of obtenerJuegosDelDia(dia)" class="hover-juego" (click)="irADetalle(j); $event.stopPropagation()">
               <img [src]="j.background_image" alt="{{j.name}}">
               <span>{{ j.name }}</span>
             </div>
@@ -92,7 +92,7 @@
     <ng-template #listaJuegos>
       <h2 class="modal-titulo">Lanzamientos del día</h2>
       <div class="modal-lista">
-        <div *ngFor="let j of diasSeleccionado" class="modal-juego" (click)="seleccionarJuego(j)">
+        <div *ngFor="let j of diasSeleccionado" class="modal-juego" (click)="irADetalle(j); $event.stopPropagation()">
           <img [src]="j.background_image" alt="{{j.name}}">
           <span>{{ j.name }}</span>
         </div>

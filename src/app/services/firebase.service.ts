@@ -64,6 +64,7 @@ export interface JuegoFavorito {
   rating?: number;
   genres?: { name: string }[];
   platforms?: { platform: { name: string } }[];
+  slug?: string;
 }
 
 // Inicialización de Firebase

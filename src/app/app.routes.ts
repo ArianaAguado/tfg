@@ -9,6 +9,7 @@ import { Biblioteca } from './components/biblioteca/biblioteca';
 import { CrearJuegosComponent } from './components/crearjuegos/crearjuegos';
 import { PeticionesJuegosComponent } from './components/peticionesjuegos/peticionesjuegos';
 import { ProponerJuegoComponent } from './components/proponerjuego/proponerjuego';
+import { DetalleJuego } from './components/detalle-juego/detalle-juego';
 
 export const routes: Routes = [
   { path: '', component: Inicio },
@@ -25,6 +26,7 @@ export const routes: Routes = [
       { path: 'crear-juegos', component: CrearJuegosComponent },
       { path: 'peticiones', component: PeticionesJuegosComponent },  
       { path: 'proponer-juego', component: ProponerJuegoComponent },
+      { path: 'juego/:slug', component: DetalleJuego }
     ]
   },
 ];

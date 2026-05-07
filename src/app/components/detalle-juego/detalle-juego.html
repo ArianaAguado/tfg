@@ -1,0 +1,36 @@
+<div class="detalle-container">
+
+  <div *ngIf="cargando" class="loading-state">
+    <p>Cargando juego...</p>
+  </div>
+
+  <ng-container *ngIf="!cargando && juego">
+    <div class="detalle-header">
+      <button class="btn-volver" (click)="volver()">← Volver</button>
+      <button class="btn-favorito" (click)="toggleFavorito()" [disabled]="cargandoFavorito">
+        <span class="material-icons">{{ esFavorito ? 'favorite' : 'favorite_border' }}</span>
+      </button>
+    </div>
+
+    <div class="detalle-body">
+      <img class="detalle-imagen" [src]="juego.background_image" [alt]="juego.name">
+
+      <div class="detalle-info">
+        <h1 class="detalle-nombre">{{ juego.name }}</h1>
+        <div class="detalle-meta">
+          <p><strong>Fecha de lanzamiento:</strong> {{ juego.released }}</p>
+          <p><strong>Rating:</strong> {{ juego.rating }} / 5</p>
+          <p><strong>Géneros:</strong> {{ obtenerGeneros() }}</p>
+          <p><strong>Plataformas:</strong> {{ obtenerPlataformas() }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="detalle-descripcion" *ngIf="juego.description_raw">
+      <h2>Descripción</h2>
+      <p>{{ juego.description_raw }}</p>
+    </div>
+
+  </ng-container>
+
+</div>

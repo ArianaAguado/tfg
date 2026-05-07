@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angula
 import { CommonModule } from '@angular/common';
 import { FirebaseService, JuegoFavorito } from '../../services/firebase.service';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-biblioteca',
@@ -14,6 +15,7 @@ export class Biblioteca implements OnInit, OnDestroy {
   private firebase = inject(FirebaseService);
   private subscription: Subscription | null = null;
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   favoritos: JuegoFavorito[] = [];
   diasMes: (number | null)[] = [];
@@ -36,20 +38,20 @@ export class Biblioteca implements OnInit, OnDestroy {
   }
 
   suscribirFavoritos(): void {
-  this.cargando = true;
-  this.subscription = this.firebase.obtenerFavoritos().subscribe({
-    next: (juegos) => {
-      this.favoritos = juegos;
-      this.cargando = false;
-      this.cdr.detectChanges(); // <- añade esto
-    },
-    error: (err) => {
-      console.error('Error cargando favoritos:', err);
-      this.cargando = false;
-      this.cdr.detectChanges(); // <- y esto
-    }
-  });
-}
+    this.cargando = true;
+    this.subscription = this.firebase.obtenerFavoritos().subscribe({
+      next: (juegos) => {
+        this.favoritos = juegos;
+        this.cargando = false;
+        this.cdr.detectChanges(); // <- añade esto
+      },
+      error: (err) => {
+        console.error('Error cargando favoritos:', err);
+        this.cargando = false;
+        this.cdr.detectChanges(); // <- y esto
+      }
+    });
+  }
 
   generarCalendario(): void {
     const año = this.fechaActual.getFullYear();
@@ -92,6 +94,10 @@ export class Biblioteca implements OnInit, OnDestroy {
   }
 
   abrirModal(juegos: JuegoFavorito[]): void {
+    if (juegos.length === 1) {
+      this.irADetalle(juegos[0]);
+      return;
+    }
     this.diasSeleccionado = juegos;
     this.mostrarModal = true;
     this.juegoSeleccionado = null;
@@ -120,5 +126,29 @@ export class Biblioteca implements OnInit, OnDestroy {
 
   obtenerPlataformas(juego: any): string {
     return juego.platforms?.map((p: any) => p.platform.name).join(', ') || 'No disponible';
+  }
+
+  irADetalle(juego: any): void {
+    if (juego.slug) {
+      this.router.navigate(['/dashboard/juego', juego.slug]);
+    } else {
+      // Si no tiene slug (favorito antiguo), abrimos el modal como antes
+      this.juegoSeleccionado = juego;
+      this.mostrarModal = true;
+    }
+  }
+
+  manejarClicDia(dia: any): void {
+    if (!dia) return;
+    const juegos = this.obtenerFavoritosDelDia(dia as number);
+    if (juegos.length === 0) return;
+    if (juegos.length === 1) {
+      this.irADetalle(juegos[0]);
+      return;
+    }
+    this.diasSeleccionado = juegos;
+    this.mostrarModal = true;
+    this.juegoSeleccionado = null;
+    this.cdr.detectChanges();
   }
 }

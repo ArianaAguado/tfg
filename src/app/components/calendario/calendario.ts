@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Rawg } from '../../services/rawg';
 import { FirebaseService, JuegoCustom } from '../../services/firebase.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-calendario',
@@ -16,6 +17,7 @@ export class Calendario implements OnInit {
   private rawg = inject(Rawg);
   private firebase = inject(FirebaseService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   juegos: any[] = [];
   diasMes: (number | null)[] = [];
@@ -157,6 +159,10 @@ export class Calendario implements OnInit {
   esFavoritoActual: boolean = false;
 
   async abrirModal(juegos: any[]) {
+    if (juegos.length === 1) {
+      this.irADetalle(juegos[0]);
+      return;
+    }
     this.diasSeleccionado = juegos;
     this.mostrarModal = true;
     this.juegoSeleccionado = null;
@@ -179,5 +185,9 @@ export class Calendario implements OnInit {
     }
     this.cerrarModal();
     this.cdr.detectChanges();
+  }
+
+  irADetalle(juego: any): void {
+    this.router.navigate(['/dashboard/juego', juego.slug]);
   }
 }

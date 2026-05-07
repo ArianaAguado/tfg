@@ -26,45 +26,45 @@ export class Rawg {
   }
 
   nuevosLanzamientos(fecha: Date): Observable<any[]> {
-  const { fechaInicio, fechaFin } = this.rangoMes(fecha);
-  const cacheKey = fechaInicio;
+    const { fechaInicio, fechaFin } = this.rangoMes(fecha);
+    const cacheKey = fechaInicio;
 
-  if (this.cache.has(cacheKey)) {
-    const cached = this.cache.get(cacheKey)!;
+    if (this.cache.has(cacheKey)) {
+      const cached = this.cache.get(cacheKey)!;
+      return new Observable(observer => {
+        observer.next(cached);
+        observer.complete();
+      });
+    }
+
     return new Observable(observer => {
-      observer.next(cached);
-      observer.complete();
+      const todosLosJuegos: any[] = [];
+
+      const cargarPagina = (pagina: number) => {
+        const url = `${this.apiUrl}?key=${this.apiKey}&dates=${fechaInicio},${fechaFin}&ordering=released&page_size=40&page=${pagina}`;
+
+        this.http.get<any>(url).subscribe({
+          next: (data) => {
+            const juegos = (data.results || []).map((j: any) => this.normalizarRawg(j));
+            todosLosJuegos.push(...juegos);
+
+            if (data.next) {
+              // hay más páginas, seguimos
+              cargarPagina(pagina + 1);
+            } else {
+              // ya no hay más, guardamos en caché y emitimos
+              this.cache.set(cacheKey, todosLosJuegos);
+              observer.next(todosLosJuegos);
+              observer.complete();
+            }
+          },
+          error: (err) => observer.error(err)
+        });
+      };
+
+      cargarPagina(1);
     });
   }
-
-  return new Observable(observer => {
-    const todosLosJuegos: any[] = [];
-
-    const cargarPagina = (pagina: number) => {
-      const url = `${this.apiUrl}?key=${this.apiKey}&dates=${fechaInicio},${fechaFin}&ordering=released&page_size=40&page=${pagina}`;
-
-      this.http.get<any>(url).subscribe({
-        next: (data) => {
-          const juegos = (data.results || []).map((j: any) => this.normalizarRawg(j));
-          todosLosJuegos.push(...juegos);
-
-          if (data.next) {
-            // hay más páginas, seguimos
-            cargarPagina(pagina + 1);
-          } else {
-            // ya no hay más, guardamos en caché y emitimos
-            this.cache.set(cacheKey, todosLosJuegos);
-            observer.next(todosLosJuegos);
-            observer.complete();
-          }
-        },
-        error: (err) => observer.error(err)
-      });
-    };
-
-    cargarPagina(1);
-  });
-}
 
   // Busca en RAWG y en Firebase, fusiona resultados
   buscarJuegos(query: string, fecha: Date): Observable<any[]> {
@@ -90,5 +90,10 @@ export class Rawg {
       fechaInicio: `${año}-${mes}-01`,
       fechaFin: `${año}-${mes}-${ultimoDia}`
     };
+  }
+
+  obtenerDetalle(slug: string): Observable<any> {
+    const url = `${this.apiUrl}/${slug}?key=${this.apiKey}`;
+    return this.http.get<any>(url);
   }
 }
