@@ -5,6 +5,7 @@ import { Rawg } from '../../services/rawg';
 import { FirebaseService } from '../../services/firebase.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { Location } from '@angular/common';
+import { filter, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-detalle-juego',
@@ -27,14 +28,47 @@ export class DetalleJuego implements OnInit {
   cargandoFavorito: boolean = false;
 
   ngOnInit(): void {
+    // Primero comprueba si viene por state (juego custom)
+    const nav = this.router.getCurrentNavigation();
+    const juegoCustom = nav?.extras?.state?.['juego']
+      ?? history.state?.juego;
+
+    if (juegoCustom) {
+      this.juego = juegoCustom;
+      this.cargando = false;
+      this.cdr.detectChanges();
+
+      // Comprobar si es favorito también para custom
+      this.firebase.usuario$.pipe(
+        filter(user => user !== undefined),
+        take(1)
+      ).subscribe(async (user) => {
+        if (user) {
+          this.esFavorito = await this.firebase.esFavorito(juegoCustom);
+          this.cdr.detectChanges();
+        }
+      });
+      return;
+    }
+
     const slug = this.route.snapshot.paramMap.get('slug');
     if (!slug) { this.router.navigate(['/dashboard']); return; }
 
     this.rawg.obtenerDetalle(slug).subscribe({
-      next: async (juego) => {
+      next: (juego) => {
         this.juego = juego;
         this.cargando = false;
-        this.esFavorito = await this.firebase.esFavorito(juego);
+        this.cdr.detectChanges();
+
+        this.firebase.usuario$.pipe(
+          filter(user => user !== undefined),
+          take(1)
+        ).subscribe(async (user) => {
+          if (user) {
+            this.esFavorito = await this.firebase.esFavorito(juego);
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: () => {
         this.cargando = false;

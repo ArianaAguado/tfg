@@ -188,6 +188,21 @@ export class Calendario implements OnInit {
   }
 
   irADetalle(juego: any): void {
-    this.router.navigate(['/dashboard/juego', juego.slug]);
+    if (juego.esCustom) {
+      const normalizado = {
+        name: juego.name,
+        background_image: juego.background_image,
+        released: juego.released,
+        rating: null,
+        genres: (juego.genres || []).map((g: string) => ({ name: g })),
+        platforms: (juego.platforms || []).map((p: string) => ({ platform: { name: p } })),
+        description_raw: juego.descripcion || '',
+        slug: null,
+        esCustom: true
+      };
+      this.router.navigate(['/dashboard/juego-custom'], { state: { juego: normalizado } });
+    } else {
+      this.router.navigate(['/dashboard/juego', juego.slug]);
+    }
   }
 }

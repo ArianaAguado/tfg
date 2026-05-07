@@ -134,9 +134,21 @@ export class Biblioteca implements OnInit, OnDestroy {
     if (juego.slug) {
       this.router.navigate(['/dashboard/juego', juego.slug]);
     } else {
-      // Si no tiene slug (favorito antiguo), abrimos el modal como antes
-      this.juegoSeleccionado = juego;
-      this.mostrarModal = true;
+      const normalizado = {
+        name: juego.name,
+        background_image: juego.background_image,
+        released: juego.released,
+        rating: juego.rating ?? null,
+        genres: Array.isArray(juego.genres)
+          ? juego.genres.map((g: any) => typeof g === 'string' ? { name: g } : g)
+          : [],
+        platforms: Array.isArray(juego.platforms)
+          ? juego.platforms.map((p: any) => typeof p === 'string' ? { platform: { name: p } } : p)
+          : [],
+        description_raw: juego.descripcion || juego.description_raw || '',
+        esCustom: true
+      };
+      this.router.navigate(['/dashboard/juego-custom'], { state: { juego: normalizado } });
     }
   }
 

@@ -28,7 +28,8 @@ export const routes: Routes = [
       { path: 'crear-juegos', component: CrearJuegosComponent },
       { path: 'peticiones', component: PeticionesJuegosComponent },  
       { path: 'proponer-juego', component: ProponerJuegoComponent },
-      { path: 'juego/:slug', component: DetalleJuego }
+      { path: 'juego/:slug', component: DetalleJuego },
+      { path: 'juego-custom', component: DetalleJuego }
     ]
   },
 ];
