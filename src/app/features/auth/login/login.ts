@@ -20,7 +20,7 @@ export class Login {
   private formBuilder = inject(FormBuilder);
   public router = inject(Router);
   private auth = inject(Auth);
-  private firestore = inject(Firestore); // ← necesario para Google
+  private firestore = inject(Firestore);
 
   errorMessage = '';
 
@@ -31,10 +31,10 @@ export class Login {
 
   async onSubmit() {
     if (this.formularioLogin.invalid) return;
-
     const { email, password } = this.formularioLogin.value;
     try {
       await signInWithEmailAndPassword(this.auth, email!, password!);
+      localStorage.setItem('sessionExpiry', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
       this.router.navigate(['/dashboard']);
     } catch (error: any) {
       this.errorMessage = this.getErrorMessage(error.code);
@@ -59,6 +59,7 @@ export class Login {
         });
       }
 
+      localStorage.setItem('sessionExpiry', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
       this.router.navigate(['/dashboard']);
     } catch (error: any) {
       this.errorMessage = this.getErrorMessage(error.code);

@@ -127,8 +127,10 @@ export class FirebaseService {
   }
 
   async cerrarSesion(): Promise<void> {
+    localStorage.removeItem('sessionExpiry');
     await signOut(auth);
   }
+
 
   // ── SECCIÓN: JUEGOS OFICIALES ──
 
