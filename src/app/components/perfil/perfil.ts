@@ -75,7 +75,7 @@ export class Perfil implements OnInit {
       this.firebase.obtenerAvatarUsuario(),
       this.firebase.obtenerPerfil()
     ]).subscribe(([usuario, rol, avatarUrl, perfil]) => {
-      this.usuario = usuario;
+      this.usuario = usuario ?? null;
       this.rol = rol;
       this.avatarGuardado = (avatarUrl && avatarUrl !== 'null' && avatarUrl.trim() !== '') ? avatarUrl : null;
       this.bio = perfil?.bio ?? '';

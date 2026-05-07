@@ -35,7 +35,7 @@ export class Dashboard implements OnInit, OnDestroy {
       this.firebase.rol$,
       this.firebase.obtenerAvatarUsuario()
     ]).subscribe(([usuario, rol, avatarUrl]) => {
-      this.usuario = usuario;
+      this.usuario = usuario ?? null;
       this.rol = rol;
 
       const guardado = (avatarUrl && avatarUrl !== 'null' && avatarUrl.trim() !== '') ? avatarUrl : null;

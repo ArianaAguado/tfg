@@ -15,13 +15,9 @@ import {
   query,
   orderBy
 } from 'firebase/firestore';
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut,
-  User
-} from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signOut, User, browserLocalPersistence, setPersistence } from 'firebase/auth';
 import { environment } from '../../environments/environments';
+
 
 // ── INTERFACES ──
 
@@ -35,8 +31,8 @@ export interface JuegoCustom {
   generos?: string[];
   plataformas?: string[];
   esCustom: boolean;
-  urlSteam?: string; 
-  precio?: number; 
+  urlSteam?: string;
+  precio?: number;
 }
 
 export interface PeticionJuego extends JuegoCustom {
@@ -75,21 +71,23 @@ const auth = getAuth(app);
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
 
-  private usuarioSubject = new BehaviorSubject<User | null>(null);
+  private usuarioSubject = new BehaviorSubject<User | null | undefined>(undefined);
   usuario$ = this.usuarioSubject.asObservable();
 
   private rolSubject = new BehaviorSubject<string | null>(null);
   rol$ = this.rolSubject.asObservable();
 
   constructor() {
-    onAuthStateChanged(auth, async (user) => {
-      this.usuarioSubject.next(user);
-      if (user) {
-        const rol = await this.obtenerRolUsuario(user.uid);
-        this.rolSubject.next(rol);
-      } else {
-        this.rolSubject.next(null);
-      }
+    setPersistence(auth, browserLocalPersistence).then(() => {
+      onAuthStateChanged(auth, async (user) => {
+        this.usuarioSubject.next(user);
+        if (user) {
+          const rol = await this.obtenerRolUsuario(user.uid);
+          this.rolSubject.next(rol);
+        } else {
+          this.rolSubject.next(null);
+        }
+      });
     });
   }
 
@@ -219,49 +217,49 @@ export class FirebaseService {
   }
 
   async archivarPeticion(peticion: PeticionJuego, resultado: 'aprobado' | 'rechazado'): Promise<void> {
-  await addDoc(collection(db, 'historial_peticiones'), {
-    ...peticion,
-    estado: resultado,
-    fechaResolucion: Date.now(),
-  });
-  await this.eliminarPeticion(peticion.id!);
-}
+    await addDoc(collection(db, 'historial_peticiones'), {
+      ...peticion,
+      estado: resultado,
+      fechaResolucion: Date.now(),
+    });
+    await this.eliminarPeticion(peticion.id!);
+  }
 
-obtenerHistorial(): Observable<PeticionJuego[]> {
-  return new Observable(observer => {
-    const q = query(
-      collection(db, 'historial_peticiones'),
-      orderBy('fechaResolucion', 'desc')
-    );
-    const unsub = onSnapshot(q,
-      snapshot => {
-        const historial = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PeticionJuego));
-        observer.next(historial);
-      },
-      err => observer.error(err)
-    );
-    return () => unsub();
-  });
-}
+  obtenerHistorial(): Observable<PeticionJuego[]> {
+    return new Observable(observer => {
+      const q = query(
+        collection(db, 'historial_peticiones'),
+        orderBy('fechaResolucion', 'desc')
+      );
+      const unsub = onSnapshot(q,
+        snapshot => {
+          const historial = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PeticionJuego));
+          observer.next(historial);
+        },
+        err => observer.error(err)
+      );
+      return () => unsub();
+    });
+  }
 
-obtenerHistorialPorDesarrollador(uid: string): Observable<PeticionJuego[]> {
-  return new Observable(observer => {
-    const q = query(
-      collection(db, 'historial_peticiones'),
-      orderBy('fechaResolucion', 'desc')
-    );
-    const unsub = onSnapshot(q,
-      snapshot => {
-        const historial = snapshot.docs
-          .map(d => ({ id: d.id, ...d.data() } as PeticionJuego))
-          .filter(p => p.desarrolladorId === uid);
-        observer.next(historial);
-      },
-      err => observer.error(err)
-    );
-    return () => unsub();
-  });
-}
+  obtenerHistorialPorDesarrollador(uid: string): Observable<PeticionJuego[]> {
+    return new Observable(observer => {
+      const q = query(
+        collection(db, 'historial_peticiones'),
+        orderBy('fechaResolucion', 'desc')
+      );
+      const unsub = onSnapshot(q,
+        snapshot => {
+          const historial = snapshot.docs
+            .map(d => ({ id: d.id, ...d.data() } as PeticionJuego))
+            .filter(p => p.desarrolladorId === uid);
+          observer.next(historial);
+        },
+        err => observer.error(err)
+      );
+      return () => unsub();
+    });
+  }
 
   // ── SECCIÓN: FAVORITOS ──
   async añadirFavorito(juego: JuegoFavorito): Promise<void> {
@@ -322,73 +320,73 @@ obtenerHistorialPorDesarrollador(uid: string): Observable<PeticionJuego[]> {
 
   // ── SECCIÓN: AVATAR ──
 
-async actualizarAvatar(url: string): Promise<void> {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-  await updateDoc(doc(db, 'usuarios', uid), { avatarUrl: url });
-}
+  async actualizarAvatar(url: string): Promise<void> {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    await updateDoc(doc(db, 'usuarios', uid), { avatarUrl: url });
+  }
 
-obtenerAvatarUsuario(): Observable<string | null> {
-  return new Observable(observer => {
-    let unsubFirestore: (() => void) | null = null;
+  obtenerAvatarUsuario(): Observable<string | null> {
+    return new Observable(observer => {
+      let unsubFirestore: (() => void) | null = null;
 
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      if (unsubFirestore) {
-        unsubFirestore();
-        unsubFirestore = null;
-      }
+      const unsubAuth = onAuthStateChanged(auth, (user) => {
+        if (unsubFirestore) {
+          unsubFirestore();
+          unsubFirestore = null;
+        }
 
-      if (!user) {
-        observer.next(null);
-        return;
-      }
+        if (!user) {
+          observer.next(null);
+          return;
+        }
 
-      const docRef = doc(db, 'usuarios', user.uid);
-      unsubFirestore = onSnapshot(docRef, snap => {
-        const data = snap.data();
-        const url = data?.['avatarUrl'];
-        observer.next((url && url !== 'null' && url.trim() !== '') ? url : null);
-      });
-    });
-
-    return () => {
-      unsubAuth();
-      if (unsubFirestore) unsubFirestore();
-    };
-  });
-}
-
-
-async actualizarPerfil(datos: { bio?: string; generosFav?: string[]; plataformasFav?: string[] }): Promise<void> {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-  await updateDoc(doc(db, 'usuarios', uid), { ...datos });
-}
-
-obtenerPerfil(): Observable<{ bio: string; generosFav: string[]; plataformasFav: string[] } | null> {
-  return new Observable(observer => {
-    let unsubFirestore: (() => void) | null = null;
-
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
-      if (!user) { observer.next(null); return; }
-
-      const docRef = doc(db, 'usuarios', user.uid);
-      unsubFirestore = onSnapshot(docRef, snap => {
-        const data = snap.data();
-        observer.next({
-          bio: data?.['bio'] ?? '',
-          generosFav: data?.['generosFav'] ?? [],
-          plataformasFav: data?.['plataformasFav'] ?? []
+        const docRef = doc(db, 'usuarios', user.uid);
+        unsubFirestore = onSnapshot(docRef, snap => {
+          const data = snap.data();
+          const url = data?.['avatarUrl'];
+          observer.next((url && url !== 'null' && url.trim() !== '') ? url : null);
         });
       });
-    });
 
-    return () => {
-      unsubAuth();
-      if (unsubFirestore) unsubFirestore();
-    };
-  });
-}
+      return () => {
+        unsubAuth();
+        if (unsubFirestore) unsubFirestore();
+      };
+    });
+  }
+
+
+  async actualizarPerfil(datos: { bio?: string; generosFav?: string[]; plataformasFav?: string[] }): Promise<void> {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    await updateDoc(doc(db, 'usuarios', uid), { ...datos });
+  }
+
+  obtenerPerfil(): Observable<{ bio: string; generosFav: string[]; plataformasFav: string[] } | null> {
+    return new Observable(observer => {
+      let unsubFirestore: (() => void) | null = null;
+
+      const unsubAuth = onAuthStateChanged(auth, (user) => {
+        if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
+        if (!user) { observer.next(null); return; }
+
+        const docRef = doc(db, 'usuarios', user.uid);
+        unsubFirestore = onSnapshot(docRef, snap => {
+          const data = snap.data();
+          observer.next({
+            bio: data?.['bio'] ?? '',
+            generosFav: data?.['generosFav'] ?? [],
+            plataformasFav: data?.['plataformasFav'] ?? []
+          });
+        });
+      });
+
+      return () => {
+        unsubAuth();
+        if (unsubFirestore) unsubFirestore();
+      };
+    });
+  }
 
 }
