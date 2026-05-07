@@ -1,78 +1,186 @@
-<!-- Eliminamos el *ngIf="visible" para que se vea siempre que entremos a la ruta -->
 <div class="modal-overlay-page">
     <div class="modal-panel">
 
         <div class="modal-header">
             <h2>Gestión de juegos <span class="texto-neon">custom</span></h2>
-            <!-- Si quieres que el botón X te saque de aquí, podemos usar un link o router.navigate -->
             <button class="modal-close" routerLink="/dashboard/calendario">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
         <div class="admin-form">
-            <input type="text" [(ngModel)]="datosJuego.nombre"
-                placeholder="Nombre del juego" />
-            <input type="text" [(ngModel)]="datosJuego.fechaLanzamiento"
-                placeholder="Fecha lanzamiento (YYYY-MM-DD)" />
-            <textarea [(ngModel)]="datosJuego.descripcion"
-                placeholder="Descripción"
-                rows="3"></textarea>
 
-            <div class="imagen-upload">
-                <label for="imagenInput" class="upload-label">
-                    <i class="fa-solid fa-upload"></i>
-                    {{ archivoImagen ? archivoImagen.name :
-                    'Seleccionar portada' }}
-                </label>
-                <input id="imagenInput" type="file" accept="image/*"
-                    (change)="onImagenSeleccionada($event)" hidden />
-                <img *ngIf="previewImagen" [src]="previewImagen" alt="Preview"
-                    class="imagen-preview" />
+            <!-- Fila 1: nombre y fecha -->
+            <div class="form-row-admin">
+                <div class="field-group">
+                    <label>Nombre del juego</label>
+                    <input type="text" [(ngModel)]="datosJuego.nombre"
+                        placeholder="Ej: Hollow Knight: Silksong"
+                        [class.input-error]="errores['nombre']" />
+                    <span class="error-msg" *ngIf="errores['nombre']">{{
+                        errores['nombre'] }}</span>
+                </div>
+                <div class="field-group">
+                    <label>Fecha de lanzamiento</label>
+                    <input type="date" [(ngModel)]="datosJuego.fechaLanzamiento"
+                        [class.input-error]="errores['fecha']" />
+                    <span class="error-msg" *ngIf="errores['fecha']">{{
+                        errores['fecha'] }}</span>
+                </div>
             </div>
 
-            <div class="form-actions">
-                <button class="btn-guardar" (click)="guardarJuego()"
-                    [disabled]="estaGuardando">
-                    <!-- Estado de carga -->
-                    <ng-container *ngIf="estaGuardando">
-                        <span *ngIf="estaSubiendoImagen">Subiendo
-                            imagen...</span>
-                        <span *ngIf="!estaSubiendoImagen">Guardando...</span>
-                    </ng-container>
-
-                    <!-- Estado normal -->
-                    <ng-container *ngIf="!estaGuardando">
-                        <span>{{ esEdicion ? 'Actualizar Cambios' :
-                            'Añadir nuevo juego' }}</span>
-                    </ng-container>
-                </button>
-
-                <button *ngIf="esEdicion" class="btn-cancelar"
-                    (click)="limpiarFormulario()">
-                    Cancelar edición
-                </button>
+            <!-- Fila 2: géneros y plataformas -->
+            <div class="form-row-admin">
+                <div class="field-group">
+                    <label>Géneros <small>(separados por coma)</small></label>
+                    <input type="text" [(ngModel)]="generosTexto"
+                        placeholder="Acción, RPG, Plataformas"
+                        [class.input-error]="errores['generos']" />
+                    <span class="error-msg" *ngIf="errores['generos']">{{
+                        errores['generos'] }}</span>
+                </div>
+                <div class="field-group">
+                    <label>Plataformas <small>(separadas por
+                            coma)</small></label>
+                    <input type="text" [(ngModel)]="plataformasTexto"
+                        placeholder="PC, PS5, Switch"
+                        [class.input-error]="errores['plataformas']" />
+                    <span class="error-msg" *ngIf="errores['plataformas']">{{
+                        errores['plataformas'] }}</span>
+                </div>
             </div>
 
-            <div class="admin-lista">
-                <p *ngIf="listaJuegos.length === 0" style="color: #a0a5bc">No
-                    hay juegos custom todavía.</p>
+            <!-- Fila 3: URL Steam y precio -->
+            <div class="form-row-admin">
+                <div class="field-group">
+                    <label>URL del juego</label>
+                    <input type="url" [(ngModel)]="datosJuego.urlSteam"
+                        placeholder="https://store.steampowered.com/app/..."
+                        [class.input-error]="errores['urlSteam']" />
+                    <span class="error-msg" *ngIf="errores['urlSteam']">{{
+                        errores['urlSteam'] }}</span>
+                </div>
+                <div class="field-group">
+                    <label>Precio <small>(0 si es gratis)</small></label>
+                    <input type="number" [(ngModel)]="datosJuego.precio"
+                        placeholder="19.99" min="0" step="0.01"
+                        [class.input-error]="errores['precio']" />
+                    <span class="error-msg" *ngIf="errores['precio']">{{
+                        errores['precio'] }}</span>
+                </div>
+            </div>
 
-                <div class="admin-card" *ngFor="let juego of listaJuegos">
-                    <img [src]="juego.imagen || 'assets/placeholder.png'"
-                        alt="{{ juego.nombre }}" class="card-img" />
-                    <div class="card-info">
-                        <h3>{{ juego.nombre }}</h3>
-                        <p>{{ juego.fechaLanzamiento || 'Sin fecha' }}</p>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn-edit"
-                            (click)="prepararEdicion(juego)">Editar</button>
-                        <button class="btn-delete"
-                            (click)="borrarJuego(juego)">Eliminar</button>
-                    </div>
+            <!-- Descripción -->
+            <div class="field-group">
+                <label>Descripción</label>
+                <textarea [(ngModel)]="datosJuego.descripcion"
+                    placeholder="Describe el juego..." rows="3"
+                    [class.input-error]="errores['descripcion']"></textarea>
+                <span class="error-msg" *ngIf="errores['descripcion']">{{
+                    errores['descripcion'] }}</span>
+            </div>
+
+            <!-- Imagen -->
+            <div class="imagen-y-accion">
+                <div class="imagen-upload">
+                    <label for="imagenInput" class="upload-label"
+                        [class.input-error]="errores['imagen']">
+                        <i class="fa-solid fa-upload"></i>
+                        {{ archivoImagen ? archivoImagen.name :
+                        'Seleccionar portada' }}
+                    </label>
+                    <input id="imagenInput" type="file" accept="image/*"
+                        (change)="onImagenSeleccionada($event)" hidden />
+                    <span class="error-msg" *ngIf="errores['imagen']">{{
+                        errores['imagen'] }}</span>
+                    <img *ngIf="previewImagen" [src]="previewImagen"
+                        alt="Preview" class="imagen-preview" />
+                </div>
+
+                <!-- Acciones -->
+                <div class="form-actions">
+                    <button class="btn-guardar" (click)="guardarJuego()"
+                        [disabled]="estaGuardando">
+                        <ng-container *ngIf="estaGuardando">
+                            <span *ngIf="estaSubiendoImagen">Subiendo
+                                imagen...</span>
+                            <span
+                                *ngIf="!estaSubiendoImagen">Guardando...</span>
+                        </ng-container>
+                        <ng-container *ngIf="!estaGuardando">
+                            <span>{{ esEdicion ? 'Actualizar cambios' :
+                                'Añadir juego' }}</span>
+                        </ng-container>
+                    </button>
+                    <button *ngIf="esEdicion" class="btn-cancelar"
+                        (click)="limpiarFormulario()">
+                        Cancelar edición
+                    </button>
                 </div>
             </div>
 
         </div>
+
+        <!-- Lista de juegos -->
+        <div class="admin-lista">
+
+            <!-- Buscador -->
+            <div class="buscador-lista">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                    type="text"
+                    [(ngModel)]="busqueda"
+                    (ngModelChange)="onBusqueda()"
+                    placeholder="Buscar juego por nombre..." />
+            </div>
+
+            <p *ngIf="juegosFiltrados.length === 0" style="color: #a0a5bc">
+                No se encontraron juegos.
+            </p>
+
+            <div class="admin-card" *ngFor="let juego of juegosPaginados">
+                <img [src]="juego.imagen || 'assets/placeholder.png'"
+                    alt="{{ juego.nombre }}" class="card-img" />
+                <div class="card-info">
+                    <h3>{{ juego.nombre }}</h3>
+                    <p>{{ juego.fechaLanzamiento || 'Sin fecha' }}</p>
+                    <div class="card-tags" *ngIf="juego.generos?.length">
+                        <span class="card-tag"
+                            *ngFor="let g of juego.generos">{{ g }}</span>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-edit"
+                        (click)="prepararEdicion(juego)">Editar</button>
+                    <button class="btn-delete"
+                        (click)="borrarJuego(juego)">Eliminar</button>
+                </div>
+            </div>
+
+            <!-- Paginación -->
+            <div class="paginacion" *ngIf="totalPaginas > 1">
+                <button class="nav-btn"
+                    (click)="cambiarPagina(paginaActual - 1)"
+                    [disabled]="paginaActual === 1">
+                    &#8249;
+                </button>
+
+                <button
+                    class="pag-num"
+                    *ngFor="let p of paginas"
+                    [class.activo]="paginaActual === p"
+                    (click)="cambiarPagina(p)">
+                    {{ p }}
+                </button>
+
+                <button class="nav-btn"
+                    (click)="cambiarPagina(paginaActual + 1)"
+                    [disabled]="paginaActual === totalPaginas">
+                    &#8250;
+                </button>
+            </div>
+
+        </div>
+
     </div>
+</div>

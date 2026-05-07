@@ -1,66 +1,138 @@
-<div class="perfil-wrapper">
-  <div class="perfil-panel">
+<app-btn-cerrar-sesion />
 
-    <div class="perfil-header">
-      <h1>Perfil de <span class="texto-neon">usuario</span></h1>
+<div class="perfil-wrapper" *ngIf="!cargando">
+
+  <!-- TARJETA SUPERIOR -->
+  <div class="perfil-card-top">
+
+    <div class="perfil-top-header">
+      <h1 class="perfil-titulo">Perfil de <span class="texto-neon">usuario</span></h1>
     </div>
 
-    <div class="perfil-avatar-wrapper">
-      <img *ngIf="usuario?.photoURL" [src]="usuario!.photoURL"
-        alt="Avatar" class="perfil-avatar-img"/>
-      <div *ngIf="!usuario?.photoURL" class="perfil-avatar-placeholder">
-        <i class="fa-solid fa-user"></i>
+    <!-- Avatar + selector + datos en fila -->
+    <div class="perfil-top-body">
+
+      <div class="avatar-col">
+        <!-- Avatar -->
+        <div class="avatar-contenedor" (click)="abrirSelectorAvatar()">
+          <img [src]="avatarActual" alt="Avatar" class="perfil-avatar-img" />
+          <div class="avatar-overlay">
+            <i class="fa-solid fa-pen"></i>
+          </div>
+        </div>
+
+        <!-- Selector justo debajo del avatar -->
+        <div class="avatar-selector" *ngIf="modoSeleccionAvatar">
+          <p class="avatar-selector-titulo">Cambiar avatar</p>
+          <div class="avatar-subir">
+            <label for="avatarInput" class="upload-label">
+              <i class="fa-solid fa-upload"></i>
+              {{ archivoImagen ? archivoImagen.name : 'Seleccionar imagen' }}
+            </label>
+            <input id="avatarInput" type="file" accept="image/*"
+              (change)="onImagenSeleccionada($event)" hidden />
+            <img *ngIf="previewImagen" [src]="previewImagen" class="avatar-preview" alt="Preview" />
+            <button class="btn-guardar-avatar" *ngIf="previewImagen"
+              (click)="subirImagenPersonalizada()" [disabled]="estaSubiendoAvatar">
+              {{ estaSubiendoAvatar ? 'Subiendo...' : 'Usar esta imagen' }}
+            </button>
+          </div>
+          <button class="btn-quitar-avatar" *ngIf="avatarGuardado" (click)="quitarAvatar()">
+            <i class="fa-solid fa-trash"></i> Quitar imagen
+          </button>
+          <button class="btn-cancelar-avatar" (click)="cerrarSelectorAvatar()">Cancelar</button>
+        </div>
       </div>
+
+      <!-- Datos -->
+      <div class="perfil-datos">
+        <div class="perfil-campo">
+          <span class="campo-label"><i class="fa-solid fa-user"></i> Nombre</span>
+          <span class="campo-valor">{{ usuario?.displayName || 'Sin nombre' }}</span>
+        </div>
+        <div class="perfil-campo">
+          <span class="campo-label"><i class="fa-solid fa-envelope"></i> Correo</span>
+          <span class="campo-valor">{{ usuario?.email }}</span>
+        </div>
+        <div class="perfil-campo">
+          <span class="campo-label"><i class="fa-solid fa-id-badge"></i> Rol</span>
+          <span class="campo-valor rol-badge" [ngClass]="'rol-' + rol">{{ rol }}</span>
+        </div>
+        <div class="perfil-campo">
+          <span class="campo-label"><i class="fa-solid fa-calendar-plus"></i> Miembro desde</span>
+          <span class="campo-valor">{{ usuario?.metadata?.creationTime | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="perfil-campo">
+          <span class="campo-label"><i class="fa-solid fa-clock"></i> Último acceso</span>
+          <span class="campo-valor">{{ usuario?.metadata?.lastSignInTime | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+
     </div>
-
-    <div class="perfil-datos">
-
-      <div class="perfil-campo">
-        <span class="campo-label">
-          <i class="fa-solid fa-user"></i> Nombre
-        </span>
-        <span class="campo-valor">{{ usuario?.displayName || 'Sin nombre' }}</span>
-      </div>
-
-      <div class="perfil-campo">
-        <span class="campo-label">
-          <i class="fa-solid fa-envelope"></i> Correo
-        </span>
-        <span class="campo-valor">{{ usuario?.email }}</span>
-      </div>
-
-      <div class="perfil-campo">
-        <span class="campo-label">
-          <i class="fa-solid fa-id-badge"></i> Rol
-        </span>
-        <span class="campo-valor rol-badge" [ngClass]="'rol-' + rol">
-          {{ rol }}
-        </span>
-      </div>
-
-      <div class="perfil-campo">
-        <span class="campo-label">
-          <i class="fa-solid fa-calendar-plus"></i> Miembro desde
-        </span>
-        <span class="campo-valor">
-          {{ usuario?.metadata?.creationTime | date:'dd/MM/yyyy' }}
-        </span>
-      </div>
-
-      <div class="perfil-campo">
-        <span class="campo-label">
-          <i class="fa-solid fa-clock"></i> Último acceso
-        </span>
-        <span class="campo-valor">
-          {{ usuario?.metadata?.lastSignInTime | date:'dd/MM/yyyy HH:mm' }}
-        </span>
-      </div>
-
-    </div>
-
-    <button class="btn-cerrar-sesion" (click)="cerrarSesion()">
-      <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
-    </button>
-
   </div>
+
+  <!-- TARJETA INFERIOR: personalización -->
+  <div class="perfil-card-bottom">
+    <div class="perfil-seccion-header">
+      <span class="seccion-titulo">Personalización</span>
+      <button class="btn-editar-perfil" (click)="abrirEditarPerfil()" *ngIf="!modoEditarPerfil">
+        <i class="fa-solid fa-pen"></i> Editar
+      </button>
+    </div>
+
+    <!-- Vista -->
+    <ng-container *ngIf="!modoEditarPerfil">
+      <div class="perfil-campo campo-bio" *ngIf="bio">
+        <span class="campo-label"><i class="fa-solid fa-quote-left"></i> Bio</span>
+        <span class="campo-valor bio-valor">{{ bio }}</span>
+      </div>
+      <div class="perfil-campo" *ngIf="generosFav.length">
+        <span class="campo-label"><i class="fa-solid fa-gamepad"></i> Géneros</span>
+        <div class="chips-readonly">
+          <span class="chip-readonly" *ngFor="let g of generosFav">{{ g }}</span>
+        </div>
+      </div>
+      <div class="perfil-campo" *ngIf="plataformasFav.length">
+        <span class="campo-label"><i class="fa-solid fa-desktop"></i> Plataformas</span>
+        <div class="chips-readonly">
+          <span class="chip-readonly" *ngFor="let p of plataformasFav">{{ p }}</span>
+        </div>
+      </div>
+      <p *ngIf="!bio && !generosFav.length && !plataformasFav.length" class="sin-datos">
+        Aún no has personalizado tu perfil.
+      </p>
+    </ng-container>
+
+    <!-- Editor -->
+    <ng-container *ngIf="modoEditarPerfil">
+      <div class="field-group">
+        <label>Bio <small>(máx. 280 caracteres)</small></label>
+        <textarea [(ngModel)]="bioTemp" maxlength="280"
+          placeholder="Cuéntanos algo sobre ti..." rows="3"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Géneros favoritos <small>(máx. 5)</small></label>
+        <div class="chips-selector">
+          <span class="chip" *ngFor="let g of generosList"
+            [class.activo]="estaGeneroActivo(g)"
+            (click)="toggleGenero(g)">{{ g }}</span>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Plataformas favoritas</label>
+        <div class="chips-selector">
+          <span class="chip" *ngFor="let p of plataformasList"
+            [class.activo]="estaPlataformaActiva(p)"
+            (click)="togglePlataforma(p)">{{ p }}</span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-guardar" (click)="guardarPerfil()" [disabled]="guardandoPerfil">
+          {{ guardandoPerfil ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+        <button class="btn-cancelar" (click)="cerrarEditarPerfil()">Cancelar</button>
+      </div>
+    </ng-container>
+  </div>
+
 </div>

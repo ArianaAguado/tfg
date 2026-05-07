@@ -3,34 +3,46 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
 import { User } from 'firebase/auth';
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
+import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, BtnCerrarSesion],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard implements OnInit, OnDestroy {  
+export class Dashboard implements OnInit, OnDestroy {
   private firebase = inject(FirebaseService);
   private cdr = inject(ChangeDetectorRef);
 
   usuario: User | null = null;
   rol: string | null = null;
+  avatarSidebar: string = 'assets/user.png';
   peticionesCount = 0;
   private peticionesSub?: Subscription;
 
+  readonly avataresPorRol: Record<string, string> = {
+    admin: 'assets/admin.png',
+    desarrollador: 'assets/Dev.png',
+    usuario: 'assets/user.png',
+  };
+
   ngOnInit(): void {
-    this.firebase.usuario$.subscribe(u => {
-      this.usuario = u;
-      this.cdr.detectChanges();
-    });
+    combineLatest([
+      this.firebase.usuario$,
+      this.firebase.rol$,
+      this.firebase.obtenerAvatarUsuario()
+    ]).subscribe(([usuario, rol, avatarUrl]) => {
+      this.usuario = usuario;
+      this.rol = rol;
 
-    this.firebase.rol$.subscribe(r => {
-      this.rol = r;
+      const guardado = (avatarUrl && avatarUrl !== 'null' && avatarUrl.trim() !== '') ? avatarUrl : null;
+      const porRol = this.avataresPorRol[rol ?? 'usuario'] ?? 'assets/user.png';
+      this.avatarSidebar = guardado ?? porRol;
 
-      if (r === 'admin') {
+      if (rol === 'admin') {
         this.escucharPeticiones();
       } else {
         this.peticionesSub?.unsubscribe();
@@ -51,7 +63,7 @@ export class Dashboard implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {  
+  ngOnDestroy(): void {
     this.peticionesSub?.unsubscribe();
   }
 }
