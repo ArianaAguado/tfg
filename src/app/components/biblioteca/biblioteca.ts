@@ -2,11 +2,12 @@ import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angula
 import { CommonModule } from '@angular/common';
 import { FirebaseService, JuegoFavorito } from '../../services/firebase.service';
 import { Subscription } from 'rxjs';
+import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
 @Component({
   selector: 'app-biblioteca',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BtnCerrarSesion],
   templateUrl: './biblioteca.html',
   styleUrl: './biblioteca.css',
 })

@@ -4,11 +4,12 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
 import { User } from 'firebase/auth';
 import { Subscription, combineLatest } from 'rxjs';
+import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, BtnCerrarSesion],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
