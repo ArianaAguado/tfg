@@ -26,32 +26,35 @@
 
       <ng-container *ngFor="let dia of diasMes">
         <div *ngIf="dia === null" class="calendar-day empty"></div>
-        <div *ngIf="dia as diaNum" class="calendar-day" [class.hoy]="esDiaActual(diaNum)"
-          [class.tiene-juegos]="obtenerFavoritosDelDia(diaNum).length > 0" (click)="manejarClicDia(diaNum)">
+        <ng-container *ngIf="dia !== null">
+          <div class="calendar-day" [class.hoy]="esDiaActual(dia)"
+            [class.tiene-juegos]="obtenerFavoritosDelDia(dia).length > 0"
+            (click)="obtenerFavoritosDelDia(dia).length > 0 && abrirModal(obtenerFavoritosDelDia(dia))">
 
-          <span class="day-number">{{ dia }}</span>
+            <span class="day-number">{{ dia }}</span>
 
-          <div *ngIf="obtenerFavoritosDelDia(dia)[0] as juego" class="game-info">
-            <span class="game-dot"></span>
-            <div class="game-thumbnail">
-              <img [src]="juego.background_image" alt="{{juego.name}}">
+            <div *ngIf="obtenerFavoritosDelDia(dia)[0] as juego" class="game-info">
+              <span class="game-dot"></span>
+              <div class="game-thumbnail">
+                <img [src]="juego.background_image" alt="{{juego.name}}">
+              </div>
+              <span class="game-name">{{ juego.name }}</span>
             </div>
-            <span class="game-name">{{ juego.name }}</span>
-          </div>
 
-          <span *ngIf="obtenerFavoritosDelDia(dia).length > 1" class="badge-mas">
-            +{{ obtenerFavoritosDelDia(dia).length - 1 }} más
-          </span>
+            <span *ngIf="obtenerFavoritosDelDia(dia).length > 1" class="badge-mas">
+              +{{ obtenerFavoritosDelDia(dia).length - 1 }} más
+            </span>
 
-          <div *ngIf="obtenerFavoritosDelDia(dia).length > 1" class="hover-panel">
-            <div *ngFor="let j of obtenerFavoritosDelDia(dia)" class="hover-juego"
-              (click)="irADetalle(j); $event.stopPropagation()">
-              <img [src]="j.background_image" alt="{{j.name}}">
-              <span>{{ j.name }}</span>
+            <div *ngIf="obtenerFavoritosDelDia(dia).length > 1" class="hover-panel">
+              <div *ngFor="let j of obtenerFavoritosDelDia(dia)" class="hover-juego"
+                (click)="irADetalle(j); $event.stopPropagation()">
+                <img [src]="j.background_image" alt="{{j.name}}">
+                <span>{{ j.name }}</span>
+              </div>
             </div>
-          </div>
 
-        </div>
+          </div>
+        </ng-container>
       </ng-container>
     </div>
   </section>

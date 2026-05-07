@@ -138,17 +138,4 @@ export class Biblioteca implements OnInit, OnDestroy {
     }
   }
 
-  manejarClicDia(dia: any): void {
-    if (!dia) return;
-    const juegos = this.obtenerFavoritosDelDia(dia as number);
-    if (juegos.length === 0) return;
-    if (juegos.length === 1) {
-      this.irADetalle(juegos[0]);
-      return;
-    }
-    this.diasSeleccionado = juegos;
-    this.mostrarModal = true;
-    this.juegoSeleccionado = null;
-    this.cdr.detectChanges();
-  }
 }
