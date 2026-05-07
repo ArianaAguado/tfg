@@ -319,4 +319,42 @@ obtenerHistorialPorDesarrollador(uid: string): Observable<PeticionJuego[]> {
     });
   }
 
+  // ── SECCIÓN: AVATAR ──
+
+async actualizarAvatar(url: string): Promise<void> {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return;
+  await updateDoc(doc(db, 'usuarios', uid), { avatarUrl: url });
+}
+
+obtenerAvatarUsuario(): Observable<string | null> {
+  return new Observable(observer => {
+    let unsubFirestore: (() => void) | null = null;
+
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      if (unsubFirestore) {
+        unsubFirestore();
+        unsubFirestore = null;
+      }
+
+      if (!user) {
+        observer.next(null);
+        return;
+      }
+
+      const docRef = doc(db, 'usuarios', user.uid);
+      unsubFirestore = onSnapshot(docRef, snap => {
+        const data = snap.data();
+        const url = data?.['avatarUrl'];
+        observer.next((url && url !== 'null' && url.trim() !== '') ? url : null);
+      });
+    });
+
+    return () => {
+      unsubAuth();
+      if (unsubFirestore) unsubFirestore();
+    };
+  });
+}
+
 }

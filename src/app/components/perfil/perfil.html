@@ -1,25 +1,66 @@
-<div class="perfil-wrapper">
+<div class="perfil-wrapper" *ngIf="!cargando"> 
   <div class="perfil-panel">
+
 
     <div class="perfil-header">
       <h1>Perfil de <span class="texto-neon">usuario</span></h1>
     </div>
 
+    <!-- Avatar -->
     <div class="perfil-avatar-wrapper">
-      <img *ngIf="usuario?.photoURL" [src]="usuario!.photoURL"
-        alt="Avatar" class="perfil-avatar-img"/>
-      <div *ngIf="!usuario?.photoURL" class="perfil-avatar-placeholder">
-        <i class="fa-solid fa-user"></i>
+      <div class="avatar-contenedor" (click)="abrirSelectorAvatar()">
+        <img [src]="avatarActual" alt="Avatar" class="perfil-avatar-img" />
+        <div class="avatar-overlay">
+          <i class="fa-solid fa-pen"></i>
+        </div>
       </div>
     </div>
 
+    <!-- Selector de avatar -->
+    <div class="avatar-selector" *ngIf="modoSeleccionAvatar">
+
+      <p class="avatar-selector-titulo">Cambiar avatar</p>
+
+      <div class="avatar-subir">
+        <label for="avatarInput" class="upload-label">
+          <i class="fa-solid fa-upload"></i>
+          {{ archivoImagen ? archivoImagen.name : 'Seleccionar imagen' }}
+        </label>
+        <input id="avatarInput" type="file" accept="image/*"
+          (change)="onImagenSeleccionada($event)" hidden />
+
+        <img *ngIf="previewImagen" [src]="previewImagen"
+          class="avatar-preview" alt="Preview" />
+
+        <button class="btn-guardar-avatar"
+          *ngIf="previewImagen"
+          (click)="subirImagenPersonalizada()"
+          [disabled]="estaSubiendoAvatar">
+          {{ estaSubiendoAvatar ? 'Subiendo...' : 'Usar esta imagen' }}
+        </button>
+      </div>
+
+      <button class="btn-quitar-avatar"
+        *ngIf="avatarGuardado"
+        (click)="quitarAvatar()">
+        <i class="fa-solid fa-trash"></i> Quitar imagen
+      </button>
+
+      <button class="btn-cancelar-avatar" (click)="cerrarSelectorAvatar()">
+        Cancelar
+      </button>
+
+    </div>
+
+    <!-- Datos -->
     <div class="perfil-datos">
 
       <div class="perfil-campo">
         <span class="campo-label">
           <i class="fa-solid fa-user"></i> Nombre
         </span>
-        <span class="campo-valor">{{ usuario?.displayName || 'Sin nombre' }}</span>
+        <span class="campo-valor">{{ usuario?.displayName || 'Sin nombre'
+          }}</span>
       </div>
 
       <div class="perfil-campo">

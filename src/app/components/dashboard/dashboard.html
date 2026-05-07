@@ -14,9 +14,11 @@
         <a routerLink="crear-juegos" routerLinkActive="active">
           <i class="fa-solid fa-shield"></i> Gestión Juegos
         </a>
-        <a routerLink="peticiones" routerLinkActive="active" class="link-peticiones">
+        <a routerLink="peticiones" routerLinkActive="active"
+          class="link-peticiones">
           <i class="fa-solid fa-envelope-open-text"></i> Revisar Peticiones
-          <span class="badge-count" *ngIf="peticionesCount > 0">{{ peticionesCount }}</span>
+          <span class="badge-count" *ngIf="peticionesCount > 0">{{
+            peticionesCount }}</span>
         </a>
       </ng-container>
 
@@ -30,10 +32,7 @@
 
     <div class="user-profile" *ngIf="usuario" routerLink="perfil">
       <div class="user-avatar">
-        <img *ngIf="usuario.photoURL" [src]="usuario.photoURL" alt="Avatar" class="avatar-img" />
-        <div *ngIf="!usuario.photoURL" class="avatar-placeholder">
-          <i class="fa-solid fa-user"></i>
-        </div>
+        <img [src]="avatarSidebar" alt="Avatar" class="avatar-img" />
       </div>
       <div class="user-info">
         <span class="user-name">{{ usuario.displayName || 'Usuario' }}</span>
