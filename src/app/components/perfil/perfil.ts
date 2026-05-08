@@ -7,6 +7,14 @@ import { User } from 'firebase/auth';
 import { combineLatest } from 'rxjs';
 import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
+type RedesSociales = {
+  twitter?: string;
+  instagram?: string;
+  youtube?: string;
+  twitch?: string;
+  steam?: string;
+};
+
 @Component({
   selector: 'app-perfil',
   standalone: true,
@@ -34,10 +42,12 @@ export class Perfil implements OnInit {
   bio = '';
   generosFav: string[] = [];
   plataformasFav: string[] = [];
+  redesSociales: RedesSociales = {};
   modoEditarPerfil = false;
   bioTemp = '';
   generosFavTemp: string[] = [];
   plataformasFavTemp: string[] = [];
+  redesSocialesTemp: RedesSociales = {};
   guardandoPerfil = false;
 
   readonly avataresPorRol: Record<string, string> = {
@@ -57,6 +67,14 @@ export class Perfil implements OnInit {
     'Nintendo Switch', 'Mobile', 'Mac', 'VR'
   ];
 
+  readonly redesList: { key: keyof RedesSociales; label: string; placeholder: string; icon: string }[] = [
+    { key: 'twitter',   label: 'X / Twitter', placeholder: 'https://x.com/tuusuario',                icon: 'fa-brands fa-x-twitter' },
+    { key: 'instagram', label: 'Instagram',   placeholder: 'https://instagram.com/tuusuario',        icon: 'fa-brands fa-instagram' },
+    { key: 'youtube',   label: 'YouTube',     placeholder: 'https://youtube.com/@tucanal',           icon: 'fa-brands fa-youtube'   },
+    { key: 'twitch',    label: 'Twitch',      placeholder: 'https://twitch.tv/tuusuario',            icon: 'fa-brands fa-twitch'    },
+    { key: 'steam',     label: 'Steam',       placeholder: 'https://steamcommunity.com/id/tuusuario',icon: 'fa-brands fa-steam'     },
+  ];
+
   get avatarActual(): string {
     const guardado = this.avatarGuardado;
     if (guardado && guardado !== 'null' && guardado.trim() !== '') return guardado;
@@ -66,6 +84,10 @@ export class Perfil implements OnInit {
   get avatarPorRol(): string {
     const rol = this.rol ?? 'usuario';
     return this.avataresPorRol[rol] ?? 'assets/user.png';
+  }
+
+  get tieneRedes(): boolean {
+    return this.redesList.some(r => !!this.redesSociales[r.key]);
   }
 
   ngOnInit(): void {
@@ -81,6 +103,7 @@ export class Perfil implements OnInit {
       this.bio = perfil?.bio ?? '';
       this.generosFav = perfil?.generosFav ?? [];
       this.plataformasFav = perfil?.plataformasFav ?? [];
+      this.redesSociales = perfil?.redesSociales ?? {};
       this.cargando = false;
       this.cdr.detectChanges();
     });
@@ -144,6 +167,7 @@ export class Perfil implements OnInit {
     this.bioTemp = this.bio;
     this.generosFavTemp = [...this.generosFav];
     this.plataformasFavTemp = [...this.plataformasFav];
+    this.redesSocialesTemp = { ...this.redesSociales };
     this.modoEditarPerfil = true;
     this.cdr.detectChanges();
   }
@@ -182,11 +206,13 @@ export class Perfil implements OnInit {
       await this.firebase.actualizarPerfil({
         bio: this.bioTemp,
         generosFav: this.generosFavTemp,
-        plataformasFav: this.plataformasFavTemp
+        plataformasFav: this.plataformasFavTemp,
+        redesSociales: this.redesSocialesTemp
       });
       this.bio = this.bioTemp;
       this.generosFav = [...this.generosFavTemp];
       this.plataformasFav = [...this.plataformasFavTemp];
+      this.redesSociales = { ...this.redesSocialesTemp };
       this.cerrarEditarPerfil();
     } catch (err) {
       console.error('Error al guardar perfil:', err);
