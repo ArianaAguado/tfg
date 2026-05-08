@@ -429,3 +429,69 @@
   border-color: rgba(255, 255, 255, 0.3) !important;
   color: white !important;
 }
+
+.redes-readonly {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.red-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a0a5bc;
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.red-link:hover {
+  border-color: #ff00ff;
+  color: #ff00ff;
+}
+
+.redes-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.red-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.red-input i {
+  color: #a0a5bc;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.red-input input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 0.88rem;
+  font-family: inherit;
+  width: 100%;
+}
+
+.red-input input::placeholder {
+  color: #636e72;
+}
+
+.red-input:focus-within {
+  border-color: rgba(255, 0, 255, 0.3);
+}

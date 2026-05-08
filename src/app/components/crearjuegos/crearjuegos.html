@@ -97,7 +97,6 @@
                         alt="Preview" class="imagen-preview" />
                 </div>
 
-                <!-- Acciones -->
                 <div class="form-actions">
                     <button class="btn-guardar" (click)="guardarJuego()"
                         [disabled]="estaGuardando">
@@ -124,14 +123,102 @@
         <!-- Lista de juegos -->
         <div class="admin-lista">
 
-            <!-- Buscador -->
-            <div class="buscador-lista">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input
-                    type="text"
-                    [(ngModel)]="busqueda"
-                    (ngModelChange)="onBusqueda()"
-                    placeholder="Buscar juego por nombre..." />
+            <!-- Buscador + toggle filtros -->
+            <div class="buscador-wrapper">
+                <div class="buscador-lista">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input
+                        type="text"
+                        [(ngModel)]="busqueda"
+                        (ngModelChange)="onBusqueda()"
+                        placeholder="Buscar juego por nombre..." />
+                    <button class="btn-toggle-filtros" (click)="toggleFiltros()"
+                        [class.activo]="filtrosAbiertos">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Filtros</span>
+                        <span class="filtros-badge"
+                            *ngIf="totalFiltrosActivos > 0">{{
+                            totalFiltrosActivos }}</span>
+                    </button>
+                </div>
+
+                <!-- Panel de filtros desplegable -->
+                <div class="filtros-panel" [class.abierto]="filtrosAbiertos"
+                    *ngIf="filtrosAbiertos">
+                    <div class="filtros-grid">
+
+                        <!-- Géneros -->
+                        <div class="filtro-grupo">
+                            <p class="filtro-titulo"><i
+                                    class="fa-solid fa-gamepad"></i> Género</p>
+                            <div class="filtro-chips">
+                                <span class="filtro-chip"
+                                    *ngFor="let g of generosDisponibles"
+                                    [class.activo]="filtros.generos.includes(g)"
+                                    (click)="toggleFiltroGenero(g)">{{ g
+                                    }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Plataformas -->
+                        <div class="filtro-grupo">
+                            <p class="filtro-titulo"><i
+                                    class="fa-solid fa-desktop"></i>
+                                Plataforma</p>
+                            <div class="filtro-chips">
+                                <span class="filtro-chip"
+                                    *ngFor="let p of plataformasDisponibles"
+                                    [class.activo]="filtros.plataformas.includes(p)"
+                                    (click)="toggleFiltroPlataforma(p)">{{ p
+                                    }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Precio -->
+                        <div class="filtro-grupo">
+                            <p class="filtro-titulo"><i
+                                    class="fa-solid fa-tag"></i> Precio</p>
+                            <div class="filtro-chips">
+                                <span class="filtro-chip"
+                                    *ngFor="let r of rangosPrecio"
+                                    [class.activo]="filtros.precio === r.id"
+                                    (click)="toggleFiltroPrecio(r.id)">{{
+                                    r.label }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Fecha -->
+                        <div class="filtro-grupo">
+                            <p class="filtro-titulo"><i
+                                    class="fa-solid fa-calendar"></i> Fecha de
+                                salida</p>
+                            <div class="filtro-chips">
+                                <span class="filtro-chip"
+                                    *ngFor="let f of rangosFecha"
+                                    [class.activo]="filtros.fecha === f.id"
+                                    (click)="toggleFiltroFecha(f.id)">{{ f.label
+                                    }}</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer filtros -->
+                    <div class="filtros-footer">
+                        <span class="filtros-resultado">
+                            {{ juegosFiltrados.length }} juego{{
+                            juegosFiltrados.length !== 1 ? 's' : '' }}
+                            encontrado{{ juegosFiltrados.length !== 1 ? 's' : ''
+                            }}
+                        </span>
+                        <button class="btn-limpiar-filtros"
+                            (click)="limpiarFiltros()"
+                            *ngIf="totalFiltrosActivos > 0">
+                            <i class="fa-solid fa-xmark"></i> Limpiar filtros
+                        </button>
+                    </div>
+
+                </div>
             </div>
 
             <p *ngIf="juegosFiltrados.length === 0" style="color: #a0a5bc">
@@ -161,23 +248,14 @@
             <div class="paginacion" *ngIf="totalPaginas > 1">
                 <button class="nav-btn"
                     (click)="cambiarPagina(paginaActual - 1)"
-                    [disabled]="paginaActual === 1">
-                    &#8249;
-                </button>
-
-                <button
-                    class="pag-num"
+                    [disabled]="paginaActual === 1">&#8249;</button>
+                <button class="pag-num"
                     *ngFor="let p of paginas"
                     [class.activo]="paginaActual === p"
-                    (click)="cambiarPagina(p)">
-                    {{ p }}
-                </button>
-
+                    (click)="cambiarPagina(p)">{{ p }}</button>
                 <button class="nav-btn"
                     (click)="cambiarPagina(paginaActual + 1)"
-                    [disabled]="paginaActual === totalPaginas">
-                    &#8250;
-                </button>
+                    [disabled]="paginaActual === totalPaginas">&#8250;</button>
             </div>
 
         </div>

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Rawg } from '../../services/rawg';
 import { FirebaseService, JuegoCustom } from '../../services/firebase.service';
 import { Router } from '@angular/router';
+import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
 @Component({
   selector: 'app-calendario',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BtnCerrarSesion],
   templateUrl: './calendario.html',
   styleUrl: './calendario.css',
 })

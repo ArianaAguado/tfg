@@ -127,8 +127,10 @@ export class FirebaseService {
   }
 
   async cerrarSesion(): Promise<void> {
+    localStorage.removeItem('sessionExpiry');
     await signOut(auth);
   }
+
 
   // ── SECCIÓN: JUEGOS OFICIALES ──
 
@@ -357,35 +359,40 @@ export class FirebaseService {
   }
 
 
-  async actualizarPerfil(datos: { bio?: string; generosFav?: string[]; plataformasFav?: string[] }): Promise<void> {
+  async actualizarPerfil(datos: {
+    bio?: string;
+    generosFav?: string[];
+    plataformasFav?: string[];
+    redesSociales?: { twitter?: string; instagram?: string; youtube?: string; twitch?: string; steam?: string };
+  }): Promise<void> {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
     await updateDoc(doc(db, 'usuarios', uid), { ...datos });
   }
 
-  obtenerPerfil(): Observable<{ bio: string; generosFav: string[]; plataformasFav: string[] } | null> {
+  obtenerPerfil(): Observable<{
+    bio: string;
+    generosFav: string[];
+    plataformasFav: string[];
+    redesSociales: { twitter?: string; instagram?: string; youtube?: string; twitch?: string; steam?: string };
+  } | null> {
     return new Observable(observer => {
       let unsubFirestore: (() => void) | null = null;
-
       const unsubAuth = onAuthStateChanged(auth, (user) => {
         if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
         if (!user) { observer.next(null); return; }
-
         const docRef = doc(db, 'usuarios', user.uid);
         unsubFirestore = onSnapshot(docRef, snap => {
           const data = snap.data();
           observer.next({
             bio: data?.['bio'] ?? '',
             generosFav: data?.['generosFav'] ?? [],
-            plataformasFav: data?.['plataformasFav'] ?? []
+            plataformasFav: data?.['plataformasFav'] ?? [],
+            redesSociales: data?.['redesSociales'] ?? {}
           });
         });
       });
-
-      return () => {
-        unsubAuth();
-        if (unsubFirestore) unsubFirestore();
-      };
+      return () => { unsubAuth(); if (unsubFirestore) unsubFirestore(); };
     });
   }
 

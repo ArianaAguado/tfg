@@ -98,7 +98,23 @@
           <span class="chip-readonly" *ngFor="let p of plataformasFav">{{ p }}</span>
         </div>
       </div>
-      <p *ngIf="!bio && !generosFav.length && !plataformasFav.length" class="sin-datos">
+
+      <!-- Redes sociales (vista) -->
+      <div class="perfil-campo" *ngIf="tieneRedes">
+        <span class="campo-label"><i class="fa-solid fa-share-nodes"></i> Redes sociales</span>
+        <div class="redes-readonly">
+          <ng-container *ngFor="let red of redesList">
+            <a *ngIf="redesSociales[red.key]"
+               [href]="redesSociales[red.key]"
+               target="_blank"
+               class="red-link">
+              <i [class]="red.icon"></i> {{ red.label }}
+            </a>
+          </ng-container>
+        </div>
+      </div>
+
+      <p *ngIf="!bio && !generosFav.length && !plataformasFav.length && !tieneRedes" class="sin-datos">
         Aún no has personalizado tu perfil.
       </p>
     </ng-container>
@@ -126,6 +142,20 @@
             (click)="togglePlataforma(p)">{{ p }}</span>
         </div>
       </div>
+
+      <!-- Redes sociales (editor) -->
+      <div class="field-group">
+        <label>Redes sociales</label>
+        <div class="redes-editor">
+          <div class="red-input" *ngFor="let red of redesList">
+            <i [class]="red.icon"></i>
+            <input type="url"
+                   [(ngModel)]="redesSocialesTemp[red.key]"
+                   [placeholder]="red.placeholder" />
+          </div>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button class="btn-guardar" (click)="guardarPerfil()" [disabled]="guardandoPerfil">
           {{ guardandoPerfil ? 'Guardando...' : 'Guardar cambios' }}
