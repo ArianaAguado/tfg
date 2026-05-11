@@ -1,0 +1,77 @@
+<div class="amigos-wrapper">
+
+  <h1 class="amigos-titulo">
+    <i class="fa-solid fa-user-group"></i>
+    Mis <span class="texto-neon">amigos</span>
+  </h1>
+
+  <!-- ── SOLICITUDES RECIBIDAS ── -->
+  <section class="amigos-seccion" *ngIf="solicitudes.length > 0 || cargandoSolicitudes">
+    <h2 class="seccion-titulo">
+      <i class="fa-solid fa-envelope-open-text"></i>
+      Solicitudes recibidas
+      <span class="contador" *ngIf="solicitudes.length > 0">({{ solicitudes.length }})</span>
+    </h2>
+
+    <div *ngIf="cargandoSolicitudes" class="cargando-texto">Cargando solicitudes...</div>
+
+    <div class="solicitudes-lista" *ngIf="!cargandoSolicitudes">
+      <article class="solicitud-card" *ngFor="let s of solicitudes">
+        <a [routerLink]="['/dashboard/usuario', s.deUid]" class="solicitud-link">
+          <img [src]="avatarSolicitud(s)" [alt]="s.deNombre" class="solicitud-avatar" />
+        </a>
+        <div class="solicitud-cuerpo">
+          <a [routerLink]="['/dashboard/usuario', s.deUid]" class="solicitud-nombre">
+            {{ s.deNombre }}
+          </a>
+          <span class="solicitud-fecha">{{ s.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="solicitud-acciones">
+          <button class="btn-mini btn-aceptar"
+                  (click)="aceptar(s)"
+                  [disabled]="procesandoSolicitudId === s.id">
+            <i class="fa-solid fa-check"></i> Aceptar
+          </button>
+          <button class="btn-mini btn-rechazar"
+                  (click)="rechazar(s)"
+                  [disabled]="procesandoSolicitudId === s.id">
+            <i class="fa-solid fa-xmark"></i> Rechazar
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── LISTA DE AMIGOS ── -->
+  <section class="amigos-seccion">
+    <h2 class="seccion-titulo">
+      <i class="fa-solid fa-user-group"></i>
+      Lista de amigos
+      <span class="contador" *ngIf="amigos.length > 0">({{ amigos.length }})</span>
+    </h2>
+
+    <div *ngIf="cargandoAmigos" class="cargando-texto">Cargando amigos...</div>
+
+    <div *ngIf="!cargandoAmigos && amigos.length === 0" class="vacio-mensaje">
+      Aún no tienes amigos. Ve al perfil de otros usuarios y envíales una solicitud.
+    </div>
+
+    <div class="amigos-grid" *ngIf="!cargandoAmigos && amigos.length > 0">
+      <article class="amigo-card" *ngFor="let a of amigos">
+        <a [routerLink]="['/dashboard/usuario', a.uid]" class="amigo-avatar-link">
+          <img [src]="avatarAmigo(a)" [alt]="a.nombre" class="amigo-avatar" />
+        </a>
+        <a [routerLink]="['/dashboard/usuario', a.uid]" class="amigo-nombre">
+          {{ a.nombre || 'Sin nombre' }}
+        </a>
+        <span class="amigo-rol rol-badge" [ngClass]="'rol-' + a.rol">{{ a.rol }}</span>
+        <button class="btn-eliminar-amigo"
+                (click)="eliminarAmistad(a)"
+                title="Eliminar amistad">
+          <i class="fa-solid fa-user-minus"></i>
+        </button>
+      </article>
+    </div>
+  </section>
+
+</div>

@@ -10,6 +10,8 @@ import { CrearJuegosComponent } from './components/crearjuegos/crearjuegos';
 import { PeticionesJuegosComponent } from './components/peticionesjuegos/peticionesjuegos';
 import { ProponerJuegoComponent } from './components/proponerjuego/proponerjuego';
 import { DetalleJuego } from './components/detalle-juego/detalle-juego';
+import { PerfilPublico } from './components/perfil-publico/perfil-publico';
+import { Amigos } from './components/amigos/amigos';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -25,8 +27,10 @@ export const routes: Routes = [
       { path: 'calendario', component: Calendario },
       { path: 'perfil', component: Perfil },
       { path: 'biblioteca', component: Biblioteca },
+      { path: 'amigos', component: Amigos },
+      { path: 'usuario/:uid', component: PerfilPublico },
       { path: 'crear-juegos', component: CrearJuegosComponent },
-      { path: 'peticiones', component: PeticionesJuegosComponent },  
+      { path: 'peticiones', component: PeticionesJuegosComponent },
       { path: 'proponer-juego', component: ProponerJuegoComponent },
       { path: 'juego/:slug', component: DetalleJuego },
       { path: 'juego-custom', component: DetalleJuego }

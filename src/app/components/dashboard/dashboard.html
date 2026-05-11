@@ -10,6 +10,11 @@
       <a routerLink="biblioteca" routerLinkActive="active">
         <i class="fa-solid fa-gamepad"></i> Mi Biblioteca
       </a>
+      <a routerLink="amigos" routerLinkActive="active" class="link-amigos">
+        <i class="fa-solid fa-user-group"></i> Amigos
+        <span class="badge-count" *ngIf="solicitudesAmistadCount > 0">{{
+          solicitudesAmistadCount }}</span>
+      </a>
 
       <ng-container *ngIf="rol === 'admin'">
         <a routerLink="crear-juegos" routerLinkActive="active">

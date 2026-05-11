@@ -21,7 +21,9 @@ export class Dashboard implements OnInit, OnDestroy {
   rol: string | null = null;
   avatarSidebar: string = 'assets/user.png';
   peticionesCount = 0;
+  solicitudesAmistadCount = 0;
   private peticionesSub?: Subscription;
+  private solicitudesSub?: Subscription;
 
   readonly avataresPorRol: Record<string, string> = {
     admin: 'assets/admin.png',
@@ -51,6 +53,9 @@ export class Dashboard implements OnInit, OnDestroy {
 
       this.cdr.detectChanges();
     });
+
+    // Solicitudes de amistad: badge para todos los usuarios.
+    this.escucharSolicitudesAmistad();
   }
 
   private escucharPeticiones(): void {
@@ -63,7 +68,18 @@ export class Dashboard implements OnInit, OnDestroy {
     });
   }
 
+  private escucharSolicitudesAmistad(): void {
+    this.solicitudesSub = this.firebase.obtenerSolicitudesRecibidas().subscribe({
+      next: (solicitudes) => {
+        this.solicitudesAmistadCount = solicitudes.length;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error contando solicitudes de amistad:', err)
+    });
+  }
+
   ngOnDestroy(): void {
     this.peticionesSub?.unsubscribe();
+    this.solicitudesSub?.unsubscribe();
   }
 }

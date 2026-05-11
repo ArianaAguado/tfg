@@ -1,0 +1,279 @@
+.amigos-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+  color: #e0e6ff;
+}
+
+.amigos-titulo {
+  font-size: 1.6rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.amigos-titulo i {
+  color: #ff00ff;
+}
+
+.texto-neon {
+  color: #ff00ff;
+  text-shadow: 0 0 15px #ff00ff;
+}
+
+.amigos-seccion {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.seccion-titulo {
+  font-size: 1.1rem;
+  color: #00ccff;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.seccion-titulo i {
+  color: #ff00ff;
+}
+
+.contador {
+  color: #a0a5bc;
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.cargando-texto {
+  text-align: center;
+  padding: 20px;
+  color: #a0a5bc;
+}
+
+.vacio-mensaje {
+  text-align: center;
+  padding: 32px;
+  color: #6a6f85;
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+/* ── SOLICITUDES ── */
+.solicitudes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.solicitud-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(0, 204, 255, 0.05);
+  border: 1px solid rgba(0, 204, 255, 0.15);
+  border-radius: 12px;
+  transition: 0.2s;
+}
+
+.solicitud-card:hover {
+  border-color: rgba(0, 204, 255, 0.3);
+}
+
+.solicitud-link {
+  flex-shrink: 0;
+  display: block;
+}
+
+.solicitud-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(0, 204, 255, 0.4);
+}
+
+.solicitud-cuerpo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.solicitud-nombre {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: 0.2s;
+}
+
+.solicitud-nombre:hover {
+  color: #00ccff;
+}
+
+.solicitud-fecha {
+  font-size: 0.75rem;
+  color: #6a6f85;
+}
+
+.solicitud-acciones {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-mini {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e0e6ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-mini:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-aceptar {
+  border-color: rgba(0, 204, 255, 0.4);
+  color: #00ccff;
+}
+
+.btn-aceptar:hover:not(:disabled) {
+  background: rgba(0, 204, 255, 0.1);
+  border-color: #00ccff;
+}
+
+.btn-rechazar {
+  border-color: rgba(255, 68, 102, 0.4);
+  color: #ff4466;
+}
+
+.btn-rechazar:hover:not(:disabled) {
+  background: rgba(255, 68, 102, 0.1);
+  border-color: #ff4466;
+}
+
+/* ── LISTA DE AMIGOS ── */
+.amigos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.amigo-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: 0.2s;
+}
+
+.amigo-card:hover {
+  border-color: rgba(0, 204, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.amigo-avatar-link {
+  display: block;
+}
+
+.amigo-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(0, 204, 255, 0.3);
+  transition: 0.2s;
+}
+
+.amigo-avatar-link:hover .amigo-avatar {
+  border-color: #00ccff;
+  box-shadow: 0 0 12px rgba(0, 204, 255, 0.3);
+}
+
+.amigo-nombre {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: 0.2s;
+}
+
+.amigo-nombre:hover {
+  color: #00ccff;
+}
+
+.rol-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.rol-admin {
+  background: rgba(255, 0, 170, 0.15);
+  color: #ff00aa;
+  border: 1px solid rgba(255, 0, 170, 0.3);
+}
+
+.rol-desarrollador {
+  background: rgba(255, 0, 255, 0.15);
+  color: #ff00ff;
+  border: 1px solid rgba(255, 0, 255, 0.3);
+}
+
+.rol-usuario {
+  background: rgba(0, 204, 255, 0.15);
+  color: #00ccff;
+  border: 1px solid rgba(0, 204, 255, 0.3);
+}
+
+.btn-eliminar-amigo {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: #6a6f85;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.btn-eliminar-amigo:hover {
+  color: #ff4466;
+  background: rgba(255, 68, 102, 0.1);
+}

@@ -51,17 +51,15 @@ export interface JuegoFavorito {
   slug?: string;
 }
 
-// ── NUEVAS INTERFACES: parte social ──
-
 export interface Comentario {
   id?: string;
-  slug: string;             // slug del juego al que pertenece
-  uid: string;              // autor
-  nombreUsuario: string;    // denormalizado para renderizar sin consulta extra
-  fotoUsuario: string;      // avatar personalizado del autor (vacío si no tiene)
-  rolUsuario: string;       // rol del autor: usado para escoger avatar por defecto
-  texto: string;            // máx 280 caracteres
-  fecha: number;            // timestamp (Date.now())
+  slug: string;
+  uid: string;
+  nombreUsuario: string;
+  fotoUsuario: string;
+  rolUsuario: string;
+  texto: string;
+  fecha: number;
 }
 
 export interface UsuarioPublico {
@@ -150,8 +148,6 @@ export class FirebaseService {
     return this.rolSubject.getValue();
   }
 
-  // ── SECCIÓN: AUTH ──
-
   get usuarioActual(): User | null {
     return this.auth.currentUser;
   }
@@ -161,8 +157,7 @@ export class FirebaseService {
     await signOut(this.auth);
   }
 
-
-  // ── SECCIÓN: JUEGOS OFICIALES ──
+  // ── JUEGOS OFICIALES ──
 
   obtenerJuegos(): Observable<JuegoCustom[]> {
     return new Observable(observer => {
@@ -190,7 +185,7 @@ export class FirebaseService {
     await deleteDoc(doc(this.db, 'juegos', juego.id!));
   }
 
-  // ── SECCIÓN: PETICIONES DE DESARROLLADORES ──
+  // ── PETICIONES ──
 
   obtenerPeticiones(): Observable<PeticionJuego[]> {
     return new Observable(observer => {
@@ -214,8 +209,6 @@ export class FirebaseService {
     const docRef = doc(this.db, 'peticiones_juegos', id);
     await deleteDoc(docRef);
   }
-
-  // ── SECCIÓN: UTILIDADES ──
 
   async buscarPorNombre(nombre: string): Promise<JuegoCustom[]> {
     const colRef = collection(this.db, 'juegos');
@@ -282,7 +275,7 @@ export class FirebaseService {
     });
   }
 
-  // ── SECCIÓN: FAVORITOS ──
+  // ── FAVORITOS ──
   async añadirFavorito(juego: JuegoFavorito): Promise<void> {
     const uid = this.auth.currentUser?.uid;
     if (!uid) { console.error('No hay usuario'); return; }
@@ -343,7 +336,7 @@ export class FirebaseService {
     return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as JuegoFavorito));
   }
 
-  // ── SECCIÓN: AVATAR ──
+  // ── AVATAR ──
 
   async actualizarAvatar(url: string): Promise<void> {
     const uid = this.auth.currentUser?.uid;
@@ -420,20 +413,8 @@ export class FirebaseService {
   }
 
 
-  // ════════════════════════════════════════════════════════════════════
-  //                         COMENTARIOS
-  // ════════════════════════════════════════════════════════════════════
+  // ── COMENTARIOS ──
 
-  /**
-   * Stream en tiempo real de los comentarios de un juego concreto.
-   *
-   * Ordenamos en cliente, no en la query. Si hiciéramos
-   * where('slug') + orderBy('fecha'), Firestore exigiría crear un índice
-   * compuesto en su consola, y la query devolvería vacío hasta crearlo.
-   * Como cada juego tiene como mucho decenas o cientos de comentarios,
-   * ordenar en cliente es trivial y nos ahorra el paso de configurar
-   * índices manualmente.
-   */
   obtenerComentariosDeJuego(slug: string): Observable<Comentario[]> {
     return new Observable(observer => {
       const q = query(
@@ -444,7 +425,7 @@ export class FirebaseService {
         snapshot => {
           const comentarios = snapshot.docs
             .map(d => ({ id: d.id, ...d.data() } as Comentario))
-            .sort((a, b) => b.fecha - a.fecha); // recientes primero
+            .sort((a, b) => b.fecha - a.fecha);
           this.zone.run(() => observer.next(comentarios));
         },
         err => observer.error(err)
@@ -453,10 +434,6 @@ export class FirebaseService {
     });
   }
 
-  /**
-   * Publica un comentario. Denormaliza nombre, foto y rol del autor
-   * para que la UI pueda decidir el avatar correcto sin consultas extra.
-   */
   async publicarComentario(slug: string, texto: string): Promise<void> {
     const uid = this.auth.currentUser?.uid;
     if (!uid) { console.error('No hay usuario'); return; }
@@ -500,9 +477,7 @@ export class FirebaseService {
   }
 
 
-  // ════════════════════════════════════════════════════════════════════
-  //                         USUARIO PÚBLICO
-  // ════════════════════════════════════════════════════════════════════
+  // ── USUARIO PÚBLICO ──
 
   async obtenerUsuarioPublico(uid: string): Promise<UsuarioPublico | null> {
     const snap = await getDoc(doc(this.db, 'usuarios', uid));
@@ -523,9 +498,7 @@ export class FirebaseService {
   }
 
 
-  // ════════════════════════════════════════════════════════════════════
-  //                         AMISTADES
-  // ════════════════════════════════════════════════════════════════════
+  // ── AMISTADES ──
 
   private idAmistad(uidA: string, uidB: string): string {
     return [uidA, uidB].sort().join('_');
@@ -658,8 +631,6 @@ export class FirebaseService {
         if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
         if (!user) { observer.next([]); return; }
 
-        // Solo where, sin orderBy, por el mismo motivo que en comentarios:
-        // así no exige índice compuesto. Ordenamos en cliente.
         const q = query(
           collection(this.db, 'solicitudes_amistad'),
           where('paraUid', '==', user.uid)

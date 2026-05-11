@@ -1,0 +1,168 @@
+<div class="perfil-publico-wrapper" *ngIf="!cargando && perfil">
+
+  <!-- ── TARJETA SUPERIOR: avatar + nombre + botón de amistad ── -->
+  <div class="perfil-card-top">
+    <div class="perfil-top-header">
+      <h1 class="perfil-titulo">
+        Perfil de <span class="texto-neon">{{ perfil.nombre }}</span>
+      </h1>
+    </div>
+
+    <div class="perfil-top-body">
+      <div class="avatar-col">
+        <img [src]="avatarPerfil" alt="Avatar" class="perfil-avatar-img" />
+      </div>
+
+      <div class="perfil-datos">
+        <div class="perfil-campo">
+          <span class="campo-label"><i class="fa-solid fa-user"></i> Nombre</span>
+          <span class="campo-valor">{{ perfil.nombre || 'Sin nombre' }}</span>
+        </div>
+        <div class="perfil-campo">
+          <span class="campo-label"><i class="fa-solid fa-id-badge"></i> Rol</span>
+          <span class="campo-valor rol-badge" [ngClass]="'rol-' + perfil.rol">{{ perfil.rol }}</span>
+        </div>
+        <div class="perfil-campo" *ngIf="perfil.fechaRegistro">
+          <span class="campo-label"><i class="fa-solid fa-calendar-plus"></i> Miembro desde</span>
+          <span class="campo-valor">{{ perfil.fechaRegistro | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <!-- BOTÓN DE AMISTAD: cambia según el estado de la relación. -->
+        <div class="amistad-zona">
+          <ng-container [ngSwitch]="estadoAmistad">
+
+            <button *ngSwitchCase="'ninguna'"
+                    class="btn-amistad btn-add"
+                    (click)="enviarSolicitud()"
+                    [disabled]="procesandoAmistad">
+              <i class="fa-solid fa-user-plus"></i> Añadir amigo
+            </button>
+
+            <button *ngSwitchCase="'pendiente_enviada'"
+                    class="btn-amistad btn-cancelar"
+                    (click)="cancelarSolicitud()"
+                    [disabled]="procesandoAmistad">
+              <i class="fa-solid fa-paper-plane"></i> Solicitud enviada (cancelar)
+            </button>
+
+            <div *ngSwitchCase="'pendiente_recibida'" class="amistad-acciones">
+              <span class="amistad-info">
+                <i class="fa-solid fa-envelope"></i> Te ha enviado una solicitud
+              </span>
+              <button class="btn-amistad btn-aceptar"
+                      (click)="aceptarSolicitud()"
+                      [disabled]="procesandoAmistad">
+                <i class="fa-solid fa-check"></i> Aceptar
+              </button>
+              <button class="btn-amistad btn-rechazar"
+                      (click)="rechazarSolicitud()"
+                      [disabled]="procesandoAmistad">
+                <i class="fa-solid fa-xmark"></i> Rechazar
+              </button>
+            </div>
+
+            <div *ngSwitchCase="'amigos'" class="amistad-acciones">
+              <span class="amistad-info amistad-ok">
+                <i class="fa-solid fa-user-check"></i> Sois amigos
+              </span>
+              <button class="btn-amistad btn-eliminar"
+                      (click)="eliminarAmistad()"
+                      [disabled]="procesandoAmistad">
+                <i class="fa-solid fa-user-minus"></i> Eliminar amistad
+              </button>
+            </div>
+
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TARJETA INFERIOR: bio, géneros, plataformas, redes ── -->
+  <div class="perfil-card-bottom">
+    <div class="perfil-seccion-header">
+      <span class="seccion-titulo">Sobre {{ perfil.nombre }}</span>
+    </div>
+
+    <div class="perfil-campo campo-bio" *ngIf="perfil.bio">
+      <span class="campo-label"><i class="fa-solid fa-quote-left"></i> Bio</span>
+      <span class="campo-valor bio-valor">{{ perfil.bio }}</span>
+    </div>
+
+    <div class="perfil-campo" *ngIf="perfil.generosFav && perfil.generosFav.length">
+      <span class="campo-label"><i class="fa-solid fa-gamepad"></i> Géneros</span>
+      <div class="chips-readonly">
+        <span class="chip-readonly" *ngFor="let g of perfil.generosFav">{{ g }}</span>
+      </div>
+    </div>
+
+    <div class="perfil-campo" *ngIf="perfil.plataformasFav && perfil.plataformasFav.length">
+      <span class="campo-label"><i class="fa-solid fa-desktop"></i> Plataformas</span>
+      <div class="chips-readonly">
+        <span class="chip-readonly" *ngFor="let p of perfil.plataformasFav">{{ p }}</span>
+      </div>
+    </div>
+
+    <div class="perfil-campo" *ngIf="tieneRedes">
+      <span class="campo-label"><i class="fa-solid fa-share-nodes"></i> Redes sociales</span>
+      <div class="redes-readonly">
+        <ng-container *ngFor="let red of redesList">
+          <a *ngIf="perfil.redesSociales && perfil.redesSociales[red.key]"
+             [href]="perfil.redesSociales[red.key]"
+             target="_blank"
+             class="red-link">
+            <i [class]="red.icon"></i> {{ red.label }}
+          </a>
+        </ng-container>
+      </div>
+    </div>
+
+    <p *ngIf="!perfil.bio
+              && !(perfil.generosFav && perfil.generosFav.length)
+              && !(perfil.plataformasFav && perfil.plataformasFav.length)
+              && !tieneRedes"
+       class="sin-datos">
+      Este usuario aún no ha personalizado su perfil.
+    </p>
+  </div>
+
+  <!-- ── BIBLIOTECA: solo si sois amigos ── -->
+  <div class="perfil-card-bottom" *ngIf="estadoAmistad === 'amigos'">
+    <div class="perfil-seccion-header">
+      <span class="seccion-titulo">
+        <i class="fa-solid fa-book-bookmark"></i>
+        Biblioteca de {{ perfil.nombre }}
+      </span>
+    </div>
+
+    <div *ngIf="cargandoBiblioteca" class="biblioteca-cargando">
+      Cargando biblioteca...
+    </div>
+
+    <div *ngIf="!cargandoBiblioteca && biblioteca.length === 0" class="sin-datos">
+      Aún no tiene juegos en su biblioteca.
+    </div>
+
+    <div *ngIf="!cargandoBiblioteca && biblioteca.length > 0" class="biblioteca-grid">
+      <article class="biblio-card" *ngFor="let j of biblioteca" (click)="abrirDetalle(j)">
+        <img [src]="j.background_image" [alt]="j.name" class="biblio-img" />
+        <div class="biblio-info">
+          <h3 class="biblio-nombre">{{ j.name }}</h3>
+          <p class="biblio-fecha">{{ j.released }}</p>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Mensaje si no sois amigos: pista para añadirlo -->
+  <div class="perfil-card-bottom locked-card"
+       *ngIf="estadoAmistad !== 'amigos' && estadoAmistad !== 'mismo_usuario'">
+    <i class="fa-solid fa-lock"></i>
+    <span>La biblioteca de {{ perfil.nombre }} solo es visible para sus amigos.</span>
+  </div>
+
+</div>
+
+<div class="perfil-publico-wrapper" *ngIf="cargando">
+  <p class="cargando-estado">Cargando perfil...</p>
+</div>

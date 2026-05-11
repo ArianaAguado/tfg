@@ -1,0 +1,365 @@
+.perfil-publico-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+  color: #e0e6ff;
+}
+
+.texto-neon {
+  color: #ff00ff;
+  text-shadow: 0 0 15px #ff00ff;
+}
+
+.cargando-estado {
+  text-align: center;
+  padding: 60px;
+  color: #a0a5bc;
+}
+
+/* ── TARJETA SUPERIOR ── */
+.perfil-card-top,
+.perfil-card-bottom {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.perfil-top-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.perfil-titulo {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.perfil-top-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.avatar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.perfil-avatar-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(0, 204, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 204, 255, 0.15);
+}
+
+.perfil-datos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.perfil-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.campo-label {
+  font-size: 0.75rem;
+  color: #6a6f85;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.campo-label i {
+  margin-right: 6px;
+  color: #00ccff;
+}
+
+.campo-valor {
+  color: #e0e6ff;
+  font-size: 0.95rem;
+}
+
+.bio-valor {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.rol-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  width: fit-content;
+  font-weight: 600;
+}
+
+.rol-admin {
+  background: rgba(255, 0, 170, 0.15);
+  color: #ff00aa;
+  border: 1px solid rgba(255, 0, 170, 0.3);
+}
+
+.rol-desarrollador {
+  background: rgba(255, 0, 255, 0.15);
+  color: #ff00ff;
+  border: 1px solid rgba(255, 0, 255, 0.3);
+}
+
+.rol-usuario {
+  background: rgba(0, 204, 255, 0.15);
+  color: #00ccff;
+  border: 1px solid rgba(0, 204, 255, 0.3);
+}
+
+/* ── BOTONES DE AMISTAD ── */
+.amistad-zona {
+  margin-top: 12px;
+}
+
+.amistad-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.amistad-info {
+  font-size: 0.9rem;
+  color: #a0a5bc;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+}
+
+.amistad-info.amistad-ok {
+  color: #00ccff;
+  background: rgba(0, 204, 255, 0.1);
+}
+
+.btn-amistad {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e0e6ff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-amistad:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn-amistad:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-add {
+  background: linear-gradient(135deg, #00ccff, #ff00ff);
+  border: none;
+  color: #0a0e1f;
+}
+
+.btn-add:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(0, 204, 255, 0.3);
+}
+
+.btn-cancelar {
+  border-color: rgba(255, 170, 0, 0.4);
+  color: #ffaa00;
+}
+
+.btn-cancelar:hover:not(:disabled) {
+  background: rgba(255, 170, 0, 0.1);
+  border-color: #ffaa00;
+}
+
+.btn-aceptar {
+  border-color: rgba(0, 204, 255, 0.4);
+  color: #00ccff;
+}
+
+.btn-aceptar:hover:not(:disabled) {
+  background: rgba(0, 204, 255, 0.1);
+  border-color: #00ccff;
+}
+
+.btn-rechazar {
+  border-color: rgba(255, 68, 102, 0.4);
+  color: #ff4466;
+}
+
+.btn-rechazar:hover:not(:disabled) {
+  background: rgba(255, 68, 102, 0.1);
+  border-color: #ff4466;
+}
+
+.btn-eliminar {
+  border-color: rgba(255, 68, 102, 0.3);
+  color: #ff4466;
+}
+
+.btn-eliminar:hover:not(:disabled) {
+  background: rgba(255, 68, 102, 0.1);
+}
+
+/* ── SECCIÓN INFERIOR ── */
+.perfil-seccion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.seccion-titulo {
+  color: #00ccff;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.seccion-titulo i {
+  margin-right: 8px;
+  color: #ff00ff;
+}
+
+.chips-readonly {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.chip-readonly {
+  padding: 4px 10px;
+  background: rgba(0, 204, 255, 0.08);
+  border: 1px solid rgba(0, 204, 255, 0.2);
+  border-radius: 14px;
+  font-size: 0.8rem;
+  color: #00ccff;
+}
+
+.redes-readonly {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.red-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #e0e6ff;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.red-link:hover {
+  border-color: #ff00ff;
+  color: #ff00ff;
+}
+
+.sin-datos {
+  color: #6a6f85;
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── BIBLIOTECA DEL AMIGO ── */
+.biblioteca-cargando {
+  text-align: center;
+  padding: 24px;
+  color: #a0a5bc;
+}
+
+.biblioteca-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.biblio-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.biblio-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 204, 255, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 204, 255, 0.15);
+}
+
+.biblio-img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  display: block;
+}
+
+.biblio-info {
+  padding: 8px 10px;
+}
+
+.biblio-nombre {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.biblio-fecha {
+  margin: 2px 0 0 0;
+  font-size: 0.7rem;
+  color: #6a6f85;
+}
+
+/* ── TARJETA BLOQUEADA: biblioteca privada ── */
+.locked-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  color: #6a6f85;
+  font-style: italic;
+  padding: 18px 24px;
+}
+
+.locked-card i {
+  font-size: 1.1rem;
+  color: #ff00aa;
+}
