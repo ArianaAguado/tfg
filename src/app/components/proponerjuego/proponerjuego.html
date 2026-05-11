@@ -133,40 +133,53 @@
 
     <!-- Historial resuelto -->
     <div *ngIf="historial.length > 0">
-      <button class="btn-toggle-historial" (click)="toggleHistorial()">
-        <i class="fa-solid fa-clock-rotate-left"></i>
-        {{ verHistorial ? 'Ocultar historial' : 'Ver historial (' + historial.length + ')' }}
-      </button>
+  <button class="btn-toggle-historial" (click)="toggleHistorial()">
+    <i class="fa-solid fa-clock-rotate-left"></i>
+    {{ verHistorial ? 'Ocultar historial' : 'Ver historial (' + historial.length + ')' }}
+  </button>
 
-      <div class="historial-lista" *ngIf="verHistorial">
-        <div class="historial-card" *ngFor="let item of historial"
-             [class.aprobado]="item.estado === 'aprobado'"
-             [class.rechazado]="item.estado === 'rechazado'">
+  <div *ngIf="verHistorial">
+    <div class="historial-lista">
+      <div class="historial-card" *ngFor="let item of historialPaginado"
+           [class.aprobado]="item.estado === 'aprobado'"
+           [class.rechazado]="item.estado === 'rechazado'">
 
-          <div class="historial-badge"
-               [class.badge-aprobado]="item.estado === 'aprobado'"
-               [class.badge-rechazado]="item.estado === 'rechazado'">
-            <i class="fa-solid"
-               [class.fa-check]="item.estado === 'aprobado'"
-               [class.fa-xmark]="item.estado === 'rechazado'"></i>
-            {{ item.estado === 'aprobado' ? 'Aprobado' : 'Rechazado' }}
-          </div>
-
-          <div class="historial-content">
-            <img [src]="item.imagen || 'assets/placeholder.png'" class="historial-img"
-                 (error)="$any($event.target).src='assets/placeholder.png'" />
-            <div class="historial-info">
-              <h4>{{ item.nombre }}</h4>
-              <span class="historial-fecha">
-                <i class="fa-solid fa-calendar-check"></i>
-                Resuelta el {{ item.fechaResolucion | date:'dd/MM/yyyy' }}
-              </span>
-            </div>
-          </div>
-
+        <div class="historial-badge"
+             [class.badge-aprobado]="item.estado === 'aprobado'"
+             [class.badge-rechazado]="item.estado === 'rechazado'">
+          <i class="fa-solid"
+             [class.fa-check]="item.estado === 'aprobado'"
+             [class.fa-xmark]="item.estado === 'rechazado'"></i>
+          {{ item.estado === 'aprobado' ? 'Aprobado' : 'Rechazado' }}
         </div>
+
+        <div class="historial-content">
+          <img [src]="item.imagen || 'assets/placeholder.png'" class="historial-img"
+               (error)="$any($event.target).src='assets/placeholder.png'" />
+          <div class="historial-info">
+            <h4>{{ item.nombre }}</h4>
+            <span class="historial-fecha">
+              <i class="fa-solid fa-calendar-check"></i>
+              Resuelta el {{ item.fechaResolucion | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+
       </div>
     </div>
+
+    <!-- Paginación -->
+    <div class="paginacion" *ngIf="totalPaginasHistorial > 1">
+      <button class="nav-btn" (click)="cambiarPaginaHistorial(paginaHistorial - 1)"
+        [disabled]="paginaHistorial === 1">&#8249;</button>
+      <button class="pag-num" *ngFor="let p of paginasHistorial"
+        [class.activo]="paginaHistorial === p"
+        (click)="cambiarPaginaHistorial(p)">{{ p }}</button>
+      <button class="nav-btn" (click)="cambiarPaginaHistorial(paginaHistorial + 1)"
+        [disabled]="paginaHistorial === totalPaginasHistorial">&#8250;</button>
+    </div>
+  </div>
+</div>
 
     <!-- Sin propuestas -->
     <div class="no-propuestas"

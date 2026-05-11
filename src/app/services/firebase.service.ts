@@ -5,6 +5,7 @@ import {
   Firestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs,
   getDoc, setDoc, query, orderBy, where
 } from '@angular/fire/firestore';
+import { Timestamp } from '@angular/fire/firestore';
 
 // ── INTERFACES ──
 
@@ -536,6 +537,7 @@ export class FirebaseService {
     }
   }
 
+
   async aceptarSolicitudAmistad(solicitud: SolicitudAmistad): Promise<void> {
     const miUid = this.auth.currentUser?.uid;
     if (!miUid || !solicitud.id) return;
@@ -543,7 +545,7 @@ export class FirebaseService {
     const id = this.idAmistad(miUid, solicitud.deUid);
     await setDoc(doc(this.db, 'amistades', id), {
       uids: [miUid, solicitud.deUid].sort(),
-      fecha: Date.now()
+      fecha: Timestamp.now() // ← en vez de Date.now()
     });
 
     await deleteDoc(doc(this.db, 'solicitudes_amistad', solicitud.id));
