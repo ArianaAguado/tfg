@@ -2,8 +2,9 @@ import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angula
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
-import { User } from 'firebase/auth';
+import { User } from '@angular/fire/auth';
 import { Subscription, combineLatest } from 'rxjs';
+import { filter } from 'rxjs/operators'; // ← añade esto
 import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
 @Component({
@@ -24,6 +25,9 @@ export class Dashboard implements OnInit, OnDestroy {
   solicitudesAmistadCount = 0;
   private peticionesSub?: Subscription;
   private solicitudesSub?: Subscription;
+  private mainSub?: Subscription;
+
+  private avatar$ = this.firebase.obtenerAvatarUsuario();
 
   readonly avataresPorRol: Record<string, string> = {
     admin: 'assets/admin.png',
@@ -32,11 +36,17 @@ export class Dashboard implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
-    combineLatest([
+    this.mainSub = combineLatest([
       this.firebase.usuario$,
       this.firebase.rol$,
-      this.firebase.obtenerAvatarUsuario()
-    ]).subscribe(([usuario, rol, avatarUrl]) => {
+      this.avatar$
+    ]).pipe(
+      filter(([usuario]) => usuario !== undefined) // ← espera a que Firebase resuelva
+    ).subscribe(([usuario, rol, avatarUrl]) => {
+      console.log('usuario:', usuario);
+      console.log('rol:', rol);
+      console.log('avatarUrl:', avatarUrl);
+
       this.usuario = usuario ?? null;
       this.rol = rol;
 
@@ -54,7 +64,6 @@ export class Dashboard implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     });
 
-    // Solicitudes de amistad: badge para todos los usuarios.
     this.escucharSolicitudesAmistad();
   }
 
@@ -79,6 +88,7 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.mainSub?.unsubscribe();
     this.peticionesSub?.unsubscribe();
     this.solicitudesSub?.unsubscribe();
   }

@@ -6,7 +6,6 @@ import {
   getDoc, setDoc, query, orderBy, where
 } from '@angular/fire/firestore';
 
-
 // ── INTERFACES ──
 
 export interface JuegoCustom {
@@ -105,18 +104,21 @@ export class FirebaseService {
   rol$ = this.rolSubject.asObservable();
 
   constructor() {
-    setPersistence(this.auth, browserLocalPersistence).then(() => {
-      onAuthStateChanged(this.auth, async (user) => {
-        this.zone.run(() => this.usuarioSubject.next(user));
+    // ← onAuthStateChanged fuera del setPersistence para que dispare siempre
+    onAuthStateChanged(this.auth, async (user) => {
+      this.zone.run(() => this.usuarioSubject.next(user));
 
-        if (user) {
-          const rol = await this.obtenerRolUsuario(user.uid);
-          this.zone.run(() => this.rolSubject.next(rol));
-        } else {
-          this.zone.run(() => this.rolSubject.next(null));
-        }
-      });
+      if (user) {
+        const rol = await this.obtenerRolUsuario(user.uid);
+        this.zone.run(() => this.rolSubject.next(rol));
+      } else {
+        this.zone.run(() => this.rolSubject.next(null));
+      }
     });
+
+    // setPersistence en paralelo, sin bloquear el listener
+    setPersistence(this.auth, browserLocalPersistence)
+      .catch(err => console.error('Error setPersistence:', err));
   }
 
   // ── SECCIÓN: ROLES Y USUARIOS ──
@@ -276,6 +278,7 @@ export class FirebaseService {
   }
 
   // ── FAVORITOS ──
+
   async añadirFavorito(juego: JuegoFavorito): Promise<void> {
     const uid = this.auth.currentUser?.uid;
     if (!uid) { console.error('No hay usuario'); return; }
@@ -303,15 +306,8 @@ export class FirebaseService {
       let unsubFirestore: (() => void) | null = null;
 
       const unsubAuth = onAuthStateChanged(this.auth, (user) => {
-        if (unsubFirestore) {
-          unsubFirestore();
-          unsubFirestore = null;
-        }
-
-        if (!user) {
-          observer.next([]);
-          return;
-        }
+        if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
+        if (!user) { observer.next([]); return; }
 
         const colRef = collection(this.db, 'favoritos', user.uid, 'juegos');
         unsubFirestore = onSnapshot(colRef,
@@ -349,15 +345,8 @@ export class FirebaseService {
       let unsubFirestore: (() => void) | null = null;
 
       const unsubAuth = onAuthStateChanged(this.auth, (user) => {
-        if (unsubFirestore) {
-          unsubFirestore();
-          unsubFirestore = null;
-        }
-
-        if (!user) {
-          observer.next(null);
-          return;
-        }
+        if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
+        if (!user) { observer.next(null); return; }
 
         const docRef = doc(this.db, 'usuarios', user.uid);
         unsubFirestore = onSnapshot(docRef, snap => {
@@ -373,7 +362,6 @@ export class FirebaseService {
       };
     });
   }
-
 
   async actualizarPerfil(datos: {
     bio?: string;
@@ -412,7 +400,6 @@ export class FirebaseService {
     });
   }
 
-
   // ── COMENTARIOS ──
 
   obtenerComentariosDeJuego(slug: string): Observable<Comentario[]> {
@@ -438,9 +425,7 @@ export class FirebaseService {
     const uid = this.auth.currentUser?.uid;
     if (!uid) { console.error('No hay usuario'); return; }
     if (!texto.trim()) return;
-    if (texto.length > 280) {
-      texto = texto.substring(0, 280);
-    }
+    if (texto.length > 280) texto = texto.substring(0, 280);
 
     const userDocRef = doc(this.db, 'usuarios', uid);
     const userSnap = await getDoc(userDocRef);
@@ -452,11 +437,7 @@ export class FirebaseService {
     const rolUsuario = userData['rol'] ?? 'usuario';
 
     const comentario: Omit<Comentario, 'id'> = {
-      slug,
-      uid,
-      nombreUsuario,
-      fotoUsuario,
-      rolUsuario,
+      slug, uid, nombreUsuario, fotoUsuario, rolUsuario,
       texto: texto.trim(),
       fecha: Date.now()
     };
@@ -467,15 +448,12 @@ export class FirebaseService {
   async borrarComentario(comentario: Comentario): Promise<boolean> {
     const uid = this.auth.currentUser?.uid;
     if (!uid || !comentario.id) return false;
-
     const esAutor = comentario.uid === uid;
     const esAdmin = this.rolActual === 'admin';
     if (!esAutor && !esAdmin) return false;
-
     await deleteDoc(doc(this.db, 'comentarios', comentario.id));
     return true;
   }
-
 
   // ── USUARIO PÚBLICO ──
 
@@ -497,7 +475,6 @@ export class FirebaseService {
     };
   }
 
-
   // ── AMISTADES ──
 
   private idAmistad(uidA: string, uidB: string): string {
@@ -514,7 +491,6 @@ export class FirebaseService {
     if (amistadSnap.exists()) return 'amigos';
 
     const colRef = collection(this.db, 'solicitudes_amistad');
-
     const enviadasQ = query(colRef, where('deUid', '==', miUid), where('paraUid', '==', otroUid));
     const enviadasSnap = await getDocs(enviadasQ);
     if (!enviadasSnap.empty) return 'pendiente_enviada';
@@ -650,5 +626,4 @@ export class FirebaseService {
       };
     });
   }
-
 }
