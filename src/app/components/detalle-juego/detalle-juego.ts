@@ -52,7 +52,7 @@ export class DetalleJuego implements OnInit {
     }
 
     const slug = this.route.snapshot.paramMap.get('slug');
-    if (!slug) { this.router.navigate(['/dashboard']); return; }
+    if (!slug) { this.router.navigate(['/calendario']); return; }
 
     this.rawg.obtenerDetalle(slug).subscribe({
       next: (juego) => {

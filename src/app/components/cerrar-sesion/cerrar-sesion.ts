@@ -13,8 +13,7 @@ export class BtnCerrarSesion {
   private router = inject(Router);
 
   async cerrarSesion() {
-  await this.firebase.cerrarSesion();
-  await new Promise(resolve => setTimeout(resolve, 300)); // pequeña espera
-  this.router.navigate(['/']);
-}
+    await this.firebase.cerrarSesion();
+    this.router.navigate(['/']);
+  }
 }

@@ -5,10 +5,9 @@ import { CommonModule } from '@angular/common';
 import {
   Auth,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
   GoogleAuthProvider
 } from '@angular/fire/auth';
-import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-login',
@@ -20,9 +19,9 @@ export class Login {
   private formBuilder = inject(FormBuilder);
   public router = inject(Router);
   private auth = inject(Auth);
-  private firestore = inject(Firestore);
 
   errorMessage = '';
+  cargandoGoogle = false;
 
   formularioLogin = this.formBuilder.group({
     email: ['', [Validators.required, Validators.email]],
@@ -42,26 +41,13 @@ export class Login {
   }
 
   async loginConGoogle() {
+    // que se ejecuta al volver y navega al dashboard automáticamente.
     try {
+      this.cargandoGoogle = true;
       const provider = new GoogleAuthProvider();
-      const credenciales = await signInWithPopup(this.auth, provider);
-      const user = credenciales.user;
-      const docRef = doc(this.firestore, 'usuarios', user.uid);
-      const snap = await getDoc(docRef);
-
-      if (!snap.exists()) {
-        await setDoc(docRef, {
-          uid: user.uid,
-          nombre: user.displayName ?? '',
-          email: user.email,
-          rol: 'usuario',
-          fechaRegistro: new Date().toISOString()
-        });
-      }
-
-      localStorage.setItem('sessionExpiry', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
-      this.router.navigate(['/dashboard']);
+      await signInWithRedirect(this.auth, provider);
     } catch (error: any) {
+      this.cargandoGoogle = false;
       this.errorMessage = this.getErrorMessage(error.code);
     }
   }
