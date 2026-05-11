@@ -31,6 +31,78 @@
       <p>{{ juego.description_raw }}</p>
     </div>
 
+    <!-- ════════════════════════════════════════════════════════════
+         BANDEJA DE COMENTARIOS
+         ════════════════════════════════════════════════════════════ -->
+    <div class="comentarios-seccion">
+      <h2 class="comentarios-titulo">
+        <i class="fa-solid fa-comments"></i>
+        Comentarios
+        <span class="comentarios-contador" *ngIf="comentarios.length > 0">
+          ({{ comentarios.length }})
+        </span>
+      </h2>
+
+      <!-- Formulario para publicar -->
+      <div class="comentario-form" *ngIf="uidActual">
+        <textarea
+          #textareaComentario
+          class="comentario-textarea"
+          [(ngModel)]="textoComentario"
+          placeholder="Comparte tu opinión sobre el juego..."
+          maxlength="280"
+          rows="3"></textarea>
+
+        <div class="comentario-form-footer">
+          <span class="contador-caracteres"
+                [class.advertencia]="caracteresRestantes <= 20"
+                [class.error]="caracteresRestantes < 0">
+            {{ caracteresRestantes }} / 280
+          </span>
+          <button class="btn-publicar"
+                  (click)="publicarComentario()"
+                  [disabled]="!puedePublicar">
+            {{ publicando ? 'Publicando...' : 'Publicar' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de comentarios -->
+      <div class="comentarios-lista">
+        <div *ngIf="comentarios.length === 0" class="comentarios-vacio">
+          Aún no hay comentarios. ¡Sé el primero en opinar!
+        </div>
+
+        <article class="comentario" *ngFor="let c of comentarios">
+          <a class="comentario-avatar-link"
+             [routerLink]="['/dashboard/usuario', c.uid]">
+            <img [src]="avatarComentario(c)"
+                 [alt]="c.nombreUsuario"
+                 class="comentario-avatar" />
+          </a>
+
+          <div class="comentario-cuerpo">
+            <div class="comentario-cabecera">
+              <a class="comentario-nombre"
+                 [routerLink]="['/dashboard/usuario', c.uid]">
+                {{ c.nombreUsuario }}
+              </a>
+              <span class="comentario-fecha">
+                {{ c.fecha | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+              <button class="btn-borrar-comentario"
+                      *ngIf="puedeBorrar(c)"
+                      (click)="borrarComentario(c)"
+                      title="Borrar comentario">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+            <p class="comentario-texto">{{ c.texto }}</p>
+          </div>
+        </article>
+      </div>
+    </div>
+
   </ng-container>
 
 </div>

@@ -1,7 +1,10 @@
 import { Injectable, NgZone, inject } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Auth, onAuthStateChanged, signOut, User, browserLocalPersistence, setPersistence } from '@angular/fire/auth';
-import { Firestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs, getDoc, setDoc, query, orderBy } from '@angular/fire/firestore';
+import {
+  Firestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs,
+  getDoc, setDoc, query, orderBy, where
+} from '@angular/fire/firestore';
 
 
 // ── INTERFACES ──
@@ -48,16 +51,51 @@ export interface JuegoFavorito {
   slug?: string;
 }
 
+// ── NUEVAS INTERFACES: parte social ──
+
+export interface Comentario {
+  id?: string;
+  slug: string;             // slug del juego al que pertenece
+  uid: string;              // autor
+  nombreUsuario: string;    // denormalizado para renderizar sin consulta extra
+  fotoUsuario: string;      // avatar personalizado del autor (vacío si no tiene)
+  rolUsuario: string;       // rol del autor: usado para escoger avatar por defecto
+  texto: string;            // máx 280 caracteres
+  fecha: number;            // timestamp (Date.now())
+}
+
+export interface UsuarioPublico {
+  uid: string;
+  nombre: string;
+  email?: string;
+  rol: string;
+  avatarUrl?: string;
+  bio?: string;
+  generosFav?: string[];
+  plataformasFav?: string[];
+  redesSociales?: { twitter?: string; instagram?: string; youtube?: string; twitch?: string; steam?: string };
+  fechaRegistro?: string;
+}
+
+export interface SolicitudAmistad {
+  id?: string;
+  deUid: string;
+  deNombre: string;
+  deFoto: string;
+  paraUid: string;
+  fecha: number;
+}
+
+export type EstadoAmistad =
+  | 'ninguna'
+  | 'pendiente_enviada'
+  | 'pendiente_recibida'
+  | 'amigos'
+  | 'mismo_usuario';
+
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
 
-  // Inyectamos las instancias DE @angular/fire, las mismas que usa el resto
-  // de la app (login.ts, app.ts). Antes el servicio creaba sus propias
-  // instancias con getAuth(app) y getFirestore(app), lo que hacía que
-  // FirebaseService y los componentes operasen sobre objetos diferentes:
-  // el login autenticaba en una instancia, el servicio escuchaba en la otra
-  // y el guard preguntaba a una tercera que aún veía null. De ahí los
-  // atascos al volver a entrar tras logout.
   private auth = inject(Auth);
   private db = inject(Firestore);
   private zone = inject(NgZone);
@@ -71,11 +109,7 @@ export class FirebaseService {
   constructor() {
     setPersistence(this.auth, browserLocalPersistence).then(() => {
       onAuthStateChanged(this.auth, async (user) => {
-        // NgZone.run para que las emisiones del subject ocurran dentro
-        // de la zona de Angular y la detección de cambios se dispare.
-        this.zone.run(() => {
-          this.usuarioSubject.next(user);
-        });
+        this.zone.run(() => this.usuarioSubject.next(user));
 
         if (user) {
           const rol = await this.obtenerRolUsuario(user.uid);
@@ -119,16 +153,12 @@ export class FirebaseService {
   // ── SECCIÓN: AUTH ──
 
   get usuarioActual(): User | null {
-    // Ahora apunta a la misma instancia que usan login.ts y app.ts.
     return this.auth.currentUser;
   }
 
   async cerrarSesion(): Promise<void> {
     localStorage.removeItem('sessionExpiry');
     await signOut(this.auth);
-    // signOut hace que onAuthStateChanged emita null y el subject se
-    // actualiza solo. No reseteamos manualmente a undefined porque eso
-    // confundía al guard en el siguiente login.
   }
 
 
@@ -307,6 +337,12 @@ export class FirebaseService {
     });
   }
 
+  async obtenerFavoritosDeUsuario(uid: string): Promise<JuegoFavorito[]> {
+    const colRef = collection(this.db, 'favoritos', uid, 'juegos');
+    const snapshot = await getDocs(colRef);
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as JuegoFavorito));
+  }
+
   // ── SECCIÓN: AVATAR ──
 
   async actualizarAvatar(url: string): Promise<void> {
@@ -380,6 +416,267 @@ export class FirebaseService {
         });
       });
       return () => { unsubAuth(); if (unsubFirestore) unsubFirestore(); };
+    });
+  }
+
+
+  // ════════════════════════════════════════════════════════════════════
+  //                         COMENTARIOS
+  // ════════════════════════════════════════════════════════════════════
+
+  /**
+   * Stream en tiempo real de los comentarios de un juego concreto.
+   *
+   * Ordenamos en cliente, no en la query. Si hiciéramos
+   * where('slug') + orderBy('fecha'), Firestore exigiría crear un índice
+   * compuesto en su consola, y la query devolvería vacío hasta crearlo.
+   * Como cada juego tiene como mucho decenas o cientos de comentarios,
+   * ordenar en cliente es trivial y nos ahorra el paso de configurar
+   * índices manualmente.
+   */
+  obtenerComentariosDeJuego(slug: string): Observable<Comentario[]> {
+    return new Observable(observer => {
+      const q = query(
+        collection(this.db, 'comentarios'),
+        where('slug', '==', slug)
+      );
+      const unsub = onSnapshot(q,
+        snapshot => {
+          const comentarios = snapshot.docs
+            .map(d => ({ id: d.id, ...d.data() } as Comentario))
+            .sort((a, b) => b.fecha - a.fecha); // recientes primero
+          this.zone.run(() => observer.next(comentarios));
+        },
+        err => observer.error(err)
+      );
+      return () => unsub();
+    });
+  }
+
+  /**
+   * Publica un comentario. Denormaliza nombre, foto y rol del autor
+   * para que la UI pueda decidir el avatar correcto sin consultas extra.
+   */
+  async publicarComentario(slug: string, texto: string): Promise<void> {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) { console.error('No hay usuario'); return; }
+    if (!texto.trim()) return;
+    if (texto.length > 280) {
+      texto = texto.substring(0, 280);
+    }
+
+    const userDocRef = doc(this.db, 'usuarios', uid);
+    const userSnap = await getDoc(userDocRef);
+    const userData = userSnap.exists() ? userSnap.data() : {};
+
+    const authUser = this.auth.currentUser;
+    const nombreUsuario = userData['nombre'] ?? authUser?.displayName ?? 'Usuario';
+    const fotoUsuario = userData['avatarUrl'] ?? '';
+    const rolUsuario = userData['rol'] ?? 'usuario';
+
+    const comentario: Omit<Comentario, 'id'> = {
+      slug,
+      uid,
+      nombreUsuario,
+      fotoUsuario,
+      rolUsuario,
+      texto: texto.trim(),
+      fecha: Date.now()
+    };
+
+    await addDoc(collection(this.db, 'comentarios'), comentario);
+  }
+
+  async borrarComentario(comentario: Comentario): Promise<boolean> {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid || !comentario.id) return false;
+
+    const esAutor = comentario.uid === uid;
+    const esAdmin = this.rolActual === 'admin';
+    if (!esAutor && !esAdmin) return false;
+
+    await deleteDoc(doc(this.db, 'comentarios', comentario.id));
+    return true;
+  }
+
+
+  // ════════════════════════════════════════════════════════════════════
+  //                         USUARIO PÚBLICO
+  // ════════════════════════════════════════════════════════════════════
+
+  async obtenerUsuarioPublico(uid: string): Promise<UsuarioPublico | null> {
+    const snap = await getDoc(doc(this.db, 'usuarios', uid));
+    if (!snap.exists()) return null;
+    const d = snap.data();
+    return {
+      uid,
+      nombre: d['nombre'] ?? '',
+      email: d['email'],
+      rol: d['rol'] ?? 'usuario',
+      avatarUrl: d['avatarUrl'] ?? '',
+      bio: d['bio'] ?? '',
+      generosFav: d['generosFav'] ?? [],
+      plataformasFav: d['plataformasFav'] ?? [],
+      redesSociales: d['redesSociales'] ?? {},
+      fechaRegistro: d['fechaRegistro']
+    };
+  }
+
+
+  // ════════════════════════════════════════════════════════════════════
+  //                         AMISTADES
+  // ════════════════════════════════════════════════════════════════════
+
+  private idAmistad(uidA: string, uidB: string): string {
+    return [uidA, uidB].sort().join('_');
+  }
+
+  async obtenerEstadoAmistad(otroUid: string): Promise<EstadoAmistad> {
+    const miUid = this.auth.currentUser?.uid;
+    if (!miUid) return 'ninguna';
+    if (miUid === otroUid) return 'mismo_usuario';
+
+    const amistadId = this.idAmistad(miUid, otroUid);
+    const amistadSnap = await getDoc(doc(this.db, 'amistades', amistadId));
+    if (amistadSnap.exists()) return 'amigos';
+
+    const colRef = collection(this.db, 'solicitudes_amistad');
+
+    const enviadasQ = query(colRef, where('deUid', '==', miUid), where('paraUid', '==', otroUid));
+    const enviadasSnap = await getDocs(enviadasQ);
+    if (!enviadasSnap.empty) return 'pendiente_enviada';
+
+    const recibidasQ = query(colRef, where('deUid', '==', otroUid), where('paraUid', '==', miUid));
+    const recibidasSnap = await getDocs(recibidasQ);
+    if (!recibidasSnap.empty) return 'pendiente_recibida';
+
+    return 'ninguna';
+  }
+
+  async enviarSolicitudAmistad(otroUid: string): Promise<void> {
+    const miUid = this.auth.currentUser?.uid;
+    if (!miUid || miUid === otroUid) return;
+
+    const miDoc = await getDoc(doc(this.db, 'usuarios', miUid));
+    const miData = miDoc.exists() ? miDoc.data() : {};
+    const authUser = this.auth.currentUser;
+
+    const solicitud: Omit<SolicitudAmistad, 'id'> = {
+      deUid: miUid,
+      deNombre: miData['nombre'] ?? authUser?.displayName ?? 'Usuario',
+      deFoto: miData['avatarUrl'] ?? '',
+      paraUid: otroUid,
+      fecha: Date.now()
+    };
+
+    await addDoc(collection(this.db, 'solicitudes_amistad'), solicitud);
+  }
+
+  async cancelarSolicitudAmistad(otroUid: string): Promise<void> {
+    const miUid = this.auth.currentUser?.uid;
+    if (!miUid) return;
+
+    const q = query(
+      collection(this.db, 'solicitudes_amistad'),
+      where('deUid', '==', miUid),
+      where('paraUid', '==', otroUid)
+    );
+    const snap = await getDocs(q);
+    for (const d of snap.docs) {
+      await deleteDoc(doc(this.db, 'solicitudes_amistad', d.id));
+    }
+  }
+
+  async aceptarSolicitudAmistad(solicitud: SolicitudAmistad): Promise<void> {
+    const miUid = this.auth.currentUser?.uid;
+    if (!miUid || !solicitud.id) return;
+
+    const id = this.idAmistad(miUid, solicitud.deUid);
+    await setDoc(doc(this.db, 'amistades', id), {
+      uids: [miUid, solicitud.deUid].sort(),
+      fecha: Date.now()
+    });
+
+    await deleteDoc(doc(this.db, 'solicitudes_amistad', solicitud.id));
+  }
+
+  async rechazarSolicitudAmistad(solicitud: SolicitudAmistad): Promise<void> {
+    if (!solicitud.id) return;
+    await deleteDoc(doc(this.db, 'solicitudes_amistad', solicitud.id));
+  }
+
+  async eliminarAmistad(otroUid: string): Promise<void> {
+    const miUid = this.auth.currentUser?.uid;
+    if (!miUid) return;
+    const id = this.idAmistad(miUid, otroUid);
+    await deleteDoc(doc(this.db, 'amistades', id));
+  }
+
+  obtenerAmigos(): Observable<UsuarioPublico[]> {
+    return new Observable(observer => {
+      let unsubFirestore: (() => void) | null = null;
+
+      const unsubAuth = onAuthStateChanged(this.auth, (user) => {
+        if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
+        if (!user) { observer.next([]); return; }
+
+        const q = query(
+          collection(this.db, 'amistades'),
+          where('uids', 'array-contains', user.uid)
+        );
+
+        unsubFirestore = onSnapshot(q, async snapshot => {
+          const uidsAmigos: string[] = [];
+          for (const d of snapshot.docs) {
+            const data = d.data();
+            const [a, b] = data['uids'] as string[];
+            uidsAmigos.push(a === user.uid ? b : a);
+          }
+
+          const amigos: UsuarioPublico[] = [];
+          for (const uid of uidsAmigos) {
+            const perfil = await this.obtenerUsuarioPublico(uid);
+            if (perfil) amigos.push(perfil);
+          }
+
+          this.zone.run(() => observer.next(amigos));
+        });
+      });
+
+      return () => {
+        unsubAuth();
+        if (unsubFirestore) unsubFirestore();
+      };
+    });
+  }
+
+  obtenerSolicitudesRecibidas(): Observable<SolicitudAmistad[]> {
+    return new Observable(observer => {
+      let unsubFirestore: (() => void) | null = null;
+
+      const unsubAuth = onAuthStateChanged(this.auth, (user) => {
+        if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
+        if (!user) { observer.next([]); return; }
+
+        // Solo where, sin orderBy, por el mismo motivo que en comentarios:
+        // así no exige índice compuesto. Ordenamos en cliente.
+        const q = query(
+          collection(this.db, 'solicitudes_amistad'),
+          where('paraUid', '==', user.uid)
+        );
+
+        unsubFirestore = onSnapshot(q, snapshot => {
+          const solicitudes = snapshot.docs
+            .map(d => ({ id: d.id, ...d.data() } as SolicitudAmistad))
+            .sort((a, b) => b.fecha - a.fecha);
+          this.zone.run(() => observer.next(solicitudes));
+        });
+      });
+
+      return () => {
+        unsubAuth();
+        if (unsubFirestore) unsubFirestore();
+      };
     });
   }
 

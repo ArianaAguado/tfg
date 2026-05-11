@@ -116,3 +116,218 @@
   padding: 60px;
   color: #a0a5bc;
 }
+
+/* ════════════════════════════════════════════════════════════
+   COMENTARIOS
+   ════════════════════════════════════════════════════════════ */
+
+.comentarios-seccion {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.comentarios-titulo {
+  font-size: 1.2rem;
+  color: #00ccff;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.comentarios-titulo i {
+  color: #ff00ff;
+}
+
+.comentarios-contador {
+  color: #a0a5bc;
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+/* ── Formulario ── */
+.comentario-form {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.comentario-textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #e0e6ff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 70px;
+  transition: 0.2s;
+  box-sizing: border-box;
+}
+
+.comentario-textarea:focus {
+  outline: none;
+  border-color: #00ccff;
+  box-shadow: 0 0 10px rgba(0, 204, 255, 0.2);
+}
+
+.comentario-textarea::placeholder {
+  color: #6a6f85;
+}
+
+.comentario-form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.contador-caracteres {
+  font-size: 0.8rem;
+  color: #a0a5bc;
+  font-variant-numeric: tabular-nums;
+}
+
+.contador-caracteres.advertencia {
+  color: #ffaa00;
+}
+
+.contador-caracteres.error {
+  color: #ff4466;
+}
+
+.btn-publicar {
+  background: linear-gradient(135deg, #00ccff, #ff00ff);
+  border: none;
+  color: #0a0e1f;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-publicar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 204, 255, 0.3);
+}
+
+.btn-publicar:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Lista ── */
+.comentarios-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.comentarios-vacio {
+  text-align: center;
+  padding: 32px;
+  color: #6a6f85;
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+}
+
+/* ── Comentario individual ── */
+.comentario {
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px;
+  transition: 0.2s;
+}
+
+.comentario:hover {
+  border-color: rgba(0, 204, 255, 0.2);
+}
+
+.comentario-avatar-link {
+  flex-shrink: 0;
+  display: block;
+}
+
+.comentario-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(0, 204, 255, 0.3);
+  transition: 0.2s;
+}
+
+.comentario-avatar-link:hover .comentario-avatar {
+  border-color: #00ccff;
+  box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
+}
+
+.comentario-cuerpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.comentario-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.comentario-nombre {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.comentario-nombre:hover {
+  color: #00ccff;
+  text-shadow: 0 0 8px rgba(0, 204, 255, 0.5);
+}
+
+.comentario-fecha {
+  color: #6a6f85;
+  font-size: 0.75rem;
+}
+
+.btn-borrar-comentario {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #6a6f85;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: 0.2s;
+  font-size: 0.8rem;
+}
+
+.btn-borrar-comentario:hover {
+  color: #ff4466;
+  background: rgba(255, 68, 102, 0.1);
+}
+
+.comentario-texto {
+  margin: 0;
+  color: #c5cae3;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
