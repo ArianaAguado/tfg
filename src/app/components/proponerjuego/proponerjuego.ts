@@ -2,8 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { FirebaseService, PeticionJuego } from '../../services/firebase.service';
-import { getAuth } from 'firebase/auth';
-
+import { Auth } from '@angular/fire/auth';
 @Component({
   selector: 'app-proponer-juego',
   standalone: true,
@@ -14,7 +13,7 @@ import { getAuth } from 'firebase/auth';
 export class ProponerJuegoComponent implements OnInit {
   private firebase = inject(FirebaseService);
   private cdr = inject(ChangeDetectorRef);
-  private auth = getAuth();
+  private auth = inject(Auth);
   private fb = inject(FormBuilder);
 
   enviando = false;

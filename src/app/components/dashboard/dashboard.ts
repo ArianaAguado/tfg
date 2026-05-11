@@ -41,11 +41,8 @@ export class Dashboard implements OnInit, OnDestroy {
       this.firebase.rol$,
       this.avatar$
     ]).pipe(
-      filter(([usuario]) => usuario !== undefined) // ← espera a que Firebase resuelva
+      filter(([usuario]) => usuario !== undefined)
     ).subscribe(([usuario, rol, avatarUrl]) => {
-      console.log('usuario:', usuario);
-      console.log('rol:', rol);
-      console.log('avatarUrl:', avatarUrl);
 
       this.usuario = usuario ?? null;
       this.rol = rol;
