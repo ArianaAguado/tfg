@@ -5,11 +5,12 @@ import { Subscription } from 'rxjs';
 import {
   FirebaseService, UsuarioPublico, SolicitudAmistad
 } from '../../services/firebase.service';
+import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
 @Component({
   selector: 'app-amigos',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BtnCerrarSesion],
   templateUrl: './amigos.html',
   styleUrl: './amigos.css',
 })
