@@ -13,6 +13,11 @@
     </button>
   </div>
 
+  <div *ngIf="sinResultados" class="sin-resultados">
+    <span class="material-icons">search_off</span>
+    <p>No se encontró <strong>"{{ query }}"</strong> en el calendario.</p>
+  </div>
+
   <div *ngIf="cargando" class="loading-state">
     <p>Buscando lanzamientos...</p>
   </div>

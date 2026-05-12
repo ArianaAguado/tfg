@@ -50,6 +50,11 @@ export class Perfil implements OnInit {
   redesSocialesTemp: RedesSociales = {};
   guardandoPerfil = false;
 
+  // Editar nombre
+  modoEditarNombre = false;
+  nombreTemp = '';
+  guardandoNombre = false;
+
   readonly avataresPorRol: Record<string, string> = {
     admin: 'assets/admin.png',
     desarrollador: 'assets/Dev.png',
@@ -68,11 +73,11 @@ export class Perfil implements OnInit {
   ];
 
   readonly redesList: { key: keyof RedesSociales; label: string; placeholder: string; icon: string }[] = [
-    { key: 'twitter',   label: 'X / Twitter', placeholder: 'https://x.com/tuusuario',                icon: 'fa-brands fa-x-twitter' },
-    { key: 'instagram', label: 'Instagram',   placeholder: 'https://instagram.com/tuusuario',        icon: 'fa-brands fa-instagram' },
-    { key: 'youtube',   label: 'YouTube',     placeholder: 'https://youtube.com/@tucanal',           icon: 'fa-brands fa-youtube'   },
-    { key: 'twitch',    label: 'Twitch',      placeholder: 'https://twitch.tv/tuusuario',            icon: 'fa-brands fa-twitch'    },
-    { key: 'steam',     label: 'Steam',       placeholder: 'https://steamcommunity.com/id/tuusuario',icon: 'fa-brands fa-steam'     },
+    { key: 'twitter',   label: 'X / Twitter', placeholder: 'https://x.com/tuusuario',                 icon: 'fa-brands fa-x-twitter' },
+    { key: 'instagram', label: 'Instagram',   placeholder: 'https://instagram.com/tuusuario',         icon: 'fa-brands fa-instagram' },
+    { key: 'youtube',   label: 'YouTube',     placeholder: 'https://youtube.com/@tucanal',            icon: 'fa-brands fa-youtube'   },
+    { key: 'twitch',    label: 'Twitch',      placeholder: 'https://twitch.tv/tuusuario',             icon: 'fa-brands fa-twitch'    },
+    { key: 'steam',     label: 'Steam',       placeholder: 'https://steamcommunity.com/id/tuusuario', icon: 'fa-brands fa-steam'     },
   ];
 
   get avatarActual(): string {
@@ -108,6 +113,8 @@ export class Perfil implements OnInit {
       this.cdr.detectChanges();
     });
   }
+
+  // ── AVATAR ──
 
   abrirSelectorAvatar() {
     this.modoSeleccionAvatar = true;
@@ -162,6 +169,40 @@ export class Perfil implements OnInit {
       console.error('Error al quitar avatar:', err);
     }
   }
+
+  // ── NOMBRE ──
+
+  abrirEditarNombre() {
+    this.nombreTemp = this.usuario?.displayName || '';
+    this.modoEditarNombre = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarEditarNombre() {
+    this.modoEditarNombre = false;
+    this.nombreTemp = '';
+    this.cdr.detectChanges();
+  }
+
+  async guardarNombre() {
+    if (!this.nombreTemp.trim()) return;
+    this.guardandoNombre = true;
+    this.cdr.detectChanges();
+    try {
+      await this.firebase.actualizarNombre(this.nombreTemp.trim());
+      if (this.usuario) {
+        (this.usuario as any).displayName = this.nombreTemp.trim();
+      }
+      this.cerrarEditarNombre();
+    } catch (err) {
+      console.error('Error al guardar nombre:', err);
+    } finally {
+      this.guardandoNombre = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  // ── PERFIL ──
 
   abrirEditarPerfil() {
     this.bioTemp = this.bio;

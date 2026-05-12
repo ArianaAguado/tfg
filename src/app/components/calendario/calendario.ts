@@ -25,12 +25,15 @@ export class Calendario implements OnInit {
   fechaActual: Date = new Date();
   cargando: boolean = true;
   query: string = '';
+  queryActiva: string = '';
   juegosCustom: JuegoCustom[] = [];
   juegoSeleccionado: any = null;
   diasSeleccionado: any[] = [];
   mostrarModal: boolean = false;
   favoritosIds: Set<string> = new Set();
   cargandoFavorito: boolean = false;
+  sinResultados: boolean = false;
+  esFavoritoActual: boolean = false;
 
   ngOnInit(): void {
     this.generarCalendario();
@@ -39,7 +42,6 @@ export class Calendario implements OnInit {
       next: (juegos) => { this.juegosCustom = juegos; this.cdr.detectChanges(); },
       error: (err) => console.error('Error obteniendo juegos:', err)
     });
-    // Cargamos los ids de favoritos en local
     this.firebase.obtenerFavoritos().subscribe({
       next: (favs) => {
         this.favoritosIds = new Set(favs.map(f => f.released + '_' + f.name.replace(/\s/g, '_')));
@@ -74,19 +76,42 @@ export class Calendario implements OnInit {
   }
 
   buscar() {
+    this.queryActiva = this.query;
+
     if (!this.query.trim()) {
+      this.sinResultados = false;
+      this.queryActiva = '';
+      this.fechaActual = new Date();
+      this.generarCalendario();
       this.cargarJuegos();
       return;
     }
+
     this.cargando = true;
-    this.rawg.buscarJuegos(this.query, this.fechaActual).subscribe({
+    this.sinResultados = false;
+
+    this.rawg.buscarJuegos(this.query).subscribe({
       next: (juegos) => {
         this.juegos = juegos;
+
+        if (juegos.length > 0 && juegos[0].released) {
+          const fecha = new Date(juegos[0].released + 'T12:00:00');
+          this.fechaActual = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
+          this.generarCalendario();
+        }
+
+        const hayCustom = this.juegosCustom.some(j =>
+          j.nombre.toLowerCase().includes(this.queryActiva.toLowerCase())
+        );
+        this.sinResultados = juegos.length === 0 && !hayCustom;
         this.cargando = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al buscar:', err);
         this.cargando = false;
+        this.sinResultados = true;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -104,15 +129,17 @@ export class Calendario implements OnInit {
     const mesActual = this.fechaActual.getMonth();
     const añoActual = this.fechaActual.getFullYear();
 
-    const todos = [
-      ...this.juegos,
-      ...this.juegosCustom.map(j => ({
+    const customFiltrados = this.juegosCustom
+      .filter(j => !this.queryActiva.trim() ||
+        j.nombre.toLowerCase().includes(this.queryActiva.toLowerCase()))
+      .map(j => ({
         name: j.nombre,
         background_image: j.imagen,
         released: j.fechaLanzamiento?.replace(/\//g, '-'),
         esCustom: true
-      }))
-    ];
+      }));
+
+    const todos = [...this.juegos, ...customFiltrados];
 
     return todos.filter(juego => {
       if (!juego.released) return false;
@@ -157,8 +184,6 @@ export class Calendario implements OnInit {
     this.cargarJuegos();
   }
 
-  esFavoritoActual: boolean = false;
-
   async abrirModal(juegos: any[]) {
     if (juegos.length === 1) {
       this.irADetalle(juegos[0]);
@@ -190,14 +215,18 @@ export class Calendario implements OnInit {
 
   irADetalle(juego: any): void {
     if (juego.esCustom) {
+      const juegoCompleto = this.juegosCustom.find(j => j.nombre === juego.name) || juego;
+
       const normalizado = {
-        name: juego.name,
-        background_image: juego.background_image,
-        released: juego.released,
+        name: juegoCompleto.nombre || juego.name,
+        background_image: juegoCompleto.imagen || juego.background_image,
+        released: juegoCompleto.fechaLanzamiento || juego.released,
         rating: null,
-        genres: (juego.genres || []).map((g: string) => ({ name: g })),
-        platforms: (juego.platforms || []).map((p: string) => ({ platform: { name: p } })),
-        description_raw: juego.descripcion || '',
+        genres: (juegoCompleto.generos || []).map((g: string) => ({ name: g })),
+        platforms: (juegoCompleto.plataformas || []).map((p: string) => ({ platform: { name: p } })),
+        description_raw: juegoCompleto.descripcion || '',
+        urlSteam: juegoCompleto.urlSteam || '',
+        precio: juegoCompleto.precio ?? null,
         slug: null,
         esCustom: true
       };
