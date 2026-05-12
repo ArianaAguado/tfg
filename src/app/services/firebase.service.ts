@@ -1,11 +1,12 @@
 import { Injectable, NgZone, inject } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { Auth, onAuthStateChanged, signOut, User, browserLocalPersistence, setPersistence } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged, signOut, User, browserLocalPersistence, setPersistence, updateProfile } from '@angular/fire/auth';
 import {
   Firestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs,
   getDoc, setDoc, query, orderBy, where
 } from '@angular/fire/firestore';
 import { Timestamp } from '@angular/fire/firestore';
+
 
 // ── INTERFACES ──
 
@@ -668,5 +669,12 @@ export class FirebaseService {
       return () => unsub();
     });
   }
+
+
+  async actualizarNombre(nombre: string): Promise<void> {
+  const user = this.auth.currentUser;
+  if (!user) throw new Error('No hay usuario autenticado');
+  await updateProfile(user, { displayName: nombre });
+}
 }
 

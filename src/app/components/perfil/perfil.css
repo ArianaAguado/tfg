@@ -495,3 +495,141 @@
 .red-input:focus-within {
   border-color: rgba(255, 0, 255, 0.3);
 }
+
+/* ── CAMPO NOMBRE ── */
+.perfil-campo.campo-nombre {
+  gap: 12px;
+  align-items: center;
+}
+
+.perfil-campo.campo-nombre .campo-label {
+  flex-shrink: 0;
+}
+
+.nombre-valor-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Solo icono lápiz, sin caja */
+.btn-editar-nombre {
+  background: transparent;
+  border: none !important;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 4px 5px;
+  border-radius: 5px;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-editar-nombre:hover {
+  color: #00ccff;
+  background: rgba(0, 204, 255, 0.08);
+}
+
+/* Editor inline */
+.nombre-editor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex: 1;
+  max-width: 420px;
+}
+
+.nombre-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 204, 255, 0.35) !important;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.88rem;
+  font-family: inherit;
+  padding: 6px 10px;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  transition: 0.2s;
+}
+
+.nombre-input:focus {
+  border-color: #00ccff !important;
+  box-shadow: 0 0 8px rgba(0, 204, 255, 0.12);
+}
+
+/* Botones ✓ y ✕ sin borde, solo icono */
+.btn-nombre-ok,
+.btn-nombre-cancel {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: 0.2s;
+  padding: 0;
+  background: transparent;
+  border: none !important;
+}
+
+.btn-nombre-ok {
+  color: #00ccff;
+}
+
+.btn-nombre-ok:hover:not(:disabled) {
+  color: #00ccff;
+  background: rgba(0, 204, 255, 0.1);
+}
+
+.btn-nombre-ok:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-nombre-cancel {
+  color: #636e72;
+}
+
+.btn-nombre-cancel:hover {
+  color: #ff4466;
+  background: rgba(255, 68, 102, 0.08);
+}
+
+.btn-editar-nombre {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 4px 6px;
+  border-radius: 5px;
+  transition: 0.2s;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  opacity: 1 !important;
+  visibility: visible !important;
+  line-height: 1;
+}
+
+.btn-editar-nombre i {
+  color: #ffffff !important;
+  font-size: 0.85rem !important;
+  visibility: visible !important;
+  display: inline-block !important;
+}
+
+.btn-editar-nombre:hover,
+.btn-editar-nombre:hover i {
+  color: #00ccff !important;
+}
