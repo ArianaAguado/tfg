@@ -189,21 +189,27 @@ export class Calendario implements OnInit {
   }
 
   irADetalle(juego: any): void {
-    if (juego.esCustom) {
-      const normalizado = {
-        name: juego.name,
-        background_image: juego.background_image,
-        released: juego.released,
-        rating: null,
-        genres: (juego.genres || []).map((g: string) => ({ name: g })),
-        platforms: (juego.platforms || []).map((p: string) => ({ platform: { name: p } })),
-        description_raw: juego.descripcion || '',
-        slug: null,
-        esCustom: true
-      };
-      this.router.navigate(['/dashboard/juego-custom'], { state: { juego: normalizado } });
-    } else {
-      this.router.navigate(['/dashboard/juego', juego.slug]);
-    }
+  if (juego.esCustom) {
+    // Buscar el juego completo en juegosCustom para tener todos los datos
+    const juegoCompleto = this.juegosCustom.find(j => j.nombre === juego.name) || juego;
+    
+    const normalizado = {
+      name: juegoCompleto.nombre || juego.name,
+      background_image: juegoCompleto.imagen || juego.background_image,
+      released: juegoCompleto.fechaLanzamiento || juego.released,
+      rating: null,
+      genres: (juegoCompleto.generos || []).map((g: string) => ({ name: g })),
+      platforms: (juegoCompleto.plataformas || []).map((p: string) => ({ platform: { name: p } })),
+      description_raw: juegoCompleto.descripcion || '',
+      urlSteam: juegoCompleto.urlSteam || '',
+      precio: juegoCompleto.precio ?? null,
+      slug: null,
+      esCustom: true
+    };
+    this.router.navigate(['/dashboard/juego-custom'], { state: { juego: normalizado } });
+  } else {
+    this.router.navigate(['/dashboard/juego', juego.slug]);
   }
+}
+
 }
