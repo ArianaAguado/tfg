@@ -67,14 +67,16 @@ export class Biblioteca implements OnInit, OnDestroy {
   }
 
   mesAnterior(): void {
-    this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() - 1, 1);
-    this.generarCalendario();
-  }
+  this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() - 1, 1);
+  this.generarCalendario();
+  this.cdr.detectChanges();
+}
 
-  mesSiguiente(): void {
-    this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() + 1, 1);
-    this.generarCalendario();
-  }
+mesSiguiente(): void {
+  this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() + 1, 1);
+  this.generarCalendario();
+  this.cdr.detectChanges();
+}
 
   esDiaActual(dia: number | null): boolean {
     if (!dia) return false;
