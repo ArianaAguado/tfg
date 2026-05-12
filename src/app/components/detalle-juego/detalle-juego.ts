@@ -28,6 +28,9 @@ export class DetalleJuego implements OnInit, OnDestroy {
   cargando: boolean = true;
   esFavorito: boolean = false;
   cargandoFavorito: boolean = false;
+  hypeContador: number = 0;
+  hypeActivo: boolean = false;
+  private hypeSub?: Subscription;
 
   // ── Comentarios ──
   comentarios: Comentario[] = [];
@@ -38,9 +41,6 @@ export class DetalleJuego implements OnInit, OnDestroy {
   private comentariosSub?: Subscription;
   private readonly LIMITE_COMENTARIO = 280;
 
-  // Referencia directa al textarea, para limpiarlo a mano si el ngModel
-  // se resiste a actualizar tras el await (típica desincronización entre
-  // el modelo y el DOM cuando Firebase devuelve fuera de la zona de Angular).
   @ViewChild('textareaComentario') textareaComentario?: ElementRef<HTMLTextAreaElement>;
 
   private readonly avataresPorRol: Record<string, string> = {
@@ -73,6 +73,7 @@ export class DetalleJuego implements OnInit, OnDestroy {
       });
 
       this.suscribirComentarios();
+      this.suscribirHype();
       return;
     }
 
@@ -96,6 +97,7 @@ export class DetalleJuego implements OnInit, OnDestroy {
         });
 
         this.suscribirComentarios();
+        this.suscribirHype();
       },
       error: () => {
         this.cargando = false;
@@ -106,6 +108,7 @@ export class DetalleJuego implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.comentariosSub?.unsubscribe();
+    this.hypeSub?.unsubscribe();
   }
 
   private slugParaComentarios(): string {
@@ -122,6 +125,17 @@ export class DetalleJuego implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error cargando comentarios:', err)
+    });
+  }
+
+  private suscribirHype(): void {
+    const slug = this.slugParaComentarios();
+    this.hypeSub = this.firebase.obtenerHype(slug).subscribe({
+      next: (hype) => {
+        this.hypeContador = hype.contador;
+        this.hypeActivo = !!this.uidActual && hype.usuarios.includes(this.uidActual);
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -144,11 +158,6 @@ export class DetalleJuego implements OnInit, OnDestroy {
         this.textoComentario
       );
 
-      // Limpiamos el modelo (TS) y también el DOM (input nativo) porque
-      // el binding bidireccional de ngModel a veces no refresca el DOM
-      // cuando el cambio del modelo ocurre justo tras un await que vino
-      // fuera de la zona de Angular. Tocar las dos partes garantiza que
-      // el cajón se vacía visualmente sí o sí.
       this.textoComentario = '';
       if (this.textareaComentario) {
         this.textareaComentario.nativeElement.value = '';
@@ -201,4 +210,19 @@ export class DetalleJuego implements OnInit, OnDestroy {
   obtenerPlataformas(): string {
     return this.juego?.platforms?.map((p: any) => p.platform.name).join(', ') || 'No disponible';
   }
+
+  async toggleHype(): Promise<void> {
+    console.log('toggleHype llamado');
+    console.log('uidActual:', this.uidActual);
+    console.log('slug:', this.slugParaComentarios());
+    console.log('hypeActivo:', this.hypeActivo);
+    if (!this.uidActual) return;
+    const slug = this.slugParaComentarios();
+    if (this.hypeActivo) {
+      await this.firebase.quitarHype(slug, this.uidActual);
+    } else {
+      await this.firebase.darHype(slug, this.uidActual);
+    }
+  }
 }
+
