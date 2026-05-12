@@ -67,20 +67,19 @@ export class Rawg {
   }
 
   // Busca en RAWG y en Firebase, fusiona resultados
-  buscarJuegos(query: string, fecha: Date): Observable<any[]> {
-    const { fechaInicio, fechaFin } = this.rangoMes(fecha);
-    const url = `${this.apiUrl}?key=${this.apiKey}&search=${query}&dates=${fechaInicio},${fechaFin}&page_size=40`;
+  buscarJuegos(query: string): Observable<any[]> {
+  const url = `${this.apiUrl}?key=${this.apiKey}&search=${query}&page_size=40`;
 
-    const rawg$ = this.http.get<any>(url).pipe(
-      map(data => (data.results || []).map((j: any) => this.normalizarRawg(j)))
-    );
+  const rawg$ = this.http.get<any>(url).pipe(
+    map(data => (data.results || []).map((j: any) => this.normalizarRawg(j)))
+  );
 
-    const firebase$ = from(this.firebase.buscarPorNombre(query));
+  const firebase$ = from(this.firebase.buscarPorNombre(query));
 
-    return forkJoin([rawg$, firebase$]).pipe(
-      map(([deRawg, deFirebase]) => [...deRawg, ...deFirebase])
-    );
-  }
+  return forkJoin([rawg$, firebase$]).pipe(
+    map(([deRawg, deFirebase]) => [...deRawg, ...deFirebase])
+  );
+}
 
   private rangoMes(fecha: Date) {
     const año = fecha.getFullYear();
