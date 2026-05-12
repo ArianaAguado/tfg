@@ -628,4 +628,45 @@ export class FirebaseService {
       };
     });
   }
+
+  async darHype(slug: string, uid: string): Promise<void> {
+    const ref = doc(this.db, 'hype', slug);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data['usuarios']?.includes(uid)) return; // ya dio hype
+      await updateDoc(ref, {
+        contador: data['contador'] + 1,
+        usuarios: [...data['usuarios'], uid]
+      });
+    } else {
+      await setDoc(ref, { contador: 1, usuarios: [uid] });
+    }
+  }
+
+  async quitarHype(slug: string, uid: string): Promise<void> {
+    const ref = doc(this.db, 'hype', slug);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const data = snap.data();
+    await updateDoc(ref, {
+      contador: Math.max(0, data['contador'] - 1),
+      usuarios: data['usuarios'].filter((u: string) => u !== uid)
+    });
+  }
+
+  obtenerHype(slug: string): Observable<{ contador: number, usuarios: string[] }> {
+    return new Observable(observer => {
+      const ref = doc(this.db, 'hype', slug);
+      const unsub = onSnapshot(ref, snap => {
+        if (snap.exists()) {
+          observer.next(snap.data() as { contador: number, usuarios: string[] });
+        } else {
+          observer.next({ contador: 0, usuarios: [] });
+        }
+      });
+      return () => unsub();
+    });
+  }
 }
+
