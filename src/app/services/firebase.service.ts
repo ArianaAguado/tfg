@@ -2,7 +2,7 @@ import { Injectable, NgZone, inject } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Auth, onAuthStateChanged, signOut, User, browserLocalPersistence, setPersistence, updateProfile } from '@angular/fire/auth';
 import {
-  Firestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs,
+  Firestore, collection, collectionGroup, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs,
   getDoc, setDoc, query, orderBy, where
 } from '@angular/fire/firestore';
 import { Timestamp } from '@angular/fire/firestore';
@@ -106,6 +106,35 @@ export type EstadoAmistad =
   | 'pendiente_recibida'
   | 'amigos'
   | 'mismo_usuario';
+
+export interface TicketSoporte {
+  id?:             string;
+  asunto:          string;
+  descripcion:     string;
+  capturas:        string[];
+  estado:          'abierto' | 'respondido' | 'cerrado';
+  autorId:         string;
+  autorNombre:     string;
+  autorEmail:      string;
+  autorRol:        string;
+  fechaCreacion:   number;
+  respuesta?:      string;
+  fechaRespuesta?: number;
+}
+
+export interface UsuarioAdmin {
+  uid: string;
+  nombre: string;
+  email: string;
+  avatarUrl?: string;
+  rol: 'usuario' | 'desarrollador' | 'admin';
+  baneado?: boolean;
+  fechaRegistro?: string;
+  bio?: string;
+  generosFav?: string[];
+  plataformasFav?: string[];
+  redesSociales?: { steam?: string; [key: string]: string | undefined };
+}
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
@@ -299,21 +328,21 @@ export class FirebaseService {
   async añadirFavorito(juego: JuegoFavorito): Promise<void> {
     const uid = this.auth.currentUser?.uid;
     if (!uid) { console.error('No hay usuario'); return; }
-    const id = juego.released + '_' + juego.name.replace(/\s/g, '_');
+    const id = juego.released + '' + juego.name.replace(/\s/g, '');
     await setDoc(doc(this.db, 'favoritos', uid, 'juegos', id), juego);
   }
 
   async quitarFavorito(juego: JuegoFavorito): Promise<void> {
     const uid = this.auth.currentUser?.uid;
     if (!uid) { console.error('No hay usuario'); return; }
-    const id = juego.released + '_' + juego.name.replace(/\s/g, '_');
+    const id = juego.released + '' + juego.name.replace(/\s/g, '');
     await deleteDoc(doc(this.db, 'favoritos', uid, 'juegos', id));
   }
 
   async esFavorito(juego: JuegoFavorito): Promise<boolean> {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return false;
-    const id = juego.released + '_' + juego.name.replace(/\s/g, '_');
+    const id = juego.released + '' + juego.name.replace(/\s/g, '');
     const snap = await getDoc(doc(this.db, 'favoritos', uid, 'juegos', id));
     return snap.exists();
   }

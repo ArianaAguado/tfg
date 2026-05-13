@@ -6,11 +6,12 @@ import { User } from '@angular/fire/auth';
 import { Subscription, combineLatest } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
+import { Notificaciones } from '../notificaciones/notificaciones';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, BtnCerrarSesion],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, BtnCerrarSesion, Notificaciones],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -67,6 +68,7 @@ export class Dashboard implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     });
 
+    // Solicitudes de amistad: badge para todos los usuarios autenticados.
     this.escucharSolicitudesAmistad();
   }
 
@@ -97,6 +99,16 @@ export class Dashboard implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error contando solicitudes de amistad:', err)
+    });
+  }
+
+  private escucharTicketsSoporte(): void {
+    this.ticketsSub = this.firebase.obtenerTicketsAdmin().subscribe({
+      next: (tickets) => {
+        this.ticketsAbiertosCount = tickets.filter(t => t.estado === 'abierto').length;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error contando tickets soporte:', err)
     });
   }
 

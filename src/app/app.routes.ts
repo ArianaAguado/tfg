@@ -12,6 +12,10 @@ import { ProponerJuegoComponent } from './components/proponerjuego/proponerjuego
 import { DetalleJuego } from './components/detalle-juego/detalle-juego';
 import { PerfilPublico } from './components/perfil-publico/perfil-publico';
 import { Amigos } from './components/amigos/amigos';
+import { SoporteComponent } from './components/soporte/soporte';
+import { AdminSoporteComponent } from './components/admin-soporte/admin-soporte';
+import { AdminPanelComponent } from './components/admin-panel.component/admin-panel.component';
+import { EstadisticasComponent } from './components/estadisticas.component/estadisticas.component';
 import { authGuard } from './guards/auth.guard';
 import { SoporteComponent } from './components/soporte/soporte';
 import { AdminSoporteComponent } from './components/admin-soporte/admin-soporte';

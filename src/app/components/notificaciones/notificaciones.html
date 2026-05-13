@@ -1,0 +1,42 @@
+<button class="campana-btn"
+        (click)="toggleAbierto(); $event.stopPropagation()"
+        [class.tiene-nuevas]="noLeidas > 0"
+        title="Notificaciones">
+  <span class="material-icons">notifications</span>
+  <span class="punto-rosa" *ngIf="noLeidas > 0"></span>
+</button>
+
+<div class="dropdown" *ngIf="abierto" (click)="$event.stopPropagation()">
+  <header class="dropdown-header">
+    <h3>Notificaciones</h3>
+    <button class="btn-marcar-todas"
+            *ngIf="noLeidas > 0"
+            (click)="marcarTodasLeidas()">
+      Marcar todas como leídas
+    </button>
+  </header>
+
+  <div class="lista-notificaciones" *ngIf="notificaciones.length > 0; else vacio">
+    <div *ngFor="let n of notificaciones"
+         class="notificacion-item"
+         [class.no-leida]="!n.leida"
+         (click)="clicNotificacion(n)">
+      <img [src]="n.juego.background_image"
+           [alt]="n.juego.name"
+           class="notif-imagen"
+           *ngIf="n.juego.background_image">
+      <div class="notif-cuerpo">
+        <p class="notif-mensaje">{{ n.mensaje }}</p>
+        <span class="notif-fecha">{{ n.fechaLanzamiento }}</span>
+      </div>
+      <span class="punto-no-leida" *ngIf="!n.leida"></span>
+    </div>
+  </div>
+
+  <ng-template #vacio>
+    <p class="vacio-mensaje">
+      No tienes notificaciones.<br>
+      <small>Añade juegos a tu biblioteca y te avisaremos cuando se acerquen sus lanzamientos.</small>
+    </p>
+  </ng-template>
+</div>

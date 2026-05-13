@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="admin-wrapper">
 
   <!-- HEADER -->
@@ -258,5 +259,142 @@
 
     </div>
   </div>
+=======
+<div class="stats-wrapper">
+
+  <!-- HEADER -->
+  <div class="stats-header">
+    <div class="stats-header-text">
+      <h1>Mis <span class="neon">Estadísticas</span></h1>
+      <p>Rendimiento de tus propuestas en la plataforma</p>
+    </div>
+    <div class="stats-period">
+      <button [class.active]="periodo === '7d'" (click)="setPeriodo('7d')">7 días</button>
+      <button [class.active]="periodo === '30d'" (click)="setPeriodo('30d')">30 días</button>
+      <button [class.active]="periodo === 'all'" (click)="setPeriodo('all')">Todo</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-state" *ngIf="cargando">
+    <i class="fa-solid fa-circle-notch fa-spin"></i>
+    <p>Cargando estadísticas...</p>
+  </div>
+
+  <ng-container *ngIf="!cargando">
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon"><i class="fa-solid fa-eye"></i></div>
+        <div class="kpi-data">
+          <span class="kpi-value">{{ totalVisitas | number }}</span>
+          <span class="kpi-label">Visitas totales</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon accent-blue"><i class="fa-solid fa-heart"></i></div>
+        <div class="kpi-data">
+          <span class="kpi-value">{{ totalInteresados | number }}</span>
+          <span class="kpi-label">Interesados</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon accent-orange"><i class="fa-solid fa-file-circle-plus"></i></div>
+        <div class="kpi-data">
+          <span class="kpi-value">{{ propuestas.length }}</span>
+          <span class="kpi-label">Propuestas enviadas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" *ngIf="propuestas.length === 0">
+      <i class="fa-solid fa-chart-bar"></i>
+      <h3>Sin datos aún</h3>
+      <p>Envía tu primera propuesta para ver estadísticas aquí.</p>
+    </div>
+
+    <!-- TABLA DE PROPUESTAS -->
+    <div class="section-block" *ngIf="propuestas.length > 0">
+      <h2 class="section-title">
+        <i class="fa-solid fa-gamepad"></i> Mis propuestas
+      </h2>
+      <div class="propuestas-tabla">
+        <div class="tabla-header">
+          <span>Juego</span>
+          <span>Estado</span>
+          <span>Visitas</span>
+          <span>Interesados</span>
+        </div>
+        <div class="tabla-row" *ngFor="let p of propuestas">
+          <div class="juego-cell">
+            <img [src]="p.imagen" [alt]="p.nombre" class="juego-thumb"
+              *ngIf="p.imagen && !p.imagen.startsWith('data')" />
+            <div class="juego-thumb placeholder" *ngIf="!p.imagen || p.imagen.startsWith('data')">
+              <i class="fa-solid fa-image"></i>
+            </div>
+            <div>
+              <span class="juego-nombre">{{ p.nombre }}</span>
+              <span class="juego-plataformas">{{ p.plataformas?.join(', ') }}</span>
+            </div>
+          </div>
+          <div class="estado-cell">
+            <span class="estado-badge"
+              [class.badge-pendiente]="p.estado === 'pendiente'"
+              [class.badge-aprobado]="p.estado === 'aprobado'"
+              [class.badge-rechazado]="p.estado === 'rechazado'">
+              {{ estadoLabel(p.estado) }}
+            </span>
+          </div>
+          <div class="stat-cell">
+            <i class="fa-solid fa-eye"></i>
+            {{ p.visitas ?? 0 | number }}
+          </div>
+          <div class="stat-cell">
+            <i class="fa-solid fa-heart"></i>
+            {{ p.interesados ?? 0 | number }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP JUEGO -->
+    <div class="section-block destacado-block" *ngIf="topPropuesta">
+      <h2 class="section-title">
+        <i class="fa-solid fa-trophy"></i> Tu mejor propuesta
+      </h2>
+      <div class="destacado-card">
+        <div class="destacado-img">
+          <img [src]="topPropuesta.imagen" [alt]="topPropuesta.nombre"
+            *ngIf="topPropuesta.imagen && !topPropuesta.imagen.startsWith('data')" />
+          <div class="destacado-img-placeholder"
+            *ngIf="!topPropuesta.imagen || topPropuesta.imagen.startsWith('data')">
+            <i class="fa-solid fa-gamepad"></i>
+          </div>
+        </div>
+        <div class="destacado-info">
+          <h3>{{ topPropuesta.nombre }}</h3>
+          <div class="destacado-stats">
+            <div class="dest-stat">
+              <i class="fa-solid fa-eye"></i>
+              <span>{{ topPropuesta.visitas ?? 0 | number }}</span>
+              <small>visitas</small>
+            </div>
+            <div class="dest-stat">
+              <i class="fa-solid fa-heart"></i>
+              <span>{{ topPropuesta.interesados ?? 0 | number }}</span>
+              <small>interesados</small>
+            </div>
+          </div>
+          <p class="destacado-desc" *ngIf="topPropuesta.descripcion">
+            {{ truncar(topPropuesta.descripcion, 160) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+>>>>>>> main
 
 </div>

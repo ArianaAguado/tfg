@@ -72,21 +72,21 @@
     <p>Buscando lanzamientos...</p>
   </div>
 
-  <section class="calendar-section" *ngIf="!cargando">
-    <header class="calendar-header">
-      <button class="nav-btn" (click)="mesAnterior()">&#8592;</button>
-      <h2>{{ (fechaActual | date:'MMMM yyyy') | titlecase }}</h2>
-      <button class="nav-btn" (click)="mesSiguiente()">&#8594;</button>
-    </header>
+    <section class="calendar-section" *ngIf="!cargando">
+      <header class="calendar-header">
+        <button class="nav-btn" (click)="mesAnterior()">&#8592;</button>
+        <h2>{{ (fechaActual | date:'MMMM yyyy') | titlecase }}</h2>
+        <button class="nav-btn" (click)="mesSiguiente()">&#8594;</button>
+      </header>
 
-    <div class="calendar-grid">
-      <div class="weekday">Lun</div>
-      <div class="weekday">Mar</div>
-      <div class="weekday">Mié</div>
-      <div class="weekday">Jue</div>
-      <div class="weekday">Vie</div>
-      <div class="weekday">Sáb</div>
-      <div class="weekday">Dom</div>
+      <div class="calendar-grid">
+        <div class="weekday">Lun</div>
+        <div class="weekday">Mar</div>
+        <div class="weekday">Mié</div>
+        <div class="weekday">Jue</div>
+        <div class="weekday">Vie</div>
+        <div class="weekday">Sáb</div>
+        <div class="weekday">Dom</div>
 
       <ng-container *ngFor="let dia of diasMes">
         <div *ngIf="dia === null" class="calendar-day empty"></div>
@@ -95,7 +95,7 @@
           [class.tiene-juegos]="obtenerJuegosDelDia(dia).length > 0"
           (click)="obtenerJuegosDelDia(dia).length > 0 && abrirModal(obtenerJuegosDelDia(dia))">
 
-          <span class="day-number">{{ dia }}</span>
+            <span class="day-number">{{ dia }}</span>
 
           <div *ngIf="obtenerJuegosDelDia(dia)[0] as juego" class="game-info">
             <span class="game-dot"></span>
