@@ -930,57 +930,70 @@ export class FirebaseService {
    * exista de verdad, los campos se devuelven con 0 / null para que la vista pinte.
    */
   getMisPropuestas(uid: string): Observable<any[]> {
-    return new Observable(observer => {
-      // Suscribimos a peticiones activas y al historial: las propuestas viven en dos sitios
-      const qActivas = query(
-        collection(this.db, 'peticiones_juegos'),
-        where('desarrolladorId', '==', uid)
-      );
-      const qHistorial = query(
-        collection(this.db, 'historial_peticiones'),
-        where('desarrolladorId', '==', uid)
-      );
+  return new Observable(observer => {
+    const qActivas = query(
+      collection(this.db, 'peticiones_juegos'),
+      where('desarrolladorId', '==', uid)
+    );
+    const qHistorial = query(
+      collection(this.db, 'historial_peticiones'),
+      where('desarrolladorId', '==', uid)
+    );
 
-      let activas: any[] = [];
-      let historial: any[] = [];
+    let activas: any[] = [];
+    let historial: any[] = [];
 
-      const emitir = () => {
-        const todas = [...activas, ...historial].map(p => ({
+    const emitir = async () => {
+      const todas = [...activas, ...historial];
+
+      const enriquecidas = await Promise.all(todas.map(async p => {
+        // Slug del juego custom (mismo cálculo que en detalle-juego)
+        const slug = 'custom_' + (p.nombre ?? '').toLowerCase().trim().replace(/\s+/g, '_');
+
+        // Visitas desde stats_juegos
+        const statsSnap = await getDoc(doc(this.db, 'stats_juegos', slug));
+        const visitas = statsSnap.exists() ? (statsSnap.data()['visitas'] ?? 0) : 0;
+
+        // Interesados desde hype
+        const hypeSnap = await getDoc(doc(this.db, 'hype', slug));
+        const interesados = hypeSnap.exists() ? (hypeSnap.data()['contador'] ?? 0) : 0;
+
+        return {
           id: p.id,
           nombre: p.nombre,
           imagen: p.imagen,
           plataformas: p.plataformas ?? [],
           descripcion: p.descripcion ?? '',
           estado: p.estado ?? 'pendiente',
-          visitas: p.visitas ?? 0,
-          valoracionMedia: p.valoracionMedia ?? 0,
-          numValoraciones: p.numValoraciones ?? 0,
-          interesados: p.interesados ?? 0
-        }));
-        this.zone.run(() => observer.next(todas));
-      };
+          visitas,
+          interesados,
+        };
+      }));
 
-      const unsubActivas = onSnapshot(qActivas,
-        snap => {
-          activas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          emitir();
-        },
-        err => observer.error(err)
-      );
+      this.zone.run(() => observer.next(enriquecidas));
+    };
 
-      const unsubHistorial = onSnapshot(qHistorial,
-        snap => {
-          historial = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          emitir();
-        },
-        err => observer.error(err)
-      );
+    const unsubActivas = onSnapshot(qActivas,
+      snap => { activas = snap.docs.map(d => ({ id: d.id, ...d.data() })); emitir(); },
+      err => observer.error(err)
+    );
+    const unsubHistorial = onSnapshot(qHistorial,
+      snap => { historial = snap.docs.map(d => ({ id: d.id, ...d.data() })); emitir(); },
+      err => observer.error(err)
+    );
 
-      return () => {
-        unsubActivas();
-        unsubHistorial();
-      };
-    });
+    return () => { unsubActivas(); unsubHistorial(); };
+  });
+}
+
+
+  async incrementarVisita(slug: string): Promise<void> {
+  const ref = doc(this.db, 'stats_juegos', slug);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    await updateDoc(ref, { visitas: snap.data()['visitas'] + 1 });
+  } else {
+    await setDoc(ref, { visitas: 1 });
   }
-
+}
 }

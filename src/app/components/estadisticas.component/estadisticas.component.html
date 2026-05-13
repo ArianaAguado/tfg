@@ -31,13 +31,6 @@
         </div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-icon accent-green"><i class="fa-solid fa-star"></i></div>
-        <div class="kpi-data">
-          <span class="kpi-value">{{ mediaValoracion | number:'1.1-1' }}</span>
-          <span class="kpi-label">Valoración media</span>
-        </div>
-      </div>
-      <div class="kpi-card">
         <div class="kpi-icon accent-blue"><i class="fa-solid fa-heart"></i></div>
         <div class="kpi-data">
           <span class="kpi-value">{{ totalInteresados | number }}</span>
@@ -70,7 +63,6 @@
           <span>Juego</span>
           <span>Estado</span>
           <span>Visitas</span>
-          <span>Valoración</span>
           <span>Interesados</span>
         </div>
         <div class="tabla-row" *ngFor="let p of propuestas">
@@ -96,11 +88,6 @@
           <div class="stat-cell">
             <i class="fa-solid fa-eye"></i>
             {{ p.visitas ?? 0 | number }}
-          </div>
-          <div class="stat-cell">
-            <i class="fa-solid fa-star"></i>
-            {{ p.valoracionMedia ?? 0 | number:'1.1-1' }}
-            <small>({{ p.numValoraciones ?? 0 }})</small>
           </div>
           <div class="stat-cell">
             <i class="fa-solid fa-heart"></i>
@@ -131,11 +118,6 @@
               <i class="fa-solid fa-eye"></i>
               <span>{{ topPropuesta.visitas ?? 0 | number }}</span>
               <small>visitas</small>
-            </div>
-            <div class="dest-stat">
-              <i class="fa-solid fa-star"></i>
-              <span>{{ topPropuesta.valoracionMedia ?? 0 | number:'1.1-1' }}</span>
-              <small>valoración</small>
             </div>
             <div class="dest-stat">
               <i class="fa-solid fa-heart"></i>

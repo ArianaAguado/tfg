@@ -1,7 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Auth } from '@angular/fire/auth';
 import { FirebaseService } from '../../services/firebase.service';
+import { Subscription } from 'rxjs';
+import { filter, take, switchMap } from 'rxjs/operators';
 
 export interface PropuestaStats {
   id?: string;
@@ -11,8 +13,6 @@ export interface PropuestaStats {
   descripcion?: string;
   estado?: 'pendiente' | 'aprobado' | 'rechazado';
   visitas?: number;
-  valoracionMedia?: number;
-  numValoraciones?: number;
   interesados?: number;
 }
 
@@ -23,7 +23,7 @@ export interface PropuestaStats {
   templateUrl: './estadisticas.component.html',
   styleUrl: './estadisticas.component.css',
 })
-export class EstadisticasComponent implements OnInit {
+export class EstadisticasComponent implements OnInit, OnDestroy {
   private firebase = inject(FirebaseService);
   private auth     = inject(Auth);
   private cdr      = inject(ChangeDetectorRef);
@@ -31,16 +31,10 @@ export class EstadisticasComponent implements OnInit {
   cargando   = true;
   periodo    = '30d';
   propuestas: PropuestaStats[] = [];
+  private sub?: Subscription;
 
-  // ── KPIs calculados ─────────────────────────────────────────────
   get totalVisitas(): number {
     return this.propuestas.reduce((s, p) => s + (p.visitas ?? 0), 0);
-  }
-
-  get mediaValoracion(): number {
-    const con = this.propuestas.filter(p => (p.numValoraciones ?? 0) > 0);
-    if (!con.length) return 0;
-    return con.reduce((s, p) => s + (p.valoracionMedia ?? 0), 0) / con.length;
   }
 
   get totalInteresados(): number {
@@ -58,20 +52,24 @@ export class EstadisticasComponent implements OnInit {
     this.cargarEstadisticas();
   }
 
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
   setPeriodo(p: string): void {
     this.periodo = p;
     this.cargarEstadisticas();
   }
 
   private cargarEstadisticas(): void {
-    const user = this.auth.currentUser;
-    if (!user) return;
+    this.sub?.unsubscribe();
     this.cargando = true;
 
-    // Carga las propuestas del desarrollador actual.
-    // Ajusta el método de firebase.service según tu implementación:
-    // - getMisPropuestas(uid) si tienes un campo autorId en la colección juegos/propuestas
-    this.firebase.getMisPropuestas(user.uid).subscribe({
+    this.sub = this.firebase.usuario$.pipe(
+      filter(user => user !== undefined && user !== null),
+      take(1),
+      switchMap(user => this.firebase.getMisPropuestas(user!.uid))
+    ).subscribe({
       next: (data: PropuestaStats[]) => {
         this.propuestas = data;
         this.cargando   = false;
