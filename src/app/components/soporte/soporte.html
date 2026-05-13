@@ -1,0 +1,146 @@
+<div class="soporte-wrapper">
+
+    <div class="header">
+        <h1>Contactar con el <span class="texto-neon">equipo</span></h1>
+        <p>¿Tienes un problema o quieres solicitar algo? Escríbenos.</p>
+    </div>
+
+    <div *ngIf="error" class="alert-error">
+        <i class="fa-solid fa-triangle-exclamation"></i> {{ error }}
+    </div>
+
+    <!-- ── ESTADO ENVIADO ── -->
+    <div class="enviado-state" *ngIf="enviado">
+        <i class="fa-solid fa-circle-check"></i>
+        <h2>¡Mensaje enviado!</h2>
+        <p>El equipo revisará tu solicitud y te responderá en breve.</p>
+        <button class="btn-nueva-propuesta" (click)="volverAEnviar()">
+            <!-- FIX 2: clase btn-icon para controlar el tamaño del icono por CSS -->
+             Enviar otro mensaje
+        </button>
+    </div>
+
+    <!-- ── FORMULARIO ── -->
+    <div class="soporte-form" *ngIf="!enviado">
+
+        <div class="form-group">
+            <label>Asunto</label>
+            <input type="text" [(ngModel)]="asunto"
+                placeholder="Ej: Solicitud de rol desarrollador, error en el calendario..." />
+        </div>
+
+        <div class="form-group">
+            <label>Descripción</label>
+            <textarea [(ngModel)]="descripcion" rows="5"
+                placeholder="Explica con detalle tu petición o problema..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Capturas <small>(opcional)</small></label>
+            <label for="capturaInput" class="upload-label">
+                <i class="fa-solid fa-upload"></i>
+                {{ subiendoCaptura ? 'Subiendo...' : 'Adjuntar imagen' }}
+            </label>
+            <input id="capturaInput" type="file" accept="image/*" multiple
+                hidden
+                (change)="onCapturaSeleccionada($event)" />
+
+            <div class="capturas-preview" *ngIf="capturas.length > 0">
+                <div class="captura-item"
+                    *ngFor="let url of capturas; let i = index">
+                    <img [src]="url" alt="Captura {{ i + 1 }}" />
+                    <button class="btn-quitar-captura"
+                        (click)="eliminarCaptura(i)">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-enviar" (click)="enviar()"
+            [disabled]="enviando || subiendoCaptura">
+            <i class="fa-solid fa-paper-plane"></i>
+            {{ enviando ? 'Enviando...' : 'Enviar mensaje' }}
+        </button>
+
+    </div>
+
+    <!-- ── MIS TICKETS ── -->
+    <!--
+        FIX 3: el *ngIf usa misTickets.length > 0 igual que antes,
+        pero ahora cargarTickets() se llama también tras enviar,
+        por lo que misTickets se mantiene actualizado y el botón
+        no desaparece al volver al formulario.
+    -->
+    <div class="mis-tickets-section" *ngIf="misTickets.length > 0">
+
+        <button class="btn-toggle-historial" (click)="toggleHistorial()">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            {{ verHistorial ? 'Ocultar mis mensajes' : 'Ver mis mensajes (' +
+            misTickets.length + ')' }}
+        </button>
+
+        <div *ngIf="verHistorial">
+            <div class="historial-lista">
+                <div class="historial-card ticket-card"
+                    *ngFor="let t of ticketsPaginados"
+                    [class.respondido]="t.estado === 'respondido'"
+                    [class.cerrado]="t.estado === 'cerrado'">
+
+                    <div class="historial-badge"
+                        [class.badge-abierto]="t.estado === 'abierto'"
+                        [class.badge-respondido]="t.estado === 'respondido'"
+                        [class.badge-cerrado]="t.estado === 'cerrado'">
+                        <i class="fa-solid"
+                            [class.fa-envelope-open]="t.estado === 'abierto'"
+                            [class.fa-reply]="t.estado === 'respondido'"
+                            [class.fa-lock]="t.estado === 'cerrado'"></i>
+                        {{ estadoLabel(t.estado) }}
+                    </div>
+
+                    <div class="ticket-info">
+                        <h4>{{ t.asunto }}</h4>
+                        <p class="ticket-desc">{{ truncar(t.descripcion) }}</p>
+                        <span class="historial-fecha">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                            Enviado el {{ t.fechaCreacion |
+                            date:'dd/MM/yyyy HH:mm' }}
+                        </span>
+
+                        <div class="capturas-mini" *ngIf="t.capturas?.length">
+                            <img *ngFor="let url of t.capturas" [src]="url"
+                                alt="Captura" />
+                        </div>
+
+                        <div class="respuesta-admin" *ngIf="t.respuesta">
+                            <p class="respuesta-label">
+                                <i class="fa-solid fa-headset"></i> Respuesta
+                                del equipo
+                            </p>
+                            <p class="respuesta-texto">{{ t.respuesta }}</p>
+                            <span class="historial-fecha">
+                                <i class="fa-solid fa-calendar-check"></i>
+                                {{ t.fechaRespuesta | date:'dd/MM/yyyy HH:mm' }}
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="paginacion" *ngIf="totalPaginas > 1">
+                <button class="nav-btn"
+                    (click)="cambiarPagina(paginaActual - 1)"
+                    [disabled]="paginaActual === 1">&#8249;</button>
+                <button class="pag-num" *ngFor="let p of paginas"
+                    [class.activo]="paginaActual === p"
+                    (click)="cambiarPagina(p)">{{ p }}</button>
+                <button class="nav-btn"
+                    (click)="cambiarPagina(paginaActual + 1)"
+                    [disabled]="paginaActual === totalPaginas">&#8250;</button>
+            </div>
+        </div>
+
+    </div>
+
+</div>

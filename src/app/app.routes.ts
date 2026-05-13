@@ -13,6 +13,8 @@ import { DetalleJuego } from './components/detalle-juego/detalle-juego';
 import { PerfilPublico } from './components/perfil-publico/perfil-publico';
 import { Amigos } from './components/amigos/amigos';
 import { authGuard } from './guards/auth.guard';
+import { SoporteComponent } from './components/soporte/soporte';
+import { AdminSoporteComponent } from './components/admin-soporte/admin-soporte';
 
 export const routes: Routes = [
   { path: '', component: Inicio },
@@ -33,7 +35,9 @@ export const routes: Routes = [
       { path: 'peticiones', component: PeticionesJuegosComponent },
       { path: 'proponer-juego', component: ProponerJuegoComponent },
       { path: 'juego/:slug', component: DetalleJuego },
-      { path: 'juego-custom', component: DetalleJuego }
+      { path: 'juego-custom', component: DetalleJuego },
+      { path: 'soporte', component: SoporteComponent },
+      { path: 'admin-soporte', component: AdminSoporteComponent },
     ]
   },
 ];

@@ -731,3 +731,30 @@
   margin: 20px 0 10px 15px;
   letter-spacing: 1px;
 }
+
+/* ── Separador de rol en el sidebar ── */
+.nav-separator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0px;
+  padding: 0 12px;
+}
+
+.nav-separator::before,
+.nav-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15); /* ajusta al color de tu sidebar */
+}
+
+.nav-separator-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);     /* ajusta al color de tu sidebar */
+  white-space: nowrap;
+  user-select: none;
+}

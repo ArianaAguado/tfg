@@ -1,0 +1,154 @@
+<div class="peticiones-wrapper">
+
+    <div class="header-peticiones">
+        <h1>Bandeja de <span class="texto-neon">soporte</span></h1>
+        <p>{{ contadorPorEstado.abierto }} ticket{{ contadorPorEstado.abierto
+            !== 1 ? 's' : '' }} abierto{{ contadorPorEstado.abierto !== 1 ? 's'
+            : '' }} pendiente{{ contadorPorEstado.abierto !== 1 ? 's' : ''
+            }}.</p>
+    </div>
+
+    <!-- Éxito -->
+    <div *ngIf="mensajeExito" class="alert-success">
+        <i class="fa-solid fa-circle-check"></i> {{ mensajeExito }}
+    </div>
+
+    <!-- Filtros de estado -->
+    <div class="filtros-estado">
+        <button *ngFor="let f of filtrosDisponibles"
+            class="filtro-btn"
+            [class.activo]="filtroEstado === f.id"
+            (click)="cambiarFiltro(f.id)">
+            {{ f.label }}
+            <span class="filtro-count">{{ contadorPorEstado[f.id] }}</span>
+        </button>
+    </div>
+
+    <!-- Lista de tickets -->
+    <div class="lista-peticiones">
+
+        <div *ngIf="ticketsPaginados.length === 0" class="no-peticiones">
+            <i class="fa-solid fa-inbox"></i>
+            <p>No hay tickets en esta categoría.</p>
+        </div>
+
+        <div class="peticion-card ticket-admin-card"
+            *ngFor="let t of ticketsPaginados">
+
+            <div class="card-badge"
+                [class.badge-abierto]="t.estado === 'abierto'"
+                [class.badge-respondido]="t.estado === 'respondido'"
+                [class.badge-cerrado]="t.estado === 'cerrado'">
+                {{ estadoLabel(t.estado) | uppercase }}
+            </div>
+
+            <div class="peticion-content">
+                <div class="peticion-info" style="flex: 1">
+
+                    <h3>{{ t.asunto }}</h3>
+
+                    <div class="dev-data">
+                        <span><i class="fa-solid fa-user"></i> {{ t.autorNombre
+                            }}</span>
+                        <span><i class="fa-solid fa-envelope"></i> {{
+                            t.autorEmail }}</span>
+                        <span><i class="fa-solid fa-id-badge"></i> {{ t.autorRol
+                            }}</span>
+                    </div>
+
+                    <p class="desc">{{ t.descripcion }}</p>
+
+                    <!-- Capturas -->
+                    <div class="capturas-mini" *ngIf="t.capturas?.length">
+                        <img *ngFor="let url of t.capturas" [src]="url"
+                            alt="Captura adjunta" />
+                    </div>
+
+                    <span class="historial-fecha">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        Recibido el {{ t.fechaCreacion | date:'dd/MM/yyyy HH:mm'
+                        }}
+                    </span>
+
+                    <!-- Respuesta previa -->
+                    <div class="respuesta-admin" *ngIf="t.respuesta">
+                        <p class="respuesta-label">
+                            <i class="fa-solid fa-reply"></i> Tu respuesta
+                        </p>
+                        <p class="respuesta-texto">{{ t.respuesta }}</p>
+                        <span class="historial-fecha">
+                            {{ t.fechaRespuesta | date:'dd/MM/yyyy HH:mm' }}
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="peticion-actions">
+                <button class="btn-aprobar" (click)="abrirRespuesta(t)"
+                    [disabled]="cargando">
+                    <i class="fa-solid fa-reply"></i>
+                    {{ t.respuesta ? 'Editar respuesta' : 'Responder' }}
+                </button>
+                <button class="btn-rechazar" (click)="cerrarTicket(t)"
+                    [disabled]="cargando || t.estado === 'cerrado'">
+                    <i class="fa-solid fa-lock"></i> Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button class="nav-btn" (click)="cambiarPagina(paginaHistorial - 1)"
+            [disabled]="paginaHistorial === 1">&#8249;</button>
+        <button class="pag-num" *ngFor="let p of paginas"
+            [class.activo]="paginaHistorial === p"
+            (click)="cambiarPagina(p)">{{ p }}</button>
+        <button class="nav-btn" (click)="cambiarPagina(paginaHistorial + 1)"
+            [disabled]="paginaHistorial === totalPaginas">&#8250;</button>
+    </div>
+
+</div>
+
+<!-- ── MODAL RESPUESTA ── -->
+<div class="modal-overlay" *ngIf="ticketActivo" (click)="cerrarRespuesta()">
+    <div class="modal-contenido respuesta-modal"
+        (click)="$event.stopPropagation()">
+        <button class="modal-cerrar" (click)="cerrarRespuesta()">✕</button>
+
+        <h2 class="modal-titulo">
+            <i class="fa-solid fa-reply"></i> Responder ticket
+        </h2>
+
+        <div class="ticket-resumen">
+            <p class="resumen-asunto">{{ ticketActivo.asunto }}</p>
+            <p class="resumen-autor">
+                <i class="fa-solid fa-user"></i> {{ ticketActivo.autorNombre }}
+                &nbsp;·&nbsp;
+                <i class="fa-solid fa-envelope"></i> {{ ticketActivo.autorEmail
+                }}
+            </p>
+            <p class="resumen-desc">{{ ticketActivo.descripcion }}</p>
+        </div>
+
+        <div class="form-group">
+            <label>Tu respuesta</label>
+            <textarea [(ngModel)]="textoRespuesta" rows="5"
+                placeholder="Escribe tu respuesta al usuario..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-aprobar" (click)="enviarRespuesta()"
+                [disabled]="cargando || !textoRespuesta.trim()">
+                <i class="fa-solid fa-paper-plane"></i>
+                {{ cargando ? 'Enviando...' : 'Enviar respuesta' }}
+            </button>
+            <button class="btn-rechazar" (click)="cerrarRespuesta()">
+                Cancelar
+            </button>
+        </div>
+
+    </div>
+</div>

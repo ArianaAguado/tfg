@@ -85,6 +85,21 @@ export interface SolicitudAmistad {
   fecha: number;
 }
 
+export interface TicketSoporte {
+  id?:             string;
+  asunto:          string;
+  descripcion:     string;
+  capturas:        string[];
+  estado:          'abierto' | 'respondido' | 'cerrado';
+  autorId:         string;
+  autorNombre:     string;
+  autorEmail:      string;
+  autorRol:        string;
+  fechaCreacion:   number;
+  respuesta?:      string;
+  fechaRespuesta?: number;
+}
+
 export type EstadoAmistad =
   | 'ninguna'
   | 'pendiente_enviada'
@@ -676,5 +691,64 @@ export class FirebaseService {
   if (!user) throw new Error('No hay usuario autenticado');
   await updateProfile(user, { displayName: nombre });
 }
+
+// ── TICKETS DE SOPORTE ──
+
+async enviarTicket(ticket: Omit<TicketSoporte, 'id'>): Promise<void> {
+  await addDoc(collection(this.db, 'tickets_soporte'), ticket);
+}
+
+obtenerMisTickets(uid: string): Observable<TicketSoporte[]> {
+  return new Observable(observer => {
+    const q = query(
+      collection(this.db, 'tickets_soporte'),
+      where('autorId', '==', uid),
+      orderBy('fechaCreacion', 'desc')
+    );
+    const unsub = onSnapshot(q,
+      snapshot => {
+        const tickets = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as TicketSoporte));
+        this.zone.run(() => observer.next(tickets));
+      },
+      err => observer.error(err)
+    );
+    return () => unsub();
+  });
+}
+
+obtenerTicketsAdmin(): Observable<TicketSoporte[]> {
+  return new Observable(observer => {
+    const q = query(
+      collection(this.db, 'tickets_soporte'),
+      orderBy('fechaCreacion', 'desc')
+    );
+    const unsub = onSnapshot(q,
+      snapshot => {
+        const tickets = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as TicketSoporte));
+        this.zone.run(() => observer.next(tickets));
+      },
+      err => observer.error(err)
+    );
+    return () => unsub();
+  });
+}
+
+async responderTicket(id: string, respuesta: string): Promise<void> {
+  await updateDoc(doc(this.db, 'tickets_soporte', id), {
+    respuesta,
+    estado: 'respondido',
+    fechaRespuesta: Date.now()
+  });
+}
+
+async cerrarTicket(id: string): Promise<void> {
+  await updateDoc(doc(this.db, 'tickets_soporte', id), { estado: 'cerrado' });
+}
+
+async subirCaptura(archivo: File): Promise<string> {
+  const { url } = await this.subirImagen(archivo);
+  return url;
+}
+
 }
 
