@@ -4,7 +4,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FirebaseService } from '../../services/firebase.service';
 import { User } from '@angular/fire/auth';
 import { Subscription, combineLatest } from 'rxjs';
-import { filter } from 'rxjs/operators'; // ← añade esto
+import { filter } from 'rxjs/operators';
 import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 import { Notificaciones } from '../notificaciones/notificaciones';
 
@@ -24,9 +24,12 @@ export class Dashboard implements OnInit, OnDestroy {
   avatarSidebar: string = 'assets/user.png';
   peticionesCount = 0;
   solicitudesAmistadCount = 0;
+  ticketsAbiertosCount = 0;
+
+  private mainSub?: Subscription;
   private peticionesSub?: Subscription;
   private solicitudesSub?: Subscription;
-  private mainSub?: Subscription;
+  private ticketsSub?: Subscription;
 
   private avatar$ = this.firebase.obtenerAvatarUsuario();
 
@@ -54,14 +57,18 @@ export class Dashboard implements OnInit, OnDestroy {
 
       if (rol === 'admin') {
         this.escucharPeticiones();
+        this.escucharTicketsSoporte();
       } else {
         this.peticionesSub?.unsubscribe();
         this.peticionesCount = 0;
+        this.ticketsSub?.unsubscribe();
+        this.ticketsAbiertosCount = 0;
       }
 
       this.cdr.detectChanges();
     });
 
+    // Solicitudes de amistad: badge para todos los usuarios autenticados.
     this.escucharSolicitudesAmistad();
   }
 
@@ -85,9 +92,20 @@ export class Dashboard implements OnInit, OnDestroy {
     });
   }
 
+  private escucharTicketsSoporte(): void {
+    this.ticketsSub = this.firebase.obtenerTicketsAdmin().subscribe({
+      next: (tickets) => {
+        this.ticketsAbiertosCount = tickets.filter(t => t.estado === 'abierto').length;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error contando tickets soporte:', err)
+    });
+  }
+
   ngOnDestroy(): void {
     this.mainSub?.unsubscribe();
     this.peticionesSub?.unsubscribe();
     this.solicitudesSub?.unsubscribe();
+    this.ticketsSub?.unsubscribe();
   }
 }

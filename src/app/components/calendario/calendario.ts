@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Rawg } from '../../services/rawg';
@@ -7,6 +7,11 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
+interface FiltrosActivos {
+  generos: string[];
+  plataformas: string[];
+}
+
 @Component({
   selector: 'app-calendario',
   standalone: true,
@@ -14,8 +19,7 @@ import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
   templateUrl: './calendario.html',
   styleUrl: './calendario.css',
 })
-
-export class Calendario implements OnInit {
+export class Calendario implements OnInit, OnDestroy {
   private rawg = inject(Rawg);
   private firebase = inject(FirebaseService);
   private cdr = inject(ChangeDetectorRef);
@@ -36,11 +40,85 @@ export class Calendario implements OnInit {
   sinResultados: boolean = false;
   esFavoritoActual: boolean = false;
 
-  //para los rankings
+  // ── Rankings ──
   rankingMasAnadidos: { name: string; background_image: string; slug?: string; released?: string; esCustom?: boolean; total: number }[] = [];
   rankingMasHype: { slug: string; contador: number; name?: string; background_image?: string }[] = [];
   private masAnadidosSub?: Subscription;
   private masHypeSub?: Subscription;
+
+  // ── Filtros ──
+  filtrosAbiertos = false;
+
+  filtros: FiltrosActivos = {
+    generos: [],
+    plataformas: [],
+  };
+
+  get generosDisponibles(): string[] {
+    const deRawg = this.juegos.flatMap(j => j.genres?.map((g: any) => g.name) ?? []);
+    const deCustom = this.juegosCustom.flatMap(j => j.generos ?? []);
+    return [...new Set([...deRawg, ...deCustom])].sort();
+  }
+
+  get plataformasDisponibles(): string[] {
+    const deRawg = this.juegos.flatMap(j => j.platforms?.map((p: any) => p.platform.name) ?? []);
+    const deCustom = this.juegosCustom.flatMap(j => j.plataformas ?? []);
+    return [...new Set([...deRawg, ...deCustom])].sort();
+  }
+
+  get totalFiltrosActivos(): number {
+    return this.filtros.generos.length + this.filtros.plataformas.length;
+  }
+
+  toggleFiltros(): void {
+    this.filtrosAbiertos = !this.filtrosAbiertos;
+    this.cdr.markForCheck();
+  }
+
+  toggleFiltroGenero(g: string): void {
+    const idx = this.filtros.generos.indexOf(g);
+    if (idx === -1) this.filtros.generos.push(g);
+    else this.filtros.generos.splice(idx, 1);
+    this.cdr.markForCheck();
+  }
+
+  toggleFiltroPlataforma(p: string): void {
+    const idx = this.filtros.plataformas.indexOf(p);
+    if (idx === -1) this.filtros.plataformas.push(p);
+    else this.filtros.plataformas.splice(idx, 1);
+    this.cdr.markForCheck();
+  }
+
+  limpiarFiltros(): void {
+    this.filtros = { generos: [], plataformas: [] };
+    this.cdr.markForCheck();
+  }
+
+  private juegoSuperaFiltros(juego: any): boolean {
+    if (this.filtros.generos.length) {
+      const generosJuego: string[] = juego.genres?.map((g: any) => g.name) ?? [];
+      if (!this.filtros.generos.some(g => generosJuego.includes(g))) return false;
+    }
+
+    if (this.filtros.plataformas.length) {
+      const platsJuego: string[] = juego.platforms?.map((p: any) => p.platform?.name ?? p) ?? [];
+      if (!this.filtros.plataformas.some(p => platsJuego.includes(p))) return false;
+    }
+
+    return true;
+  }
+
+  get totalJuegosFiltrados(): number {
+    const customMapeados = this.juegosCustom.map(j => ({
+      name: j.nombre,
+      background_image: j.imagen,
+      released: j.fechaLanzamiento?.replace(/\//g, '-'),
+      esCustom: true,
+      genres: (j.generos ?? []).map(g => ({ name: g })),
+      platforms: (j.plataformas ?? []).map(p => ({ platform: { name: p } })),
+    }));
+    return [...this.juegos, ...customMapeados].filter(j => this.juegoSuperaFiltros(j)).length;
+  }
 
   ngOnInit(): void {
     this.generarCalendario();
@@ -86,7 +164,6 @@ export class Calendario implements OnInit {
     this.masAnadidosSub?.unsubscribe();
     this.masHypeSub?.unsubscribe();
   }
-
 
   generarCalendario() {
     const año = this.fechaActual.getFullYear();
@@ -174,18 +251,22 @@ export class Calendario implements OnInit {
         name: j.nombre,
         background_image: j.imagen,
         released: j.fechaLanzamiento?.replace(/\//g, '-'),
-        esCustom: true
+        esCustom: true,
+        genres: (j.generos ?? []).map(g => ({ name: g })),
+        platforms: (j.plataformas ?? []).map(p => ({ platform: { name: p } })),
       }));
 
     const todos = [...this.juegos, ...customFiltrados];
 
-    return todos.filter(juego => {
-      if (!juego.released) return false;
-      const fechaJuego = new Date(juego.released + 'T12:00:00');
-      return fechaJuego.getDate() === dia &&
-        fechaJuego.getMonth() === mesActual &&
-        fechaJuego.getFullYear() === añoActual;
-    });
+    return todos
+      .filter(juego => {
+        if (!juego.released) return false;
+        const fechaJuego = new Date(juego.released + 'T12:00:00');
+        return fechaJuego.getDate() === dia &&
+          fechaJuego.getMonth() === mesActual &&
+          fechaJuego.getFullYear() === añoActual;
+      })
+      .filter(juego => this.juegoSuperaFiltros(juego));
   }
 
   cerrarModal() {

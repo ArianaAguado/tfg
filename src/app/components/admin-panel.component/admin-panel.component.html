@@ -1,0 +1,262 @@
+<div class="admin-wrapper">
+
+  <!-- HEADER -->
+  <div class="admin-header">
+    <div>
+      <h1>Panel de <span class="neon">Administración</span></h1>
+      <p>Gestión de usuarios y métricas globales de la plataforma</p>
+    </div>
+  </div>
+
+  <!-- KPIs GLOBALES -->
+  <div class="kpi-grid" *ngIf="!cargandoStats">
+    <div class="kpi-card">
+      <div class="kpi-icon"><i class="fa-solid fa-users"></i></div>
+      <div class="kpi-data">
+        <span class="kpi-value">{{ totalUsuarios }}</span>
+        <span class="kpi-label">Usuarios totales</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon accent-green"><i class="fa-solid fa-gamepad"></i></div>
+      <div class="kpi-data">
+        <span class="kpi-value">{{ totalJuegos }}</span>
+        <span class="kpi-label">Juegos en catálogo</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon accent-orange"><i class="fa-solid fa-file-circle-plus"></i></div>
+      <div class="kpi-data">
+        <span class="kpi-value">{{ totalPropuestas }}</span>
+        <span class="kpi-label">Propuestas recibidas</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon accent-red"><i class="fa-solid fa-ban"></i></div>
+      <div class="kpi-data">
+        <span class="kpi-value">{{ totalBaneados }}</span>
+        <span class="kpi-label">Usuarios baneados</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button [class.active]="tabActivo === 'usuarios'" (click)="setTab('usuarios')">
+      <i class="fa-solid fa-users"></i> Usuarios
+    </button>
+    <button [class.active]="tabActivo === 'metricas'" (click)="setTab('metricas')">
+      <i class="fa-solid fa-chart-line"></i> Métricas
+    </button>
+  </div>
+
+  <!-- ══ TAB USUARIOS ══ -->
+  <div class="section-block" *ngIf="tabActivo === 'usuarios'">
+
+    <!-- BUSCADOR -->
+    <div class="usuarios-toolbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Buscar por nombre o email..."
+          [(ngModel)]="busquedaUsuario"
+          (ngModelChange)="filtrarUsuarios()" />
+      </div>
+      <div class="filter-rol">
+        <select [(ngModel)]="filtroRol" (ngModelChange)="filtrarUsuarios()">
+          <option value="">Todos los roles</option>
+          <option value="usuario">Usuario</option>
+          <option value="desarrollador">Desarrollador</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading-state" *ngIf="cargandoUsuarios">
+      <i class="fa-solid fa-circle-notch fa-spin"></i>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <!-- LISTA USUARIOS -->
+    <div class="usuarios-lista" *ngIf="!cargandoUsuarios">
+      <div class="usuario-row"
+        *ngFor="let u of usuariosFiltrados"
+        [class.baneado]="u.baneado">
+
+        <!-- AVATAR + INFO -->
+        <div class="usuario-info">
+          <div class="u-avatar">
+            <img [src]="u.avatarUrl" [alt]="u.nombre" *ngIf="u.avatarUrl" />
+            <div class="u-avatar-placeholder" *ngIf="!u.avatarUrl">
+              {{ u.nombre?.charAt(0)?.toUpperCase() || '?' }}
+            </div>
+          </div>
+          <div class="u-datos">
+            <span class="u-nombre">
+              {{ u.nombre }}
+              <span class="ban-badge" *ngIf="u.baneado">
+                <i class="fa-solid fa-ban"></i> Baneado
+              </span>
+            </span>
+            <span class="u-email">{{ u.email }}</span>
+            <span class="u-fecha">
+              Registro: {{ u.fechaRegistro | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- ROL BADGE -->
+        <div class="u-rol">
+          <span class="rol-badge"
+            [class.rol-admin]="u.rol === 'admin'"
+            [class.rol-dev]="u.rol === 'desarrollador'"
+            [class.rol-user]="u.rol === 'usuario'">
+            {{ rolLabel(u.rol) }}
+          </span>
+        </div>
+
+        <!-- GÉNEROS + PLATAFORMAS -->
+        <div class="u-prefs">
+          <span class="pref-chip" *ngFor="let g of u.generosFav?.slice(0,2)">{{ g }}</span>
+          <span class="pref-chip plat" *ngFor="let p of u.plataformasFav?.slice(0,2)">{{ p }}</span>
+        </div>
+
+        <!-- ACCIONES -->
+        <div class="u-acciones">
+
+          <!-- Cambiar rol -->
+          <div class="accion-grupo" *ngIf="!u.baneado">
+            <select class="rol-select"
+              [value]="u.rol"
+              (change)="cambiarRol(u, $any($event.target).value)"
+              [disabled]="u.guardandoRol">
+              <option value="usuario">Usuario</option>
+              <option value="desarrollador">Desarrollador</option>
+              <option value="admin">Admin</option>
+            </select>
+            <span class="guardando-label" *ngIf="u.guardandoRol">
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+            </span>
+          </div>
+
+          <!-- Ver actividad -->
+          <button class="btn-accion btn-info"
+            (click)="toggleActividad(u)"
+            title="Ver actividad">
+            <i class="fa-solid fa-chart-bar"></i>
+          </button>
+
+          <!-- Banear / Desbanear -->
+          <button class="btn-accion"
+            [class.btn-danger]="!u.baneado"
+            [class.btn-success]="u.baneado"
+            (click)="toggleBan(u)"
+            [disabled]="u.guardandoBan"
+            [title]="u.baneado ? 'Desbanear' : 'Banear'">
+            <i class="fa-solid"
+              [class.fa-ban]="!u.baneado"
+              [class.fa-check]="u.baneado"></i>
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- PANEL ACTIVIDAD -->
+      <div class="actividad-panel" *ngIf="usuarioActividad">
+        <div class="actividad-header">
+          <h3>
+            <i class="fa-solid fa-chart-bar"></i>
+            Actividad de {{ usuarioActividad.nombre }}
+          </h3>
+          <button class="btn-cerrar" (click)="usuarioActividad = null">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="actividad-grid">
+          <div class="act-item">
+            <i class="fa-solid fa-gamepad"></i>
+            <span class="act-val">{{ usuarioActividad.actividadJuegos ?? 0 }}</span>
+            <span class="act-lbl">Juegos en biblioteca</span>
+          </div>
+          <div class="act-item">
+            <i class="fa-solid fa-user-group"></i>
+            <span class="act-val">{{ usuarioActividad.actividadAmigos ?? 0 }}</span>
+            <span class="act-lbl">Amigos</span>
+          </div>
+          <div class="act-item">
+            <i class="fa-solid fa-star"></i>
+            <span class="act-val">{{ usuarioActividad.actividadValoraciones ?? 0 }}</span>
+            <span class="act-lbl">Valoraciones</span>
+          </div>
+          <div class="act-item">
+            <i class="fa-solid fa-file-circle-plus"></i>
+            <span class="act-val">{{ usuarioActividad.actividadPropuestas ?? 0 }}</span>
+            <span class="act-lbl">Propuestas</span>
+          </div>
+        </div>
+        <div class="actividad-bio" *ngIf="usuarioActividad.bio">
+          <p><strong>Bio:</strong> {{ usuarioActividad.bio }}</p>
+        </div>
+        <div class="actividad-redes" *ngIf="usuarioActividad.redesSociales?.steam">
+          <a [href]="usuarioActividad.redesSociales?.steam" target="_blank">
+            <i class="fa-brands fa-steam"></i> Ver Steam
+          </a>
+        </div>
+      </div>
+
+      <!-- PAGINACIÓN -->
+      <div class="paginacion" *ngIf="totalPaginasUsuarios > 1">
+        <button class="nav-btn"
+          (click)="cambiarPaginaUsuarios(paginaUsuarios - 1)"
+          [disabled]="paginaUsuarios === 1">&#8249;</button>
+        <button class="pag-num"
+          *ngFor="let p of paginasUsuarios"
+          [class.activo]="paginaUsuarios === p"
+          (click)="cambiarPaginaUsuarios(p)">{{ p }}</button>
+        <button class="nav-btn"
+          (click)="cambiarPaginaUsuarios(paginaUsuarios + 1)"
+          [disabled]="paginaUsuarios === totalPaginasUsuarios">&#8250;</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TAB MÉTRICAS ══ -->
+  <div class="section-block" *ngIf="tabActivo === 'metricas'">
+    <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Métricas globales</h2>
+
+    <div class="metricas-grid">
+
+      <div class="metrica-card">
+        <h4><i class="fa-solid fa-user-plus"></i> Nuevos registros</h4>
+        <div class="metrica-rows">
+          <div class="metrica-row" *ngFor="let m of registrosPorDia">
+            <span class="metrica-fecha">{{ m.fecha }}</span>
+            <div class="metrica-bar-wrap">
+              <div class="metrica-bar" [style.width.%]="barPct(m.count, maxRegistros)"></div>
+            </div>
+            <span class="metrica-count">{{ m.count }}</span>
+          </div>
+          <p class="sin-datos" *ngIf="!registrosPorDia.length">Sin datos de registro</p>
+        </div>
+      </div>
+
+      <div class="metrica-card">
+        <h4><i class="fa-solid fa-shield-halved"></i> Distribución de roles</h4>
+        <div class="roles-dist">
+          <div class="rol-dist-item" *ngFor="let r of rolDistribucion">
+            <span class="rol-dist-label">{{ r.label }}</span>
+            <div class="metrica-bar-wrap">
+              <div class="metrica-bar accent"
+                [style.width.%]="barPct(r.count, totalUsuarios)"></div>
+            </div>
+            <span class="metrica-count">{{ r.count }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

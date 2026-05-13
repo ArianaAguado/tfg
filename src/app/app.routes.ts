@@ -12,6 +12,10 @@ import { ProponerJuegoComponent } from './components/proponerjuego/proponerjuego
 import { DetalleJuego } from './components/detalle-juego/detalle-juego';
 import { PerfilPublico } from './components/perfil-publico/perfil-publico';
 import { Amigos } from './components/amigos/amigos';
+import { SoporteComponent } from './components/soporte/soporte';
+import { AdminSoporteComponent } from './components/admin-soporte/admin-soporte';
+import { AdminPanelComponent } from './components/admin-panel.component/admin-panel.component';
+import { EstadisticasComponent } from './components/estadisticas.component/estadisticas.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -33,7 +37,11 @@ export const routes: Routes = [
       { path: 'peticiones', component: PeticionesJuegosComponent },
       { path: 'proponer-juego', component: ProponerJuegoComponent },
       { path: 'juego/:slug', component: DetalleJuego },
-      { path: 'juego-custom', component: DetalleJuego }
+      { path: 'juego-custom', component: DetalleJuego },
+      { path: 'soporte', component: SoporteComponent },
+      { path: 'admin-soporte', component: AdminSoporteComponent },
+      { path: 'admin-panel', component: AdminPanelComponent },
+      { path: 'estadisticas', component: EstadisticasComponent },
     ]
   },
 ];

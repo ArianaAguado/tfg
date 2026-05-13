@@ -92,6 +92,35 @@ export type EstadoAmistad =
   | 'amigos'
   | 'mismo_usuario';
 
+export interface TicketSoporte {
+  id?:             string;
+  asunto:          string;
+  descripcion:     string;
+  capturas:        string[];
+  estado:          'abierto' | 'respondido' | 'cerrado';
+  autorId:         string;
+  autorNombre:     string;
+  autorEmail:      string;
+  autorRol:        string;
+  fechaCreacion:   number;
+  respuesta?:      string;
+  fechaRespuesta?: number;
+}
+
+export interface UsuarioAdmin {
+  uid: string;
+  nombre: string;
+  email: string;
+  avatarUrl?: string;
+  rol: 'usuario' | 'desarrollador' | 'admin';
+  baneado?: boolean;
+  fechaRegistro?: string;
+  bio?: string;
+  generosFav?: string[];
+  plataformasFav?: string[];
+  redesSociales?: { steam?: string; [key: string]: string | undefined };
+}
+
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
 
@@ -284,21 +313,21 @@ export class FirebaseService {
   async añadirFavorito(juego: JuegoFavorito): Promise<void> {
     const uid = this.auth.currentUser?.uid;
     if (!uid) { console.error('No hay usuario'); return; }
-    const id = juego.released + '_' + juego.name.replace(/\s/g, '_');
+    const id = juego.released + '' + juego.name.replace(/\s/g, '');
     await setDoc(doc(this.db, 'favoritos', uid, 'juegos', id), juego);
   }
 
   async quitarFavorito(juego: JuegoFavorito): Promise<void> {
     const uid = this.auth.currentUser?.uid;
     if (!uid) { console.error('No hay usuario'); return; }
-    const id = juego.released + '_' + juego.name.replace(/\s/g, '_');
+    const id = juego.released + '' + juego.name.replace(/\s/g, '');
     await deleteDoc(doc(this.db, 'favoritos', uid, 'juegos', id));
   }
 
   async esFavorito(juego: JuegoFavorito): Promise<boolean> {
     const uid = this.auth.currentUser?.uid;
     if (!uid) return false;
-    const id = juego.released + '_' + juego.name.replace(/\s/g, '_');
+    const id = juego.released + '' + juego.name.replace(/\s/g, '');
     const snap = await getDoc(doc(this.db, 'favoritos', uid, 'juegos', id));
     return snap.exists();
   }
@@ -780,5 +809,178 @@ export class FirebaseService {
     );
   }
 
-}
+  // ── TICKETS DE SOPORTE ──
 
+  async enviarTicket(ticket: Omit<TicketSoporte, 'id'>): Promise<void> {
+    await addDoc(collection(this.db, 'tickets_soporte'), ticket);
+  }
+
+  obtenerMisTickets(uid: string): Observable<TicketSoporte[]> {
+    return new Observable(observer => {
+      const q = query(
+        collection(this.db, 'tickets_soporte'),
+        where('autorId', '==', uid),
+        orderBy('fechaCreacion', 'desc')
+      );
+      const unsub = onSnapshot(q,
+        snapshot => {
+          const tickets = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as TicketSoporte));
+          this.zone.run(() => observer.next(tickets));
+        },
+        err => observer.error(err)
+      );
+      return () => unsub();
+    });
+  }
+
+  obtenerTicketsAdmin(): Observable<TicketSoporte[]> {
+    return new Observable(observer => {
+      const q = query(
+        collection(this.db, 'tickets_soporte'),
+        orderBy('fechaCreacion', 'desc')
+      );
+      const unsub = onSnapshot(q,
+        snapshot => {
+          const tickets = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as TicketSoporte));
+          this.zone.run(() => observer.next(tickets));
+        },
+        err => observer.error(err)
+      );
+      return () => unsub();
+    });
+  }
+
+  async responderTicket(id: string, respuesta: string): Promise<void> {
+    await updateDoc(doc(this.db, 'tickets_soporte', id), {
+      respuesta,
+      estado: 'respondido',
+      fechaRespuesta: Date.now()
+    });
+  }
+
+  async cerrarTicket(id: string): Promise<void> {
+    await updateDoc(doc(this.db, 'tickets_soporte', id), { estado: 'cerrado' });
+  }
+
+  async subirCaptura(archivo: File): Promise<string> {
+    const { url } = await this.subirImagen(archivo);
+    return url;
+  }
+
+  // ── ADMIN PANEL: GESTIÓN GLOBAL DE USUARIOS ──
+
+  /**
+   * Cuenta cuántos documentos hay en una colección.
+   * Lo usa el panel de admin para mostrar KPIs (total usuarios, juegos, propuestas).
+   */
+  async contarColeccion(nombreColeccion: string): Promise<number> {
+    const snap = await getDocs(collection(this.db, nombreColeccion));
+    return snap.size;
+  }
+
+  /**
+   * Lista TODOS los usuarios registrados.
+   * Solo debería poder llamarlo un admin (lo controlan las reglas de Firestore).
+   */
+  getTodosUsuarios(): Observable<UsuarioAdmin[]> {
+    return new Observable(observer => {
+      const colRef = collection(this.db, 'usuarios');
+      const unsub = onSnapshot(colRef,
+        snapshot => {
+          const usuarios = snapshot.docs.map(d => {
+            const data = d.data() as any;
+            return {
+              uid: d.id,
+              nombre: data.nombre ?? '',
+              email: data.email ?? '',
+              avatarUrl: data.avatarUrl ?? '',
+              rol: data.rol ?? 'usuario',
+              baneado: data.baneado ?? false,
+              fechaRegistro: data.fechaRegistro,
+              bio: data.bio ?? '',
+              generosFav: data.generosFav ?? [],
+              plataformasFav: data.plataformasFav ?? [],
+              redesSociales: data.redesSociales ?? {}
+            } as UsuarioAdmin;
+          });
+          this.zone.run(() => observer.next(usuarios));
+        },
+        err => observer.error(err)
+      );
+      return () => unsub();
+    });
+  }
+
+  /** Cambia el rol de un usuario. */
+  async actualizarRolUsuario(uid: string, nuevoRol: string): Promise<void> {
+    await updateDoc(doc(this.db, 'usuarios', uid), { rol: nuevoRol });
+  }
+
+  /** Actualiza cualquier campo del documento de un usuario (banear, etc.). */
+  async actualizarUsuario(uid: string, cambios: Partial<UsuarioAdmin>): Promise<void> {
+    await updateDoc(doc(this.db, 'usuarios', uid), cambios as any);
+  }
+
+  // ── ESTADÍSTICAS DEL DESARROLLADOR ──
+
+  /**
+   * Devuelve las propuestas del desarrollador (activas + las archivadas en el historial).
+   * Se calculan al vuelo unas métricas básicas (visitas, valoraciones, interesados)
+   * usando los datos que ya tenemos en Firestore. Mientras el sistema de visitas no
+   * exista de verdad, los campos se devuelven con 0 / null para que la vista pinte.
+   */
+  getMisPropuestas(uid: string): Observable<any[]> {
+    return new Observable(observer => {
+      // Suscribimos a peticiones activas y al historial: las propuestas viven en dos sitios
+      const qActivas = query(
+        collection(this.db, 'peticiones_juegos'),
+        where('desarrolladorId', '==', uid)
+      );
+      const qHistorial = query(
+        collection(this.db, 'historial_peticiones'),
+        where('desarrolladorId', '==', uid)
+      );
+
+      let activas: any[] = [];
+      let historial: any[] = [];
+
+      const emitir = () => {
+        const todas = [...activas, ...historial].map(p => ({
+          id: p.id,
+          nombre: p.nombre,
+          imagen: p.imagen,
+          plataformas: p.plataformas ?? [],
+          descripcion: p.descripcion ?? '',
+          estado: p.estado ?? 'pendiente',
+          visitas: p.visitas ?? 0,
+          valoracionMedia: p.valoracionMedia ?? 0,
+          numValoraciones: p.numValoraciones ?? 0,
+          interesados: p.interesados ?? 0
+        }));
+        this.zone.run(() => observer.next(todas));
+      };
+
+      const unsubActivas = onSnapshot(qActivas,
+        snap => {
+          activas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          emitir();
+        },
+        err => observer.error(err)
+      );
+
+      const unsubHistorial = onSnapshot(qHistorial,
+        snap => {
+          historial = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          emitir();
+        },
+        err => observer.error(err)
+      );
+
+      return () => {
+        unsubActivas();
+        unsubHistorial();
+      };
+    });
+  }
+
+}

@@ -4,6 +4,8 @@
     <div class="logo">Know Your <span class="neon">Game</span></div>
 
     <nav>
+
+      <!-- ── SECCIÓN COMÚN ── -->
       <a routerLink="calendario" routerLinkActive="active">
         <i class="fa-solid fa-calendar"></i> Calendario
       </a>
@@ -15,25 +17,46 @@
         <span class="badge-count" *ngIf="solicitudesAmistadCount > 0">{{
           solicitudesAmistadCount }}</span>
       </a>
+      <a routerLink="soporte" routerLinkActive="active">
+        <i class="fa-solid fa-headset"></i> Soporte
+      </a>
 
+      <!-- ── SECCIÓN DEV ── -->
+      <ng-container *ngIf="rol === 'desarrollador'">
+        <div class="nav-separator">
+          <span class="nav-separator-label">Dev</span>
+        </div>
+        <a routerLink="proponer-juego" routerLinkActive="active">
+          <i class="fa-solid fa-file-circle-plus"></i> Enviar Propuesta
+        </a>
+        <a routerLink="estadisticas" routerLinkActive="active">
+          <i class="fa-solid fa-chart-line"></i> Estadísticas
+        </a>
+      </ng-container>
+
+      <!-- ── SECCIÓN ADMIN ── -->
       <ng-container *ngIf="rol === 'admin'">
+        <div class="nav-separator">
+          <span class="nav-separator-label">Admin</span>
+        </div>
         <a routerLink="crear-juegos" routerLinkActive="active">
           <i class="fa-solid fa-shield"></i> Gestión Juegos
         </a>
-        <a routerLink="peticiones" routerLinkActive="active"
-          class="link-peticiones">
+        <a routerLink="peticiones" routerLinkActive="active" class="link-peticiones">
           <i class="fa-solid fa-envelope-open-text"></i> Revisar Peticiones
           <span class="badge-count" *ngIf="peticionesCount > 0">{{
             peticionesCount }}</span>
         </a>
-      </ng-container>
-
-      <!-- Ruta separada para el desarrollador -->
-      <ng-container *ngIf="rol === 'desarrollador'">
-        <a routerLink="proponer-juego" routerLinkActive="active">
-          <i class="fa-solid fa-file-circle-plus"></i> Enviar Propuesta
+        <a routerLink="admin-soporte" routerLinkActive="active" class="link-soporte">
+          <i class="fa-solid fa-ticket"></i> Bandeja Soporte
+          <span class="badge-count" *ngIf="ticketsAbiertosCount > 0">{{
+            ticketsAbiertosCount }}</span>
+        </a>
+        <a routerLink="admin-panel" routerLinkActive="active">
+          <i class="fa-solid fa-users-gear"></i> Panel Admin
         </a>
       </ng-container>
+
     </nav>
 
     <div class="user-profile" *ngIf="usuario" routerLink="perfil">

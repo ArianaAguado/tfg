@@ -731,3 +731,29 @@
   margin: 20px 0 10px 15px;
   letter-spacing: 1px;
 }
+
+.nav-separator{ 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0px;
+  padding: 0 12px;
+}
+
+.nav-separator::before,
+.nav-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.nav-separator-labbel {
+  font-size: 0.65rem;
+  font-weigth: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+  user-select: none;
+}
