@@ -1,4 +1,4 @@
-<app-btn-cerrar-sesion /> 
+<app-btn-cerrar-sesion />
 
 <header class="main-header">
   <h1>Mi <span class="texto-neon">Biblioteca</span></h1>
@@ -13,7 +13,7 @@
   <section class="calendar-section" *ngIf="!cargando">
     <header class="calendar-header">
       <button class="nav-btn" (click)="mesAnterior()">&#8592;</button>
-      <h2>{{ fechaActual | date:'MMMM yyyy' }}</h2>
+      <h2>{{ (fechaActual | date:'MMMM yyyy') | titlecase }}</h2>
       <button class="nav-btn" (click)="mesSiguiente()">&#8594;</button>
     </header>
 
@@ -29,9 +29,10 @@
       <ng-container *ngFor="let dia of diasMes">
         <div *ngIf="dia === null" class="calendar-day empty"></div>
         <ng-container *ngIf="dia !== null">
-          <div class="calendar-day" [class.hoy]="esDiaActual(dia)"
-            [class.tiene-juegos]="obtenerFavoritosDelDia(dia).length > 0"
-            (click)="obtenerFavoritosDelDia(dia).length > 0 && abrirModal(obtenerFavoritosDelDia(dia))">
+          <div class="calendar-day"
+               [class.hoy]="esDiaActual(dia)"
+               [class.tiene-juegos]="obtenerFavoritosDelDia(dia).length > 0"
+               (click)="obtenerFavoritosDelDia(dia).length > 0 && abrirModal(obtenerFavoritosDelDia(dia))">
 
             <span class="day-number">{{ dia }}</span>
 
@@ -48,8 +49,7 @@
             </span>
 
             <div *ngIf="obtenerFavoritosDelDia(dia).length > 1" class="hover-panel">
-              <div *ngFor="let j of obtenerFavoritosDelDia(dia)" class="hover-juego"
-                (click)="irADetalle(j); $event.stopPropagation()">
+              <div *ngFor="let j of obtenerFavoritosDelDia(dia)" class="hover-juego">
                 <img [src]="j.background_image" alt="{{j.name}}">
                 <span>{{ j.name }}</span>
               </div>

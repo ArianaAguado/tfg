@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Rawg } from '../../services/rawg';
 import { FirebaseService, JuegoCustom } from '../../services/firebase.service';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
 @Component({
@@ -35,6 +36,12 @@ export class Calendario implements OnInit {
   sinResultados: boolean = false;
   esFavoritoActual: boolean = false;
 
+  //para los rankings
+  rankingMasAnadidos: { name: string; background_image: string; slug?: string; released?: string; esCustom?: boolean; total: number }[] = [];
+  rankingMasHype: { slug: string; contador: number; name?: string; background_image?: string }[] = [];
+  private masAnadidosSub?: Subscription;
+  private masHypeSub?: Subscription;
+
   ngOnInit(): void {
     this.generarCalendario();
     this.cargarJuegos();
@@ -48,7 +55,38 @@ export class Calendario implements OnInit {
         this.cdr.detectChanges();
       }
     });
+
+    // Rankings
+    this.masAnadidosSub = this.firebase.obtenerRankingMasAnadidos(5).subscribe(ranking => {
+      this.rankingMasAnadidos = ranking;
+      this.cdr.detectChanges();
+    });
+
+    this.masHypeSub = this.firebase.obtenerRankingMasHype(5).subscribe(ranking => {
+      this.rankingMasHype = ranking.map(r => {
+        // Buscar en juegos de RAWG cargados
+        const enRawg = this.juegos.find(j => j.slug === r.slug);
+        if (enRawg) {
+          return { ...r, name: enRawg.name, background_image: enRawg.background_image };
+        }
+        // Buscar en juegos custom
+        const enCustom = this.juegosCustom.find(j =>
+          ('custom_' + j.nombre.toLowerCase().trim().replace(/\s+/g, '_')) === r.slug
+        );
+        if (enCustom) {
+          return { ...r, name: enCustom.nombre, background_image: enCustom.imagen };
+        }
+        return { ...r, name: r.slug.replace(/^custom_/, '').replace(/_/g, ' '), background_image: '' };
+      });
+      this.cdr.detectChanges();
+    });
   }
+
+  ngOnDestroy(): void {
+    this.masAnadidosSub?.unsubscribe();
+    this.masHypeSub?.unsubscribe();
+  }
+
 
   generarCalendario() {
     const año = this.fechaActual.getFullYear();
@@ -233,6 +271,31 @@ export class Calendario implements OnInit {
       this.router.navigate(['/dashboard/juego-custom'], { state: { juego: normalizado } });
     } else {
       this.router.navigate(['/dashboard/juego', juego.slug]);
+    }
+  }
+
+  irADetalleDesdeRanking(item: any): void {
+    if (item.slug && item.slug.startsWith('custom_')) {
+      // Custom: necesitamos pasar el objeto completo por state
+      const nombreLimpio = item.slug.replace(/^custom_/, '').replace(/_/g, ' ');
+      const custom = this.juegosCustom.find(j =>
+        j.nombre.toLowerCase().trim() === nombreLimpio.toLowerCase().trim()
+      );
+      if (custom) {
+        this.irADetalle({ ...custom, name: custom.nombre, esCustom: true });
+      }
+    } else if (item.slug) {
+      this.router.navigate(['/dashboard/juego', item.slug]);
+    } else {
+      const enRawg = this.juegos.find(j => j.name === item.name);
+      if (enRawg) {
+        this.router.navigate(['/dashboard/juego', enRawg.slug]);
+        return;
+      }
+      const enCustom = this.juegosCustom.find(j => j.nombre === item.name);
+      if (enCustom) {
+        this.irADetalle({ ...enCustom, name: enCustom.nombre, esCustom: true });
+      }
     }
   }
 }

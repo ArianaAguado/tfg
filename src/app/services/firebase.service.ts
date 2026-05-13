@@ -2,7 +2,7 @@ import { Injectable, NgZone, inject } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Auth, onAuthStateChanged, signOut, User, browserLocalPersistence, setPersistence, updateProfile } from '@angular/fire/auth';
 import {
-  Firestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs,
+  Firestore, collection, collectionGroup, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDocs,
   getDoc, setDoc, query, orderBy, where
 } from '@angular/fire/firestore';
 import { Timestamp } from '@angular/fire/firestore';
@@ -672,9 +672,69 @@ export class FirebaseService {
 
 
   async actualizarNombre(nombre: string): Promise<void> {
-  const user = this.auth.currentUser;
-  if (!user) throw new Error('No hay usuario autenticado');
-  await updateProfile(user, { displayName: nombre });
-}
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('No hay usuario autenticado');
+    await updateProfile(user, { displayName: nombre });
+  }
+
+  // ── RANKINGS ──
+  obtenerRankingMasAnadidos(limite: number = 5): Observable<{ name: string; background_image: string; slug?: string; released?: string; esCustom?: boolean; total: number }[]> {
+    return new Observable(observer => {
+      const colRef = collectionGroup(this.db, 'juegos');
+      const unsub = onSnapshot(colRef,
+        snapshot => {
+          // Agrupar por nombre (mismo juego, varios usuarios)
+          const mapa = new Map<string, { name: string; background_image: string; slug?: string; released?: string; total: number }>();
+
+          for (const docSnap of snapshot.docs) {
+            const data = docSnap.data() as any;
+            const key = (data.name ?? '').toLowerCase().trim();
+            if (!key) continue;
+
+            if (mapa.has(key)) {
+              mapa.get(key)!.total++;
+            } else {
+              mapa.set(key, {
+                name: data.name,
+                background_image: data.background_image,
+                slug: data.slug,
+                released: data.released,
+                total: 1
+              });
+            }
+          }
+
+          const ranking = Array.from(mapa.values())
+            .sort((a, b) => b.total - a.total)
+            .slice(0, limite);
+
+          this.zone.run(() => observer.next(ranking));
+        },
+        err => observer.error(err)
+      );
+      return () => unsub();
+    });
+  }
+
+  obtenerRankingMasHype(limite: number = 5): Observable<{ slug: string; contador: number }[]> {
+    return new Observable(observer => {
+      const q = query(
+        collection(this.db, 'hype'),
+        orderBy('contador', 'desc')
+      );
+      const unsub = onSnapshot(q,
+        snapshot => {
+          const ranking = snapshot.docs
+            .map(d => ({ slug: d.id, contador: (d.data() as any).contador ?? 0 }))
+            .filter(r => r.contador > 0)
+            .slice(0, limite);
+          this.zone.run(() => observer.next(ranking));
+        },
+        err => observer.error(err)
+      );
+      return () => unsub();
+    });
+  }
+
 }
 

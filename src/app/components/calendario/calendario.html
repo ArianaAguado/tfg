@@ -5,13 +5,14 @@
 </header>
 
 <div class="dashboard-container">
-  <div class="search-bar">
-    <input type="text" [(ngModel)]="query" (keyup.enter)="buscar()" placeholder="Busca tu juego en el calendario..."
-      class="search-input" />
-    <button (click)="buscar()" class="search-button">
-      <span class="material-icons">search</span>
-    </button>
-  </div>
+  <div class="columna-principal">
+    <div class="search-bar">
+      <input type="text" [(ngModel)]="query" (keyup.enter)="buscar()" placeholder="Busca tu juego en el calendario..."
+        class="search-input" />
+      <button (click)="buscar()" class="search-button">
+        <span class="material-icons">search</span>
+      </button>
+    </div>
 
   <div *ngIf="sinResultados" class="sin-resultados">
     <span class="material-icons">search_off</span>
@@ -72,6 +73,51 @@
       </ng-container>
     </div>
   </section>
+</div>
+
+  <aside class="columna-rankings">
+    <section class="ranking-card">
+      <h3 class="ranking-titulo">
+        <span class="material-icons">emoji_events</span>
+        Más añadidos
+      </h3>
+      <ol class="ranking-lista" *ngIf="rankingMasAnadidos.length > 0; else vacioAnadidos">
+        <li *ngFor="let item of rankingMasAnadidos; let i = index"
+            class="ranking-item"
+            (click)="irADetalleDesdeRanking(item)">
+          <span class="ranking-puesto" [class.podio]="i < 3">{{ i + 1 }}</span>
+          <img *ngIf="item.background_image" [src]="item.background_image" [alt]="item.name" class="ranking-img">
+          <div class="ranking-img placeholder" *ngIf="!item.background_image">?</div>
+          <span class="ranking-nombre">{{ item.name }}</span>
+          <span class="ranking-valor">{{ item.total }}</span>
+        </li>
+      </ol>
+      <ng-template #vacioAnadidos>
+        <p class="ranking-vacio">Aún no hay datos.</p>
+      </ng-template>
+    </section>
+
+    <section class="ranking-card">
+      <h3 class="ranking-titulo">
+        <span class="material-icons">local_fire_department</span>
+        Más hype
+      </h3>
+      <ol class="ranking-lista" *ngIf="rankingMasHype.length > 0; else vacioHype">
+        <li *ngFor="let item of rankingMasHype; let i = index"
+            class="ranking-item"
+            (click)="irADetalleDesdeRanking(item)">
+          <span class="ranking-puesto" [class.podio]="i < 3">{{ i + 1 }}</span>
+          <img *ngIf="item.background_image" [src]="item.background_image" [alt]="item.name" class="ranking-img">
+          <div class="ranking-img placeholder" *ngIf="!item.background_image">?</div>
+          <span class="ranking-nombre">{{ item.name }}</span>
+          <span class="ranking-valor hype">🔥 {{ item.contador }}</span>
+        </li>
+      </ol>
+      <ng-template #vacioHype>
+        <p class="ranking-vacio">Aún no hay hype.</p>
+      </ng-template>
+    </section>
+  </aside>
 </div>
 
 <!-- MODAL -->

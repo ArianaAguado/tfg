@@ -67,16 +67,16 @@ export class Biblioteca implements OnInit, OnDestroy {
   }
 
   mesAnterior(): void {
-  this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() - 1, 1);
-  this.generarCalendario();
-  this.cdr.detectChanges();
-}
+    this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() - 1, 1);
+    this.generarCalendario();
+    this.cdr.detectChanges();
+  }
 
-mesSiguiente(): void {
-  this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() + 1, 1);
-  this.generarCalendario();
-  this.cdr.detectChanges();
-}
+  mesSiguiente(): void {
+    this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() + 1, 1);
+    this.generarCalendario();
+    this.cdr.detectChanges();
+  }
 
   esDiaActual(dia: number | null): boolean {
     if (!dia) return false;
@@ -105,6 +105,7 @@ mesSiguiente(): void {
     this.diasSeleccionado = juegos;
     this.mostrarModal = true;
     this.juegoSeleccionado = null;
+    this.cdr.detectChanges();
   }
 
   seleccionarJuego(juego: any): void {
@@ -115,6 +116,7 @@ mesSiguiente(): void {
     this.mostrarModal = false;
     this.juegoSeleccionado = null;
     this.diasSeleccionado = [];
+    this.cdr.detectChanges();
   }
 
   async toggleFavorito(): Promise<void> {
