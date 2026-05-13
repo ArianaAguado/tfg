@@ -5,19 +5,69 @@
 </header>
 
 <div class="dashboard-container">
+
+  <!-- Barra de búsqueda + botón filtros -->
   <div class="search-bar">
-    <input type="text" [(ngModel)]="query" (keyup.enter)="buscar()" placeholder="Busca tu juego en el calendario..."
-      class="search-input" />
+    <input type="text" [(ngModel)]="query" (keyup.enter)="buscar()"
+      placeholder="Busca tu juego en el calendario..." class="search-input" />
     <button (click)="buscar()" class="search-button">
       <span class="material-icons">search</span>
     </button>
+    <button class="btn-toggle-filtros" (click)="toggleFiltros()" [class.activo]="filtrosAbiertos">
+      <span class="material-icons">tune</span>
+      <span>Filtros</span>
+      <span class="filtros-badge" *ngIf="totalFiltrosActivos > 0">{{ totalFiltrosActivos }}</span>
+    </button>
   </div>
 
+  <!-- Panel de filtros desplegable -->
+  <div class="filtros-panel" *ngIf="filtrosAbiertos">
+    <div class="filtros-grid">
+
+      <div class="filtro-grupo">
+        <p class="filtro-titulo">
+          <span class="material-icons">sports_esports</span> Género
+        </p>
+        <div class="filtro-chips">
+          <span class="filtro-chip"
+            *ngFor="let g of generosDisponibles"
+            [class.activo]="filtros.generos.includes(g)"
+            (click)="toggleFiltroGenero(g)">{{ g }}</span>
+        </div>
+      </div>
+
+      <div class="filtro-grupo">
+        <p class="filtro-titulo">
+          <span class="material-icons">devices</span> Plataforma
+        </p>
+        <div class="filtro-chips">
+          <span class="filtro-chip"
+            *ngFor="let p of plataformasDisponibles"
+            [class.activo]="filtros.plataformas.includes(p)"
+            (click)="toggleFiltroPlataforma(p)">{{ p }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="filtros-footer">
+      <span class="filtros-resultado">
+        {{ totalJuegosFiltrados }} juego{{ totalJuegosFiltrados !== 1 ? 's' : '' }}
+        visible{{ totalJuegosFiltrados !== 1 ? 's' : '' }} en el calendario
+      </span>
+      <button class="btn-limpiar-filtros" (click)="limpiarFiltros()" *ngIf="totalFiltrosActivos > 0">
+        <span class="material-icons">close</span> Limpiar filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Sin resultados -->
   <div *ngIf="sinResultados" class="sin-resultados">
     <span class="material-icons">search_off</span>
     <p>No se encontró <strong>"{{ query }}"</strong> en el calendario.</p>
   </div>
 
+  <!-- Cargando -->
   <div *ngIf="cargando" class="loading-state">
     <p>Buscando lanzamientos...</p>
   </div>
@@ -40,13 +90,13 @@
 
       <ng-container *ngFor="let dia of diasMes">
         <div *ngIf="dia === null" class="calendar-day empty"></div>
-        <div *ngIf="dia !== null" class="calendar-day" [class.hoy]="esDiaActual(dia)"
+        <div *ngIf="dia !== null" class="calendar-day"
+          [class.hoy]="esDiaActual(dia)"
           [class.tiene-juegos]="obtenerJuegosDelDia(dia).length > 0"
           (click)="obtenerJuegosDelDia(dia).length > 0 && abrirModal(obtenerJuegosDelDia(dia))">
 
           <span class="day-number">{{ dia }}</span>
 
-          <!-- Juego principal (el primero) -->
           <div *ngIf="obtenerJuegosDelDia(dia)[0] as juego" class="game-info">
             <span class="game-dot"></span>
             <div class="game-thumbnail">
@@ -55,14 +105,13 @@
             <span class="game-name">{{ juego.name }}</span>
           </div>
 
-          <!-- Badge si hay más de uno -->
           <span *ngIf="obtenerJuegosDelDia(dia).length > 1" class="badge-mas">
             +{{ obtenerJuegosDelDia(dia).length - 1 }} más
           </span>
 
-          <!-- Hover panel -->
           <div *ngIf="obtenerJuegosDelDia(dia).length > 1" class="hover-panel">
-            <div *ngFor="let j of obtenerJuegosDelDia(dia)" class="hover-juego" (click)="irADetalle(j); $event.stopPropagation()">
+            <div *ngFor="let j of obtenerJuegosDelDia(dia)" class="hover-juego"
+              (click)="irADetalle(j); $event.stopPropagation()">
               <img [src]="j.background_image" alt="{{j.name}}">
               <span>{{ j.name }}</span>
             </div>
@@ -79,7 +128,6 @@
   <div class="modal-contenido" (click)="$event.stopPropagation()">
     <button class="modal-cerrar" (click)="cerrarModal()">✕</button>
 
-    <!-- Vista detalle de un juego -->
     <div *ngIf="juegoSeleccionado; else listaJuegos" class="juego-detalle">
       <div class="detalle-header">
         <button class="btn-volver" (click)="juegoSeleccionado = null">← Volver</button>
@@ -95,11 +143,11 @@
       <p><strong>Plataformas:</strong> {{ obtenerPlataformas(juegoSeleccionado) }}</p>
     </div>
 
-    <!-- Vista lista de juegos del día -->
     <ng-template #listaJuegos>
       <h2 class="modal-titulo">Lanzamientos del día</h2>
       <div class="modal-lista">
-        <div *ngFor="let j of diasSeleccionado" class="modal-juego" (click)="irADetalle(j); $event.stopPropagation()">
+        <div *ngFor="let j of diasSeleccionado" class="modal-juego"
+          (click)="irADetalle(j); $event.stopPropagation()">
           <img [src]="j.background_image" alt="{{j.name}}">
           <span>{{ j.name }}</span>
         </div>

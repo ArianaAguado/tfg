@@ -6,6 +6,11 @@ import { FirebaseService, JuegoCustom } from '../../services/firebase.service';
 import { Router } from '@angular/router';
 import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
 
+interface FiltrosActivos {
+  generos: string[];
+  plataformas: string[];
+}
+
 @Component({
   selector: 'app-calendario',
   standalone: true,
@@ -13,7 +18,6 @@ import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
   templateUrl: './calendario.html',
   styleUrl: './calendario.css',
 })
-
 export class Calendario implements OnInit {
   private rawg = inject(Rawg);
   private firebase = inject(FirebaseService);
@@ -34,6 +38,80 @@ export class Calendario implements OnInit {
   cargandoFavorito: boolean = false;
   sinResultados: boolean = false;
   esFavoritoActual: boolean = false;
+
+  // ── Filtros ──────────────────────────────────────────────────────
+  filtrosAbiertos = false;
+
+  filtros: FiltrosActivos = {
+    generos: [],
+    plataformas: [],
+  };
+
+  get generosDisponibles(): string[] {
+    const deRawg = this.juegos.flatMap(j => j.genres?.map((g: any) => g.name) ?? []);
+    const deCustom = this.juegosCustom.flatMap(j => j.generos ?? []);
+    return [...new Set([...deRawg, ...deCustom])].sort();
+  }
+
+  get plataformasDisponibles(): string[] {
+    const deRawg = this.juegos.flatMap(j => j.platforms?.map((p: any) => p.platform.name) ?? []);
+    const deCustom = this.juegosCustom.flatMap(j => j.plataformas ?? []);
+    return [...new Set([...deRawg, ...deCustom])].sort();
+  }
+
+  get totalFiltrosActivos(): number {
+    return this.filtros.generos.length + this.filtros.plataformas.length;
+  }
+
+  toggleFiltros(): void {
+    this.filtrosAbiertos = !this.filtrosAbiertos;
+    this.cdr.markForCheck();
+  }
+
+  toggleFiltroGenero(g: string): void {
+    const idx = this.filtros.generos.indexOf(g);
+    if (idx === -1) this.filtros.generos.push(g);
+    else this.filtros.generos.splice(idx, 1);
+    this.cdr.markForCheck();
+  }
+
+  toggleFiltroPlataforma(p: string): void {
+    const idx = this.filtros.plataformas.indexOf(p);
+    if (idx === -1) this.filtros.plataformas.push(p);
+    else this.filtros.plataformas.splice(idx, 1);
+    this.cdr.markForCheck();
+  }
+
+  limpiarFiltros(): void {
+    this.filtros = { generos: [], plataformas: [] };
+    this.cdr.markForCheck();
+  }
+
+  private juegoSuperaFiltros(juego: any): boolean {
+    if (this.filtros.generos.length) {
+      const generosJuego: string[] = juego.genres?.map((g: any) => g.name) ?? [];
+      if (!this.filtros.generos.some(g => generosJuego.includes(g))) return false;
+    }
+
+    if (this.filtros.plataformas.length) {
+      const platsJuego: string[] = juego.platforms?.map((p: any) => p.platform?.name ?? p) ?? [];
+      if (!this.filtros.plataformas.some(p => platsJuego.includes(p))) return false;
+    }
+
+    return true;
+  }
+
+  get totalJuegosFiltrados(): number {
+    const customMapeados = this.juegosCustom.map(j => ({
+      name: j.nombre,
+      background_image: j.imagen,
+      released: j.fechaLanzamiento?.replace(/\//g, '-'),
+      esCustom: true,
+      genres: (j.generos ?? []).map(g => ({ name: g })),
+      platforms: (j.plataformas ?? []).map(p => ({ platform: { name: p } })),
+    }));
+    return [...this.juegos, ...customMapeados].filter(j => this.juegoSuperaFiltros(j)).length;
+  }
 
   ngOnInit(): void {
     this.generarCalendario();
@@ -64,20 +142,13 @@ export class Calendario implements OnInit {
   cargarJuegos() {
     this.cargando = true;
     this.rawg.nuevosLanzamientos(this.fechaActual).subscribe({
-      next: (juegos) => {
-        this.juegos = juegos;
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar los juegos: ', err);
-        this.cargando = false;
-      }
+      next: (juegos) => { this.juegos = juegos; this.cargando = false; },
+      error: (err) => { console.error('Error al cargar los juegos: ', err); this.cargando = false; }
     });
   }
 
   buscar() {
     this.queryActiva = this.query;
-
     if (!this.query.trim()) {
       this.sinResultados = false;
       this.queryActiva = '';
@@ -86,20 +157,16 @@ export class Calendario implements OnInit {
       this.cargarJuegos();
       return;
     }
-
     this.cargando = true;
     this.sinResultados = false;
-
     this.rawg.buscarJuegos(this.query).subscribe({
       next: (juegos) => {
         this.juegos = juegos;
-
         if (juegos.length > 0 && juegos[0].released) {
           const fecha = new Date(juegos[0].released + 'T12:00:00');
           this.fechaActual = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
           this.generarCalendario();
         }
-
         const hayCustom = this.juegosCustom.some(j =>
           j.nombre.toLowerCase().includes(this.queryActiva.toLowerCase())
         );
@@ -136,18 +203,22 @@ export class Calendario implements OnInit {
         name: j.nombre,
         background_image: j.imagen,
         released: j.fechaLanzamiento?.replace(/\//g, '-'),
-        esCustom: true
+        esCustom: true,
+        genres: (j.generos ?? []).map(g => ({ name: g })),
+        platforms: (j.plataformas ?? []).map(p => ({ platform: { name: p } })),
       }));
 
     const todos = [...this.juegos, ...customFiltrados];
 
-    return todos.filter(juego => {
-      if (!juego.released) return false;
-      const fechaJuego = new Date(juego.released + 'T12:00:00');
-      return fechaJuego.getDate() === dia &&
-        fechaJuego.getMonth() === mesActual &&
-        fechaJuego.getFullYear() === añoActual;
-    });
+    return todos
+      .filter(juego => {
+        if (!juego.released) return false;
+        const fechaJuego = new Date(juego.released + 'T12:00:00');
+        return fechaJuego.getDate() === dia &&
+          fechaJuego.getMonth() === mesActual &&
+          fechaJuego.getFullYear() === añoActual;
+      })
+      .filter(juego => this.juegoSuperaFiltros(juego));
   }
 
   cerrarModal() {
@@ -165,30 +236,19 @@ export class Calendario implements OnInit {
   }
 
   mesAnterior() {
-    this.fechaActual = new Date(
-      this.fechaActual.getFullYear(),
-      this.fechaActual.getMonth() - 1,
-      1
-    );
+    this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() - 1, 1);
     this.generarCalendario();
     this.cargarJuegos();
   }
 
   mesSiguiente() {
-    this.fechaActual = new Date(
-      this.fechaActual.getFullYear(),
-      this.fechaActual.getMonth() + 1,
-      1
-    );
+    this.fechaActual = new Date(this.fechaActual.getFullYear(), this.fechaActual.getMonth() + 1, 1);
     this.generarCalendario();
     this.cargarJuegos();
   }
 
   async abrirModal(juegos: any[]) {
-    if (juegos.length === 1) {
-      this.irADetalle(juegos[0]);
-      return;
-    }
+    if (juegos.length === 1) { this.irADetalle(juegos[0]); return; }
     this.diasSeleccionado = juegos;
     this.mostrarModal = true;
     this.juegoSeleccionado = null;
@@ -204,11 +264,8 @@ export class Calendario implements OnInit {
 
   async toggleFavorito() {
     if (!this.juegoSeleccionado) return;
-    if (this.esFavoritoActual) {
-      await this.firebase.quitarFavorito(this.juegoSeleccionado);
-    } else {
-      await this.firebase.añadirFavorito(this.juegoSeleccionado);
-    }
+    if (this.esFavoritoActual) await this.firebase.quitarFavorito(this.juegoSeleccionado);
+    else await this.firebase.añadirFavorito(this.juegoSeleccionado);
     this.cerrarModal();
     this.cdr.detectChanges();
   }
@@ -216,7 +273,6 @@ export class Calendario implements OnInit {
   irADetalle(juego: any): void {
     if (juego.esCustom) {
       const juegoCompleto = this.juegosCustom.find(j => j.nombre === juego.name) || juego;
-
       const normalizado = {
         name: juegoCompleto.nombre || juego.name,
         background_image: juegoCompleto.imagen || juego.background_image,
