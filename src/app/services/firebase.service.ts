@@ -736,5 +736,49 @@ export class FirebaseService {
     });
   }
 
+  // ── NOTIFICACIONES ──
+  obtenerNotificacionesLeidas(): Observable<Set<string>> {
+    return new Observable(observer => {
+      let unsubFirestore: (() => void) | null = null;
+
+      const unsubAuth = onAuthStateChanged(this.auth, (user) => {
+        if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
+        if (!user) { observer.next(new Set()); return; }
+
+        const colRef = collection(this.db, 'notificaciones_leidas', user.uid, 'items');
+        unsubFirestore = onSnapshot(colRef,
+          snapshot => {
+            const ids = new Set(snapshot.docs.map(d => d.id));
+            this.zone.run(() => observer.next(ids));
+          },
+          err => observer.error(err)
+        );
+      });
+
+      return () => {
+        unsubAuth();
+        if (unsubFirestore) unsubFirestore();
+      };
+    });
+  }
+
+  async marcarNotificacionLeida(notificacionId: string): Promise<void> {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    await setDoc(doc(this.db, 'notificaciones_leidas', uid, 'items', notificacionId), {
+      fecha: Date.now()
+    });
+  }
+
+  async marcarTodasLeidas(ids: string[]): Promise<void> {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    await Promise.all(
+      ids.map(id => setDoc(doc(this.db, 'notificaciones_leidas', uid, 'items', id), {
+        fecha: Date.now()
+      }))
+    );
+  }
+
 }
 

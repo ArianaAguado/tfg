@@ -6,11 +6,12 @@ import { User } from '@angular/fire/auth';
 import { Subscription, combineLatest } from 'rxjs';
 import { filter } from 'rxjs/operators'; // ← añade esto
 import { BtnCerrarSesion } from '../cerrar-sesion/cerrar-sesion';
+import { Notificaciones } from '../notificaciones/notificaciones';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, BtnCerrarSesion],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, BtnCerrarSesion, Notificaciones],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
