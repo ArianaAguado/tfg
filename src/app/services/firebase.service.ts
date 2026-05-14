@@ -1060,4 +1060,28 @@ async getDocUsuario(uid: string): Promise<Record<string, any> | null> {
   const snap = await getDoc(doc(this.db, 'usuarios', uid));
   return snap.exists() ? snap.data() : null;
 }
+
+
+
+async getActividadUsuario(uid: string): Promise<{
+  juegos: number;
+  amigos: number;
+  comentarios: number;
+  propuestas: number;
+}> {
+  const [favSnap, amistadSnap, peticionesSnap, historialSnap, comentariosSnap] = await Promise.all([
+    getDocs(collection(this.db, 'favoritos', uid, 'juegos')),
+    getDocs(query(collection(this.db, 'amistades'), where('uids', 'array-contains', uid))),
+    getDocs(query(collection(this.db, 'peticiones_juegos'), where('desarrolladorId', '==', uid))),
+    getDocs(query(collection(this.db, 'historial_peticiones'), where('desarrolladorId', '==', uid))),
+    getDocs(query(collection(this.db, 'comentarios'), where('uid', '==', uid))),
+  ]);
+
+  return {
+    juegos: favSnap.size,
+    amigos: amistadSnap.size,
+    comentarios: comentariosSnap.size,
+    propuestas: peticionesSnap.size + historialSnap.size,
+  };
+}
 }
