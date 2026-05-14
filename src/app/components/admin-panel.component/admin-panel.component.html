@@ -18,14 +18,16 @@
       </div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-icon accent-green"><i class="fa-solid fa-gamepad"></i></div>
+      <div class="kpi-icon accent-green"><i
+          class="fa-solid fa-gamepad"></i></div>
       <div class="kpi-data">
         <span class="kpi-value">{{ totalJuegos }}</span>
         <span class="kpi-label">Juegos en catálogo</span>
       </div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-icon accent-orange"><i class="fa-solid fa-file-circle-plus"></i></div>
+      <div class="kpi-icon accent-orange"><i
+          class="fa-solid fa-file-circle-plus"></i></div>
       <div class="kpi-data">
         <span class="kpi-value">{{ totalPropuestas }}</span>
         <span class="kpi-label">Propuestas recibidas</span>
@@ -42,10 +44,12 @@
 
   <!-- TABS -->
   <div class="tabs">
-    <button [class.active]="tabActivo === 'usuarios'" (click)="setTab('usuarios')">
+    <button [class.active]="tabActivo === 'usuarios'"
+      (click)="setTab('usuarios')">
       <i class="fa-solid fa-users"></i> Usuarios
     </button>
-    <button [class.active]="tabActivo === 'metricas'" (click)="setTab('metricas')">
+    <button [class.active]="tabActivo === 'metricas'"
+      (click)="setTab('metricas')">
       <i class="fa-solid fa-chart-line"></i> Métricas
     </button>
   </div>
@@ -63,7 +67,7 @@
       </div>
       <div class="filter-rol">
         <select [(ngModel)]="filtroRol" (ngModelChange)="filtrarUsuarios()">
-          <option value="">Todos los roles</option>
+          <option value>Todos los roles</option>
           <option value="usuario">Usuario</option>
           <option value="desarrollador">Desarrollador</option>
           <option value="admin">Admin</option>
@@ -117,8 +121,10 @@
 
         <!-- GÉNEROS + PLATAFORMAS -->
         <div class="u-prefs">
-          <span class="pref-chip" *ngFor="let g of u.generosFav?.slice(0,2)">{{ g }}</span>
-          <span class="pref-chip plat" *ngFor="let p of u.plataformasFav?.slice(0,2)">{{ p }}</span>
+          <span class="pref-chip" *ngFor="let g of u.generosFav?.slice(0,2)">{{
+            g }}</span>
+          <span class="pref-chip plat"
+            *ngFor="let p of u.plataformasFav?.slice(0,2)">{{ p }}</span>
         </div>
 
         <!-- ACCIONES -->
@@ -176,29 +182,34 @@
         <div class="actividad-grid">
           <div class="act-item">
             <i class="fa-solid fa-gamepad"></i>
-            <span class="act-val">{{ usuarioActividad.actividadJuegos ?? 0 }}</span>
+            <span class="act-val">{{ usuarioActividad.actividadJuegos ?? 0
+              }}</span>
             <span class="act-lbl">Juegos en biblioteca</span>
           </div>
           <div class="act-item">
             <i class="fa-solid fa-user-group"></i>
-            <span class="act-val">{{ usuarioActividad.actividadAmigos ?? 0 }}</span>
+            <span class="act-val">{{ usuarioActividad.actividadAmigos ?? 0
+              }}</span>
             <span class="act-lbl">Amigos</span>
           </div>
           <div class="act-item">
-            <i class="fa-solid fa-star"></i>
-            <span class="act-val">{{ usuarioActividad.actividadValoraciones ?? 0 }}</span>
-            <span class="act-lbl">Valoraciones</span>
+            <i class="fa-solid fa-comment"></i>
+            <span class="act-val">{{ usuarioActividad.actividadComentarios ?? 0
+              }}</span>
+            <span class="act-lbl">Comentarios</span>
           </div>
           <div class="act-item">
             <i class="fa-solid fa-file-circle-plus"></i>
-            <span class="act-val">{{ usuarioActividad.actividadPropuestas ?? 0 }}</span>
+            <span class="act-val">{{ usuarioActividad.actividadPropuestas ?? 0
+              }}</span>
             <span class="act-lbl">Propuestas</span>
           </div>
         </div>
         <div class="actividad-bio" *ngIf="usuarioActividad.bio">
           <p><strong>Bio:</strong> {{ usuarioActividad.bio }}</p>
         </div>
-        <div class="actividad-redes" *ngIf="usuarioActividad.redesSociales?.steam">
+        <div class="actividad-redes"
+          *ngIf="usuarioActividad.redesSociales?.steam">
           <a [href]="usuarioActividad.redesSociales?.steam" target="_blank">
             <i class="fa-brands fa-steam"></i> Ver Steam
           </a>
@@ -224,7 +235,8 @@
 
   <!-- ══ TAB MÉTRICAS ══ -->
   <div class="section-block" *ngIf="tabActivo === 'metricas'">
-    <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Métricas globales</h2>
+    <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Métricas
+      globales</h2>
 
     <div class="metricas-grid">
 
@@ -234,11 +246,13 @@
           <div class="metrica-row" *ngFor="let m of registrosPorDia">
             <span class="metrica-fecha">{{ m.fecha }}</span>
             <div class="metrica-bar-wrap">
-              <div class="metrica-bar" [style.width.%]="barPct(m.count, maxRegistros)"></div>
+              <div class="metrica-bar"
+                [style.width.%]="barPct(m.count, maxRegistros)"></div>
             </div>
             <span class="metrica-count">{{ m.count }}</span>
           </div>
-          <p class="sin-datos" *ngIf="!registrosPorDia.length">Sin datos de registro</p>
+          <p class="sin-datos" *ngIf="!registrosPorDia.length">Sin datos de
+            registro</p>
         </div>
       </div>
 

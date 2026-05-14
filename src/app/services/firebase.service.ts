@@ -229,9 +229,17 @@ export class FirebaseService {
   }
 
   async eliminarJuego(juego: JuegoCustom): Promise<void> {
-    await deleteDoc(doc(this.db, 'juegos', juego.id!));
-  }
+  await deleteDoc(doc(this.db, 'juegos', juego.id!));
 
+  if (juego.esCustom) {
+    const q = query(
+      collection(this.db, 'historial_peticiones'),
+      where('nombre', '==', juego.nombre)
+    );
+    const snap = await getDocs(q);
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+  }
+}
   // ── PETICIONES ──
 
   obtenerPeticiones(): Observable<PeticionJuego[]> {
@@ -955,66 +963,90 @@ async quitarFavorito(juego: JuegoFavorito): Promise<void> {
 
   // ── ESTADÍSTICAS DEL DESARROLLADOR ──
 
-  getMisPropuestas(uid: string): Observable<any[]> {
-    return new Observable(observer => {
-      const qActivas = query(
-        collection(this.db, 'peticiones_juegos'),
-        where('desarrolladorId', '==', uid)
-      );
-      const qHistorial = query(
-        collection(this.db, 'historial_peticiones'),
-        where('desarrolladorId', '==', uid)
-      );
+getMisPropuestas(uid: string): Observable<any[]> {
+  return new Observable(observer => {
+    const qActivas = query(
+      collection(this.db, 'peticiones_juegos'),
+      where('desarrolladorId', '==', uid)
+    );
+    const qHistorial = query(
+      collection(this.db, 'historial_peticiones'),
+      where('desarrolladorId', '==', uid)
+    );
 
-      let activas: any[] = [];
-      let historial: any[] = [];
+    let activas: any[] = [];
+    let historial: any[] = [];
+    let activasCargadas = false;
+    let historialCargado = false;
 
-      const emitir = async () => {
-  if (!this.auth.currentUser) return;
-  const todas = [...activas, ...historial];
+    const emitir = async () => {
+      if (!activasCargadas || !historialCargado) return;
 
-        const enriquecidas = await Promise.all(todas.map(async p => {
-          const slug = 'custom_' + (p.nombre ?? '').toLowerCase().trim().replace(/\s+/g, '_');
+      const todas = [...activas, ...historial];
 
-          const statsSnap = await getDoc(doc(this.db, 'stats_juegos', slug));
-          const visitas = statsSnap.exists() ? (statsSnap.data()['visitas'] ?? 0) : 0;
-
-          const hypeSnap = await getDoc(doc(this.db, 'hype', slug));
-          const interesados = hypeSnap.exists() ? (hypeSnap.data()['contador'] ?? 0) : 0;
-
-          const likesSnap = await getDoc(doc(this.db, 'likes_juegos', slug));
-          const likes = likesSnap.exists() ? (likesSnap.data()['contador'] ?? 0) : 0;
-
-          return {
-            id: p.id,
-            nombre: p.nombre,
-            imagen: p.imagen,
-            plataformas: p.plataformas ?? [],
-            descripcion: p.descripcion ?? '',
-            estado: p.estado ?? 'pendiente',
-            visitas,
-            interesados,
-            likes,
-          };
-        }));
-
-        this.zone.run(() => observer.next(enriquecidas));
-      };
-
-      const unsubActivas = onSnapshot(qActivas,
-        snap => { activas = snap.docs.map(d => ({ id: d.id, ...d.data() })); emitir(); },
-        err => observer.error(err)
-      );
-      const unsubHistorial = onSnapshot(qHistorial,
-        snap => { historial = snap.docs.map(d => ({ id: d.id, ...d.data() })); emitir(); },
-        err => observer.error(err)
+      const juegosSnap = await getDocs(collection(this.db, 'juegos'));
+      const nombresPublicados = new Set(
+        juegosSnap.docs.map(d => (d.data()['nombre'] ?? '').toLowerCase().trim())
       );
 
-      return () => { unsubActivas(); unsubHistorial(); };
-    });
-  }
+      const filtradas = todas.filter(p => {
+        if (p.estado === 'aprobado') {
+          return nombresPublicados.has((p.nombre ?? '').toLowerCase().trim());
+        }
+        return true;
+      });
 
-  async incrementarVisita(slug: string): Promise<void> {
+      const enriquecidas = await Promise.all(filtradas.map(async p => {
+        const slug = 'custom_' + (p.nombre ?? '').toLowerCase().trim().replace(/\s+/g, '_');
+
+        const statsSnap = await getDoc(doc(this.db, 'stats_juegos', slug));
+        const visitas = statsSnap.exists() ? (statsSnap.data()['visitas'] ?? 0) : 0;
+
+        const hypeSnap = await getDoc(doc(this.db, 'hype', slug));
+        const interesados = hypeSnap.exists() ? (hypeSnap.data()['contador'] ?? 0) : 0;
+
+        const likesSnap = await getDoc(doc(this.db, 'likes_juegos', slug));
+        const likes = likesSnap.exists() ? (likesSnap.data()['contador'] ?? 0) : 0;
+
+        return {
+          id: p.id,
+          nombre: p.nombre,
+          imagen: p.imagen,
+          plataformas: p.plataformas ?? [],
+          descripcion: p.descripcion ?? '',
+          estado: p.estado ?? 'pendiente',
+          visitas,
+          interesados,
+          likes,
+        };
+      }));
+
+      this.zone.run(() => observer.next(enriquecidas));
+    };
+
+    const unsubActivas = onSnapshot(qActivas,
+      snap => {
+        activas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        activasCargadas = true;
+        emitir();
+      },
+      err => observer.error(err)
+    );
+
+    const unsubHistorial = onSnapshot(qHistorial,
+      snap => {
+        historial = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        historialCargado = true;
+        emitir();
+      },
+      err => observer.error(err)
+    );
+
+    return () => { unsubActivas(); unsubHistorial(); };
+  });
+}
+
+async incrementarVisita(slug: string): Promise<void> {
   const ref = doc(this.db, 'stats_juegos', slug);
   const snap = await getDoc(ref);
   if (snap.exists()) {
@@ -1024,11 +1056,32 @@ async quitarFavorito(juego: JuegoFavorito): Promise<void> {
   }
 }
 
-
-
 async getDocUsuario(uid: string): Promise<Record<string, any> | null> {
   const snap = await getDoc(doc(this.db, 'usuarios', uid));
   return snap.exists() ? snap.data() : null;
 }
 
+
+
+async getActividadUsuario(uid: string): Promise<{
+  juegos: number;
+  amigos: number;
+  comentarios: number;
+  propuestas: number;
+}> {
+  const [favSnap, amistadSnap, peticionesSnap, historialSnap, comentariosSnap] = await Promise.all([
+    getDocs(collection(this.db, 'favoritos', uid, 'juegos')),
+    getDocs(query(collection(this.db, 'amistades'), where('uids', 'array-contains', uid))),
+    getDocs(query(collection(this.db, 'peticiones_juegos'), where('desarrolladorId', '==', uid))),
+    getDocs(query(collection(this.db, 'historial_peticiones'), where('desarrolladorId', '==', uid))),
+    getDocs(query(collection(this.db, 'comentarios'), where('uid', '==', uid))),
+  ]);
+
+  return {
+    juegos: favSnap.size,
+    amigos: amistadSnap.size,
+    comentarios: comentariosSnap.size,
+    propuestas: peticionesSnap.size + historialSnap.size,
+  };
+}
 }

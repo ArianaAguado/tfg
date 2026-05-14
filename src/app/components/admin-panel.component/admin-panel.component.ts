@@ -15,12 +15,10 @@ export interface UsuarioAdmin {
   generosFav?: string[];
   plataformasFav?: string[];
   redesSociales?: { steam?: string; [key: string]: string | undefined };
-  // actividad calculada
   actividadJuegos?: number;
   actividadAmigos?: number;
-  actividadValoraciones?: number;
+  actividadComentarios?: number;
   actividadPropuestas?: number;
-  // estado UI
   guardandoRol?: boolean;
   guardandoBan?: boolean;
 }
@@ -190,12 +188,27 @@ export class AdminPanelComponent implements OnInit {
     }
   }
 
-  toggleActividad(u: UsuarioAdmin): void {
-    this.usuarioActividad = this.usuarioActividad?.uid === u.uid ? null : u;
-    // Si no tienes los datos de actividad ya cargados, aquí puedes hacer una
-    // llamada extra: this.firebase.getActividadUsuario(u.uid).then(...)
+  async toggleActividad(u: UsuarioAdmin): Promise<void> {
+  if (this.usuarioActividad?.uid === u.uid) {
+    this.usuarioActividad = null;
     this.cdr.detectChanges();
+    return;
   }
+
+  this.usuarioActividad = { ...u };
+  this.cdr.detectChanges();
+
+  try {
+    const actividad = await this.firebase.getActividadUsuario(u.uid);
+    this.usuarioActividad.actividadJuegos      = actividad.juegos;
+    this.usuarioActividad.actividadAmigos      = actividad.amigos;  
+    this.usuarioActividad.actividadComentarios = actividad.comentarios;
+    this.usuarioActividad.actividadPropuestas  = actividad.propuestas;
+    this.cdr.detectChanges();
+  } catch (err) {
+    console.error('Error actividad:', err);
+  }
+}
 
   // ── Métricas internas ─────────────────────────────────────────────
   private calcularMetricas(usuarios: UsuarioAdmin[]): void {

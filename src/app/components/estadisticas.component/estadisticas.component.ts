@@ -26,11 +26,11 @@ export interface PropuestaStats {
 })
 export class EstadisticasComponent implements OnInit, OnDestroy {
   private firebase = inject(FirebaseService);
-  private auth     = inject(Auth);
-  private cdr      = inject(ChangeDetectorRef);
+  private auth = inject(Auth);
+  private cdr = inject(ChangeDetectorRef);
 
-  cargando   = true;
-  periodo    = '30d';
+  cargando = true;
+  periodo = '30d';
   propuestas: PropuestaStats[] = [];
   private sub?: Subscription;
 
@@ -48,10 +48,10 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
       (a, b) => (b.visitas ?? 0) - (a.visitas ?? 0)
     )[0];
   }
-  
+
   get totalLikes(): number {
-  return this.propuestas.reduce((s, p) => s + (p.likes ?? 0), 0);
-}
+    return this.propuestas.reduce((s, p) => s + (p.likes ?? 0), 0);
+  }
 
   ngOnInit(): void {
     this.cargarEstadisticas();
@@ -71,13 +71,18 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
     this.cargando = true;
 
     this.sub = this.firebase.usuario$.pipe(
-      filter(user => user !== undefined && user !== null),
+      filter(user => user !== undefined),
       take(1),
-      switchMap(user => this.firebase.getMisPropuestas(user!.uid))
+      switchMap(user => {
+        if (!user) {
+          return [];
+        }
+        return this.firebase.getMisPropuestas(user.uid);
+      })
     ).subscribe({
       next: (data: PropuestaStats[]) => {
-        this.propuestas = data;
-        this.cargando   = false;
+        this.propuestas = data as PropuestaStats[];
+        this.cargando = false;
         this.cdr.detectChanges();
       },
       error: (err: unknown) => {
@@ -91,7 +96,7 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
   estadoLabel(estado?: string): string {
     return (
       { pendiente: 'Pendiente', aprobado: 'Aprobado', rechazado: 'Rechazado' }[
-        estado ?? ''
+      estado ?? ''
       ] ?? estado ?? '—'
     );
   }

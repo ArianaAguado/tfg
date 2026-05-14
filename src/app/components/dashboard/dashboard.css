@@ -9,7 +9,7 @@
 
 /* Sidebar (Barra lateral) */
 .sidebar {
-    width: 250px;
+    /* width: 250px; */
     background: rgba(255, 255, 255, 0.02);
     border-right: 1px solid rgba(0, 204, 255, 0.08);
     padding: 30px 20px;
@@ -756,4 +756,18 @@
   color: rgba(255, 255, 255, 0.35);
   white-space: nowrap;
   user-select: none;
+}
+
+
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-gato {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
 }
