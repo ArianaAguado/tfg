@@ -4,7 +4,7 @@
   min-height: 100vh;
   background-color: #030507;
   color: white;
-  overflow-y: auto; /* ← muévelo aquí */
+  position: relative;
 }
 
 /* Sidebar (Barra lateral) */
@@ -56,7 +56,6 @@
 .main-content {
   flex: 1;
   padding: 40px;
-  overflow-y: visible; /* ← o simplemente quítalo */
 }
 
 .main-header h1 {
@@ -751,7 +750,7 @@
 
 .nav-separator-labbel {
   font-size: 0.65rem;
-  font-weigth: 600;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: rgba(255, 255, 255, 0.35);

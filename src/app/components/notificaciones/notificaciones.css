@@ -1,5 +1,5 @@
 :host {
-  position: fixed;
+  position: absolute;
   top: 20px;
   right: 180px; /* a la izquierda del botón de cerrar sesión */
   z-index: 99;
