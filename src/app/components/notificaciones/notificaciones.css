@@ -1,7 +1,7 @@
 :host {
-  position: relative;
-  top: 0px;
-  right: 0px; /* a la izquierda del botón de cerrar sesión */
+  position: fixed;
+  top: 20px;
+  right: 180px; /* a la izquierda del botón de cerrar sesión */
   z-index: 99;
 }
 
@@ -61,9 +61,9 @@
 
 /* ── DROPDOWN ── */
 .dropdown {
-  position: absolute;
-  top: 54px;
-  right: 0;
+  position: fixed;
+  top: 70px;
+  right: 30px;
   width: 360px;
   max-height: 480px;
   background: #0f0f1a;
@@ -74,6 +74,7 @@
   flex-direction: column;
   overflow: hidden;
   animation: aparecer 0.2s ease;
+  z-index: 999;
 }
 
 @keyframes aparecer {

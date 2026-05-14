@@ -99,7 +99,7 @@ export class AdminPanelComponent implements OnInit {
     Promise.all([
       this.firebase.contarColeccion('usuarios'),
       this.firebase.contarColeccion('juegos'),
-      this.firebase.contarColeccion('propuestas'),
+      this.firebase.contarColeccion('peticiones_juegos'),
     ]).then(([u, j, p]) => {
       this.totalUsuarios   = u;
       this.totalJuegos     = j;

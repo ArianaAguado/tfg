@@ -1,9 +1,10 @@
 /* --- LAYOUT DEL DASHBOARD --- */
 .dashboard-wrapper {
-    display: flex;
-    min-height: 100vh;
-    background-color: #030507; /* Fondo oscuro KYG */
-    color: white;
+  display: flex;
+  min-height: 100vh;
+  background-color: #030507;
+  color: white;
+  overflow-y: auto; /* ← muévelo aquí */
 }
 
 /* Sidebar (Barra lateral) */
@@ -53,9 +54,9 @@
 
 /* Contenido Principal */
 .main-content {
-    flex: 1;
-    padding: 40px;
-    overflow-y: auto;
+  flex: 1;
+  padding: 40px;
+  overflow-y: visible; /* ← o simplemente quítalo */
 }
 
 .main-header h1 {

@@ -1,17 +1,16 @@
 :host {
-  position: relative;
-  top: 20px;
-  right: 30px;
-  z-index: 1000;
+  display: contents; /* ← no ocupa espacio */
 }
 
 .barra-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: contents; /* ← no ocupa espacio */
 }
 
 .btn-cerrar-sesion {
+  position: fixed;
+  top: 20px;
+  right: 30px;
+  z-index: 100;
   padding: 11px 16px;
   background: transparent;
   border: 1px solid #ff4466;
@@ -25,6 +24,10 @@
   gap: 8px;
   transition: 0.3s;
   white-space: nowrap;
+}
+
+.btn-cerrar-sesion:hover {
+  background: rgba(255, 68, 102, 0.1);
 }
 
 .btn-cerrar-sesion:hover {

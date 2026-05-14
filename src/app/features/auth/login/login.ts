@@ -34,7 +34,15 @@ export class Login {
     if (this.formularioLogin.invalid) return;
     const { email, password } = this.formularioLogin.value;
     try {
-      await signInWithEmailAndPassword(this.auth, email!, password!);
+      const result = await signInWithEmailAndPassword(this.auth, email!, password!);
+
+      const docSnap = await this.firebaseService.getDocUsuario(result.user.uid);
+      if (docSnap?.['baneado'] === true) {
+        await this.auth.signOut();
+        this.errorMessage = 'Tu cuenta ha sido suspendida. Contacta con soporte.';
+        return;
+      }
+
       localStorage.setItem('sessionExpiry', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
       this.router.navigate(['/dashboard']);
     } catch (error: any) {
@@ -42,21 +50,29 @@ export class Login {
     }
   }
 
-async loginConGoogle() {
-  try {
-    this.cargandoGoogle = true;
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(this.auth, provider);
-    
-    await this.firebaseService.crearUsuarioEnFirestore(result.user);
-    localStorage.setItem('sessionExpiry', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
-    this.router.navigate(['/dashboard']);
-  } catch (error) {
-    this.cargandoGoogle = false;
-    const firebaseError = error as { code: string }; // ← tipado explícito
-    this.errorMessage = this.getErrorMessage(firebaseError.code);
+  async loginConGoogle() {
+    try {
+      this.cargandoGoogle = true;
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(this.auth, provider);
+
+      const docSnap = await this.firebaseService.getDocUsuario(result.user.uid);
+      if (docSnap?.['baneado'] === true) {
+        await this.auth.signOut();
+        this.errorMessage = 'Tu cuenta ha sido suspendida. Contacta con soporte.';
+        this.cargandoGoogle = false;
+        return;
+      }
+
+      await this.firebaseService.crearUsuarioEnFirestore(result.user);
+      localStorage.setItem('sessionExpiry', String(Date.now() + 7 * 24 * 60 * 60 * 1000));
+      this.router.navigate(['/dashboard']);
+    } catch (error) {
+      this.cargandoGoogle = false;
+      const firebaseError = error as { code: string };
+      this.errorMessage = this.getErrorMessage(firebaseError.code);
+    }
   }
-}
 
   goHome() {
     this.router.navigate(['/']);

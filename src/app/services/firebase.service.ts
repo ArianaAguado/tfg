@@ -135,22 +135,36 @@ export class FirebaseService {
   rol$ = this.rolSubject.asObservable();
 
   constructor() {
-    // ← onAuthStateChanged fuera del setPersistence para que dispare siempre
     onAuthStateChanged(this.auth, async (user) => {
-      this.zone.run(() => this.usuarioSubject.next(user));
-
       if (user) {
-        const rol = await this.obtenerRolUsuario(user.uid);
+        const docSnap = await getDoc(doc(this.db, 'usuarios', user.uid));
+        const data = docSnap.exists() ? docSnap.data() : null;
+
+        if (data?.['baneado'] === true) {
+          await signOut(this.auth);
+          this.zone.run(() => {
+            this.usuarioSubject.next(null);
+            this.rolSubject.next(null);
+          });
+          return;
+        }
+
+        this.zone.run(() => this.usuarioSubject.next(user));
+        const rol = data?.['rol'] ?? 'usuario';
         this.zone.run(() => this.rolSubject.next(rol));
       } else {
-        this.zone.run(() => this.rolSubject.next(null));
+        this.zone.run(() => {
+          this.usuarioSubject.next(null);
+          this.rolSubject.next(null);
+        });
       }
     });
 
-    // setPersistence en paralelo, sin bloquear el listener
     setPersistence(this.auth, browserLocalPersistence)
       .catch(err => console.error('Error setPersistence:', err));
   }
+
+  
 
   // ── SECCIÓN: ROLES Y USUARIOS ──
 
@@ -958,7 +972,6 @@ async quitarFavorito(juego: JuegoFavorito): Promise<void> {
       const emitir = async () => {
   if (!this.auth.currentUser) return;
   const todas = [...activas, ...historial];
-  console.log('Propuestas raw:', todas.map(p => ({ nombre: p.nombre, estado: p.estado })));
 
         const enriquecidas = await Promise.all(todas.map(async p => {
           const slug = 'custom_' + (p.nombre ?? '').toLowerCase().trim().replace(/\s+/g, '_');
@@ -1010,4 +1023,12 @@ async quitarFavorito(juego: JuegoFavorito): Promise<void> {
     await setDoc(ref, { visitas: 1 });
   }
 }
+
+
+
+async getDocUsuario(uid: string): Promise<Record<string, any> | null> {
+  const snap = await getDoc(doc(this.db, 'usuarios', uid));
+  return snap.exists() ? snap.data() : null;
+}
+
 }
