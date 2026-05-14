@@ -50,3 +50,6 @@ Thumbs.db
 *.TMP
 *-bueno.txt
 restaurar-*.ps1
+
+# Specs autogenerados descartados
+*.spec.ts.bak

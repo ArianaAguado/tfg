@@ -65,14 +65,7 @@ export class Amigos implements OnInit, OnDestroy {
     return this.avataresPorRol[amigo.rol] ?? this.avataresPorRol['usuario'];
   }
 
-  /**
-   * Para solicitudes solo tenemos foto y nombre denormalizados.
-   * No tenemos el rol, así que si no hay foto subida caemos al
-   * avatar de usuario por defecto. Si quieres ser estricto y mostrar
-   * el rol correcto aquí, habría que denormalizar también el rol
-   * en la solicitud o hacer un fetch extra. Para un TFG con perfiles
-   * normales el avatar genérico cubre bien el caso.
-   */
+ 
   avatarSolicitud(s: SolicitudAmistad): string {
     if (s.deFoto && s.deFoto !== 'null' && s.deFoto.trim() !== '') return s.deFoto;
     return this.avataresPorRol['usuario'];
