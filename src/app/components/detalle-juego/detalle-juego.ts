@@ -59,8 +59,10 @@ export class DetalleJuego implements OnInit, OnDestroy {
 
     if (juegoCustom) {
       this.juego = juegoCustom;
-      if (juegoCustom?.esCustom) {
-  const slug = 'custom_' + (juegoCustom.nombre ?? '').toLowerCase().trim().replace(/\s+/g, '_');
+      // DESPUÉS
+if (juegoCustom?.esCustom) {
+  const nombreJuego = juegoCustom.nombre ?? juegoCustom.name ?? '';
+  const slug = 'custom_' + nombreJuego.toLowerCase().trim().replace(/\s+/g, '_');
   this.firebase.incrementarVisita(slug);
 }
       this.cargando = false;

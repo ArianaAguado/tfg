@@ -38,6 +38,13 @@
         </div>
       </div>
       <div class="kpi-card">
+        <div class="kpi-icon accent-green"><i class="fa-solid fa-bookmark"></i></div>
+        <div class="kpi-data">
+          <span class="kpi-value">{{ totalLikes | number }}</span>
+          <span class="kpi-label">En biblioteca</span>
+        </div>
+      </div>
+      <div class="kpi-card">
         <div class="kpi-icon accent-orange"><i class="fa-solid fa-file-circle-plus"></i></div>
         <div class="kpi-data">
           <span class="kpi-value">{{ propuestas.length }}</span>
@@ -64,12 +71,14 @@
           <span>Estado</span>
           <span>Visitas</span>
           <span>Interesados</span>
+          <span>Likes</span>
         </div>
         <div class="tabla-row" *ngFor="let p of propuestas">
           <div class="juego-cell">
             <img [src]="p.imagen" [alt]="p.nombre" class="juego-thumb"
               *ngIf="p.imagen && !p.imagen.startsWith('data')" />
-            <div class="juego-thumb placeholder" *ngIf="!p.imagen || p.imagen.startsWith('data')">
+            <div class="juego-thumb placeholder"
+              *ngIf="!p.imagen || p.imagen.startsWith('data')">
               <i class="fa-solid fa-image"></i>
             </div>
             <div>
@@ -92,6 +101,10 @@
           <div class="stat-cell">
             <i class="fa-solid fa-heart"></i>
             {{ p.interesados ?? 0 | number }}
+          </div>
+          <div class="stat-cell">
+            <i class="fa-solid fa-bookmark"></i>
+            {{ p.likes ?? 0 | number }}
           </div>
         </div>
       </div>
@@ -118,6 +131,11 @@
               <i class="fa-solid fa-eye"></i>
               <span>{{ topPropuesta.visitas ?? 0 | number }}</span>
               <small>visitas</small>
+            </div>
+            <div class="dest-stat">
+              <i class="fa-solid fa-bookmark"></i>
+              <span>{{ topPropuesta.likes ?? 0 | number }}</span>
+              <small>en biblioteca</small>
             </div>
             <div class="dest-stat">
               <i class="fa-solid fa-heart"></i>

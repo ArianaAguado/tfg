@@ -93,17 +93,17 @@ export type EstadoAmistad =
   | 'mismo_usuario';
 
 export interface TicketSoporte {
-  id?:             string;
-  asunto:          string;
-  descripcion:     string;
-  capturas:        string[];
-  estado:          'abierto' | 'respondido' | 'cerrado';
-  autorId:         string;
-  autorNombre:     string;
-  autorEmail:      string;
-  autorRol:        string;
-  fechaCreacion:   number;
-  respuesta?:      string;
+  id?: string;
+  asunto: string;
+  descripcion: string;
+  capturas: string[];
+  estado: 'abierto' | 'respondido' | 'cerrado';
+  autorId: string;
+  autorNombre: string;
+  autorEmail: string;
+  autorRol: string;
+  fechaCreacion: number;
+  respuesta?: string;
   fechaRespuesta?: number;
 }
 
@@ -118,7 +118,7 @@ export interface UsuarioAdmin {
   bio?: string;
   generosFav?: string[];
   plataformasFav?: string[];
-  redesSociales?: { steam?: string; [key: string]: string | undefined };
+  redesSociales?: { steam?: string;[key: string]: string | undefined };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -311,18 +311,36 @@ export class FirebaseService {
   // ── FAVORITOS ──
 
   async añadirFavorito(juego: JuegoFavorito): Promise<void> {
-    const uid = this.auth.currentUser?.uid;
-    if (!uid) { console.error('No hay usuario'); return; }
-    const id = juego.released + '' + juego.name.replace(/\s/g, '');
-    await setDoc(doc(this.db, 'favoritos', uid, 'juegos', id), juego);
-  }
+  const uid = this.auth.currentUser?.uid;
+  if (!uid) { console.error('No hay usuario'); return; }
+  const id = juego.released + '' + juego.name.replace(/\s/g, '');
+  await setDoc(doc(this.db, 'favoritos', uid, 'juegos', id), juego);
 
-  async quitarFavorito(juego: JuegoFavorito): Promise<void> {
-    const uid = this.auth.currentUser?.uid;
-    if (!uid) { console.error('No hay usuario'); return; }
-    const id = juego.released + '' + juego.name.replace(/\s/g, '');
-    await deleteDoc(doc(this.db, 'favoritos', uid, 'juegos', id));
+  // Si es juego custom, incrementar likes
+  if (!juego.slug || juego.slug.startsWith('custom_')) {
+    const slug = 'custom_' + juego.name.toLowerCase().trim().replace(/\s+/g, '_');
+    const ref = doc(this.db, 'likes_juegos', slug);
+    const snap = await getDoc(ref);
+    await setDoc(ref, { contador: (snap.exists() ? snap.data()['contador'] : 0) + 1 });
   }
+}
+
+async quitarFavorito(juego: JuegoFavorito): Promise<void> {
+  const uid = this.auth.currentUser?.uid;
+  if (!uid) { console.error('No hay usuario'); return; }
+  const id = juego.released + '' + juego.name.replace(/\s/g, '');
+  await deleteDoc(doc(this.db, 'favoritos', uid, 'juegos', id));
+
+  // Si es juego custom, decrementar likes
+  if (!juego.slug || juego.slug.startsWith('custom_')) {
+    const slug = 'custom_' + juego.name.toLowerCase().trim().replace(/\s+/g, '_');
+    const ref = doc(this.db, 'likes_juegos', slug);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      await setDoc(ref, { contador: Math.max(0, snap.data()['contador'] - 1) });
+    }
+  }
+}
 
   async esFavorito(juego: JuegoFavorito): Promise<boolean> {
     const uid = this.auth.currentUser?.uid;
@@ -923,69 +941,65 @@ export class FirebaseService {
 
   // ── ESTADÍSTICAS DEL DESARROLLADOR ──
 
-  /**
-   * Devuelve las propuestas del desarrollador (activas + las archivadas en el historial).
-   * Se calculan al vuelo unas métricas básicas (visitas, valoraciones, interesados)
-   * usando los datos que ya tenemos en Firestore. Mientras el sistema de visitas no
-   * exista de verdad, los campos se devuelven con 0 / null para que la vista pinte.
-   */
   getMisPropuestas(uid: string): Observable<any[]> {
-  return new Observable(observer => {
-    const qActivas = query(
-      collection(this.db, 'peticiones_juegos'),
-      where('desarrolladorId', '==', uid)
-    );
-    const qHistorial = query(
-      collection(this.db, 'historial_peticiones'),
-      where('desarrolladorId', '==', uid)
-    );
+    return new Observable(observer => {
+      const qActivas = query(
+        collection(this.db, 'peticiones_juegos'),
+        where('desarrolladorId', '==', uid)
+      );
+      const qHistorial = query(
+        collection(this.db, 'historial_peticiones'),
+        where('desarrolladorId', '==', uid)
+      );
 
-    let activas: any[] = [];
-    let historial: any[] = [];
+      let activas: any[] = [];
+      let historial: any[] = [];
 
-    const emitir = async () => {
-      const todas = [...activas, ...historial];
+      const emitir = async () => {
+  if (!this.auth.currentUser) return;
+  const todas = [...activas, ...historial];
+  console.log('Propuestas raw:', todas.map(p => ({ nombre: p.nombre, estado: p.estado })));
 
-      const enriquecidas = await Promise.all(todas.map(async p => {
-        // Slug del juego custom (mismo cálculo que en detalle-juego)
-        const slug = 'custom_' + (p.nombre ?? '').toLowerCase().trim().replace(/\s+/g, '_');
+        const enriquecidas = await Promise.all(todas.map(async p => {
+          const slug = 'custom_' + (p.nombre ?? '').toLowerCase().trim().replace(/\s+/g, '_');
 
-        // Visitas desde stats_juegos
-        const statsSnap = await getDoc(doc(this.db, 'stats_juegos', slug));
-        const visitas = statsSnap.exists() ? (statsSnap.data()['visitas'] ?? 0) : 0;
+          const statsSnap = await getDoc(doc(this.db, 'stats_juegos', slug));
+          const visitas = statsSnap.exists() ? (statsSnap.data()['visitas'] ?? 0) : 0;
 
-        // Interesados desde hype
-        const hypeSnap = await getDoc(doc(this.db, 'hype', slug));
-        const interesados = hypeSnap.exists() ? (hypeSnap.data()['contador'] ?? 0) : 0;
+          const hypeSnap = await getDoc(doc(this.db, 'hype', slug));
+          const interesados = hypeSnap.exists() ? (hypeSnap.data()['contador'] ?? 0) : 0;
 
-        return {
-          id: p.id,
-          nombre: p.nombre,
-          imagen: p.imagen,
-          plataformas: p.plataformas ?? [],
-          descripcion: p.descripcion ?? '',
-          estado: p.estado ?? 'pendiente',
-          visitas,
-          interesados,
-        };
-      }));
+          const likesSnap = await getDoc(doc(this.db, 'likes_juegos', slug));
+          const likes = likesSnap.exists() ? (likesSnap.data()['contador'] ?? 0) : 0;
 
-      this.zone.run(() => observer.next(enriquecidas));
-    };
+          return {
+            id: p.id,
+            nombre: p.nombre,
+            imagen: p.imagen,
+            plataformas: p.plataformas ?? [],
+            descripcion: p.descripcion ?? '',
+            estado: p.estado ?? 'pendiente',
+            visitas,
+            interesados,
+            likes,
+          };
+        }));
 
-    const unsubActivas = onSnapshot(qActivas,
-      snap => { activas = snap.docs.map(d => ({ id: d.id, ...d.data() })); emitir(); },
-      err => observer.error(err)
-    );
-    const unsubHistorial = onSnapshot(qHistorial,
-      snap => { historial = snap.docs.map(d => ({ id: d.id, ...d.data() })); emitir(); },
-      err => observer.error(err)
-    );
+        this.zone.run(() => observer.next(enriquecidas));
+      };
 
-    return () => { unsubActivas(); unsubHistorial(); };
-  });
-}
+      const unsubActivas = onSnapshot(qActivas,
+        snap => { activas = snap.docs.map(d => ({ id: d.id, ...d.data() })); emitir(); },
+        err => observer.error(err)
+      );
+      const unsubHistorial = onSnapshot(qHistorial,
+        snap => { historial = snap.docs.map(d => ({ id: d.id, ...d.data() })); emitir(); },
+        err => observer.error(err)
+      );
 
+      return () => { unsubActivas(); unsubHistorial(); };
+    });
+  }
 
   async incrementarVisita(slug: string): Promise<void> {
   const ref = doc(this.db, 'stats_juegos', slug);

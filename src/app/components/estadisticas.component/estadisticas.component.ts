@@ -14,6 +14,7 @@ export interface PropuestaStats {
   estado?: 'pendiente' | 'aprobado' | 'rechazado';
   visitas?: number;
   interesados?: number;
+  likes?: number;
 }
 
 @Component({
@@ -47,6 +48,10 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
       (a, b) => (b.visitas ?? 0) - (a.visitas ?? 0)
     )[0];
   }
+  
+  get totalLikes(): number {
+  return this.propuestas.reduce((s, p) => s + (p.likes ?? 0), 0);
+}
 
   ngOnInit(): void {
     this.cargarEstadisticas();
