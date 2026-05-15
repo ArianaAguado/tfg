@@ -1084,4 +1084,24 @@ async getActividadUsuario(uid: string): Promise<{
     propuestas: peticionesSnap.size + historialSnap.size,
   };
 }
+
+
+
+async buscarUsuarios(query: string): Promise<UsuarioPublico[]> {
+  const miUid = this.auth.currentUser?.uid;
+  const snap = await getDocs(collection(this.db, 'usuarios'));
+  const q = query.toLowerCase().trim();
+  return snap.docs
+    .map(d => {
+      const data = d.data() as any;
+      return {
+        uid: d.id,
+        nombre: data.nombre ?? '',
+        email: data.email,
+        rol: data.rol ?? 'usuario',
+        avatarUrl: data.avatarUrl ?? '',
+      } as UsuarioPublico;
+    })
+    .filter(u => u.uid !== miUid && u.nombre.toLowerCase().includes(q));
+}
 }

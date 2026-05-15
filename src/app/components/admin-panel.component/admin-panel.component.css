@@ -141,6 +141,11 @@
   font-size: 0.85rem;
   outline: none;
   cursor: pointer;
+  color-scheme: dark;
+}
+.filter-rol select option {
+  background: #1a1a2e;
+  color: #f0f0f0;
 }
 
 /* LOADING */
@@ -242,6 +247,11 @@
   font-size: 0.78rem;
   outline: none;
   cursor: pointer;
+  color-scheme: dark;
+}
+.rol-select option {
+  background: #1a1a2e;
+  color: #f0f0f0;
 }
 .guardando-label { color: var(--text-muted, #888); font-size: 0.8rem; }
 

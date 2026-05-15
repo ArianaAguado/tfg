@@ -1,5 +1,5 @@
 <div class="amigos-wrapper">
-  
+
   <h1 class="amigos-titulo">
     <i class="fa-solid fa-user-group"></i>
     Mis <span class="texto-neon">amigos</span>
@@ -42,6 +42,72 @@
     </div>
   </section>
 
+  <!-- ── BUSCAR USUARIOS ── -->
+  <section class="amigos-seccion">
+    <h2 class="seccion-titulo">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      Buscar usuarios
+    </h2>
+
+    <div class="amigos-search-bar">
+      <input
+        type="text"
+        [(ngModel)]="queryBusqueda"
+        (input)="onInputBusqueda()"
+        (keyup.enter)="buscarUsuarios()"
+        placeholder="Busca usuarios por nombre..."
+        class="amigos-search-input"
+      />
+      <button class="amigos-search-btn" (click)="buscarUsuarios()" [disabled]="buscando">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </div>
+
+    <div *ngIf="buscando" class="cargando-texto">Buscando...</div>
+
+    <div *ngIf="!buscando && resultadosBusqueda.length === 0 && busquedaRealizada" class="vacio-mensaje">
+      No se encontró ningún usuario con ese nombre.
+    </div>
+
+    <div class="amigos-grid" *ngIf="!buscando && resultadosBusqueda.length > 0">
+      <article class="amigo-card" *ngFor="let u of resultadosBusqueda">
+        <a [routerLink]="['/dashboard/usuario', u.uid]" class="amigo-avatar-link">
+          <img [src]="avatarUsuario(u)" [alt]="u.nombre" class="amigo-avatar" />
+        </a>
+        <a [routerLink]="['/dashboard/usuario', u.uid]" class="amigo-nombre">
+          {{ u.nombre || 'Sin nombre' }}
+        </a>
+        <span class="amigo-rol rol-badge" [ngClass]="'rol-' + u.rol">{{ u.rol }}</span>
+
+        <!-- Ya sois amigos -->
+        <span *ngIf="estadosAmistad[u.uid] === 'amigos'" class="estado-badge estado-amigos">
+          <i class="fa-solid fa-check"></i> Amigos
+        </span>
+
+        <!-- Solicitud enviada -->
+        <button *ngIf="estadosAmistad[u.uid] === 'pendiente_enviada'"
+                class="btn-mini btn-cancelar-solicitud"
+                (click)="cancelarSolicitud(u)"
+                [disabled]="procesandoUid === u.uid">
+          <i class="fa-solid fa-clock"></i> Enviada
+        </button>
+
+        <!-- Solicitud recibida -->
+        <span *ngIf="estadosAmistad[u.uid] === 'pendiente_recibida'" class="estado-badge estado-recibida">
+          <i class="fa-solid fa-envelope"></i> Te envió solicitud
+        </span>
+
+        <!-- Sin relación -->
+        <button *ngIf="estadosAmistad[u.uid] === 'ninguna'"
+                class="btn-mini btn-aceptar"
+                (click)="enviarSolicitud(u)"
+                [disabled]="procesandoUid === u.uid">
+          <i class="fa-solid fa-user-plus"></i> Añadir
+        </button>
+      </article>
+    </div>
+  </section>
+
   <!-- ── LISTA DE AMIGOS ── -->
   <section class="amigos-seccion">
     <h2 class="seccion-titulo">
@@ -50,14 +116,33 @@
       <span class="contador" *ngIf="amigos.length > 0">({{ amigos.length }})</span>
     </h2>
 
-    <div *ngIf="cargandoAmigos" class="cargando-texto">Cargando amigos...</div>
-
-    <div *ngIf="!cargandoAmigos && amigos.length === 0" class="vacio-mensaje">
-      Aún no tienes amigos. Ve al perfil de otros usuarios y envíales una solicitud.
+    <!-- Barra de búsqueda local -->
+    <div class="amigos-search-bar" *ngIf="!cargandoAmigos && amigos.length > 0">
+      <input
+        type="text"
+        [(ngModel)]="queryAmigos"
+        (input)="filtrarAmigos()"
+        placeholder="Filtrar por nombre..."
+        class="amigos-search-input"
+      />
+      <button class="amigos-search-btn" tabindex="-1">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
     </div>
 
-    <div class="amigos-grid" *ngIf="!cargandoAmigos && amigos.length > 0">
-      <article class="amigo-card" *ngFor="let a of amigos">
+    <div *ngIf="cargandoAmigos" class="cargando-texto">Cargando amigos...</div>
+
+    <div *ngIf="!cargandoAmigos && amigosFiltrados.length === 0" class="vacio-mensaje">
+      <ng-container *ngIf="queryAmigos; else sinAmigos">
+        No se encontró ningún amigo con ese nombre.
+      </ng-container>
+      <ng-template #sinAmigos>
+        Aún no tienes amigos. Usa el buscador de arriba para encontrar gente.
+      </ng-template>
+    </div>
+
+    <div class="amigos-grid" *ngIf="!cargandoAmigos && amigosFiltrados.length > 0">
+      <article class="amigo-card" *ngFor="let a of amigosFiltrados">
         <a [routerLink]="['/dashboard/usuario', a.uid]" class="amigo-avatar-link">
           <img [src]="avatarAmigo(a)" [alt]="a.nombre" class="amigo-avatar" />
         </a>
@@ -73,4 +158,5 @@
       </article>
     </div>
   </section>
+
 </div>

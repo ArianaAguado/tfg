@@ -277,3 +277,85 @@
   color: #ff4466;
   background: rgba(255, 68, 102, 0.1);
 }
+
+
+/* ── BARRA DE BÚSQUEDA ── */
+.amigos-search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.amigos-search-input {
+  flex: 1;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 204, 255, 0.2);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.95rem;
+  outline: none;
+  transition: 0.3s;
+}
+
+.amigos-search-input::placeholder {
+  color: #6a6f85;
+}
+
+.amigos-search-input:focus {
+  border-color: #00ccff;
+  box-shadow: 0 0 10px rgba(0, 204, 255, 0.15);
+}
+
+.amigos-search-btn {
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid rgba(0, 204, 255, 0.2);
+  border-radius: 10px;
+  color: #00ccff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.amigos-search-btn:hover:not(:disabled) {
+  background: rgba(0, 204, 255, 0.1);
+  border-color: #00ccff;
+}
+
+.amigos-search-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── BADGES DE ESTADO ── */
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.estado-amigos {
+  background: rgba(0, 204, 255, 0.1);
+  color: #00ccff;
+  border: 1px solid rgba(0, 204, 255, 0.3);
+}
+
+.estado-recibida {
+  background: rgba(255, 170, 0, 0.1);
+  color: #ffaa00;
+  border: 1px solid rgba(255, 170, 0, 0.3);
+}
+
+.btn-cancelar-solicitud {
+  border-color: rgba(255, 170, 0, 0.4);
+  color: #ffaa00;
+}
+
+.btn-cancelar-solicitud:hover:not(:disabled) {
+  background: rgba(255, 170, 0, 0.1);
+  border-color: #ffaa00;
+}
